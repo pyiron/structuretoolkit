@@ -1,0 +1,3 @@
+include versioneer.py
+include structuretoolkit/_version.py
+include LICENSE
