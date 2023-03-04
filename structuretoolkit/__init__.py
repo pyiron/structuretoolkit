@@ -7,7 +7,7 @@ from structuretoolkit.analyse.pyscal import (
     analyse_diamond_structure,
     analyse_cna_adaptive,
     analyse_voronoi_volume,
-    analyse_find_solids
+    analyse_find_solids,
 )
 from structuretoolkit.analyse.spatial import (
     get_mean_positions,
@@ -17,7 +17,7 @@ from structuretoolkit.analyse.spatial import (
     get_voronoi_vertices,
     get_voronoi_neighbors,
     get_delaunay_neighbors,
-    cluster_positions
+    cluster_positions,
 )
 from structuretoolkit.analyse.strain import get_strain
 
@@ -31,6 +31,6 @@ from structuretoolkit.helper import (
     get_atomic_numbers,
     get_extended_positions,
     get_vertical_length,
-    get_wrapped_coordinates
+    get_wrapped_coordinates,
 )
 from structuretoolkit.visualize import plot3d

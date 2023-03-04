@@ -265,7 +265,9 @@ class Interstitials:
 
     def _set_interstitials_to_high_symmetry_points(self):
         self.positions = self.positions + np.mean(self.neigh.vecs, axis=-2)
-        self.positions = get_wrapped_coordinates(structure=self.structure, positions=self.positions)
+        self.positions = get_wrapped_coordinates(
+            structure=self.structure, positions=self.positions
+        )
 
     def _kick_out_points(self, variance_buffer=0.01):
         variance = self.get_variances()
@@ -276,7 +278,10 @@ class Interstitials:
         if eps == 0:
             return
         extended_positions, indices = get_extended_positions(
-            structure=self.structure, width=eps, return_indices=True, positions=self.positions
+            structure=self.structure,
+            width=eps,
+            return_indices=True,
+            positions=self.positions,
         )
         labels = DBSCAN(eps=eps, min_samples=1).fit_predict(extended_positions)
         coo = coo_matrix((labels, (np.arange(len(labels)), indices)))
@@ -355,9 +360,9 @@ def get_interstitials(
         eps=eps,
     )
 
+
 get_interstitials.__doc__ = (
-    Interstitials.__doc__.replace("Class", "Function")
-    + Interstitials.__init__.__doc__
+    Interstitials.__doc__.replace("Class", "Function") + Interstitials.__init__.__doc__
 )
 
 
@@ -420,9 +425,7 @@ def get_layers(
         )
         if id_list is not None:
             id_list = np.arange(len(structure))[np.array(id_list)]
-            id_list = np.any(
-                id_list[:, np.newaxis] == indices[np.newaxis, :], axis=0
-            )
+            id_list = np.any(id_list[:, np.newaxis] == indices[np.newaxis, :], axis=0)
             positions = positions[id_list]
             indices = indices[id_list]
     else:
@@ -430,7 +433,9 @@ def get_layers(
         if id_list is not None:
             positions = positions[id_list]
         if wrap_atoms:
-            positions = get_wrapped_coordinates(structure=structure, positions=positions)
+            positions = get_wrapped_coordinates(
+                structure=structure, positions=positions
+            )
     if planes is not None:
         mat = np.asarray(planes).reshape(-1, 3)
         positions = np.einsum(
@@ -460,9 +465,7 @@ def get_layers(
                 labels[:, None] == np.unique(labels)[unique_inside_box][None, :],
                 axis=-1,
             )
-            first_occurences = np.unique(
-                indices[arr_inside_box], return_index=True
-            )[1]
+            first_occurences = np.unique(indices[arr_inside_box], return_index=True)[1]
             labels = labels[arr_inside_box]
             labels -= np.min(labels)
             labels = labels[first_occurences]
@@ -509,7 +512,8 @@ def get_voronoi_vertices(
         xx = get_average_of_unique_labels(cluster.labels_, xx)
     xx = xx[
         np.linalg.norm(
-            xx - get_wrapped_coordinates(structure=structure, positions=xx, epsilon=0), axis=-1
+            xx - get_wrapped_coordinates(structure=structure, positions=xx, epsilon=0),
+            axis=-1,
         )
         < epsilon
     ]
@@ -547,7 +551,12 @@ def get_voronoi_neighbors(structure, width_buffer: float = 10) -> np.ndarray:
     Returns:
         pairs (ndarray): Pair indices
     """
-    return _get_neighbors(structure=structure, position_interpreter=Voronoi, data_field="ridge_points", width_buffer=width_buffer)
+    return _get_neighbors(
+        structure=structure,
+        position_interpreter=Voronoi,
+        data_field="ridge_points",
+        width_buffer=width_buffer,
+    )
 
 
 def get_delaunay_neighbors(structure, width_buffer: float = 10.0) -> np.ndarray:
@@ -562,7 +571,12 @@ def get_delaunay_neighbors(structure, width_buffer: float = 10.0) -> np.ndarray:
     Returns:
         pairs (ndarray): Delaunay neighbor indices
     """
-    return _get_neighbors(structure=structure, position_interpreter=Delaunay, data_field="simplices", width_buffer=width_buffer)
+    return _get_neighbors(
+        structure=structure,
+        position_interpreter=Delaunay,
+        data_field="simplices",
+        width_buffer=width_buffer,
+    )
 
 
 def cluster_positions(
@@ -607,13 +621,14 @@ def cluster_positions(
         positions (numpy.ndarray): Mean positions
         label (numpy.ndarray): Labels of the positions (returned when `return_labels = True`)
     """
-    positions = (
-        structure.positions if positions is None else np.array(positions)
-    )
+    positions = structure.positions if positions is None else np.array(positions)
     if buffer_width is None:
         buffer_width = eps
     extended_positions, indices = get_extended_positions(
-        structure=structure, width=buffer_width, return_indices=True, positions=positions
+        structure=structure,
+        width=buffer_width,
+        return_indices=True,
+        positions=positions,
     )
     labels = DBSCAN(eps=eps, min_samples=1).fit_predict(extended_positions)
     coo = coo_matrix((labels, (np.arange(len(labels)), indices)))

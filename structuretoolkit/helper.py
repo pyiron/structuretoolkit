@@ -72,7 +72,9 @@ def get_vertical_length(structure, norm_order=2):
         norm_order (int): Norm order (cf. numpy.linalg.norm)
     """
     return np.linalg.det(structure.cell) / np.linalg.norm(
-        np.cross(np.roll(structure.cell, -1, axis=0), np.roll(structure.cell, 1, axis=0)),
+        np.cross(
+            np.roll(structure.cell, -1, axis=0), np.roll(structure.cell, 1, axis=0)
+        ),
         axis=-1,
         ord=norm_order,
     )
