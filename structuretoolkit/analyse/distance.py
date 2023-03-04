@@ -28,7 +28,7 @@ def get_distances_array(structure, p1=None, p2=None, mic=True, vectors=False):
     p1 = np.asarray(p1)
     p2 = np.asarray(p2)
     diff_relative = (
-            p2.reshape(-1, 3)[np.newaxis, :, :] - p1.reshape(-1, 3)[:, np.newaxis, :]
+        p2.reshape(-1, 3)[np.newaxis, :, :] - p1.reshape(-1, 3)[:, np.newaxis, :]
     )
     diff_relative = diff_relative.reshape(p1.shape[:-1] + p2.shape[:-1] + (3,))
     if not mic:

@@ -241,9 +241,13 @@ class Symmetry(dict):
         if use_magmoms is None:
             use_magmoms = self._use_magmoms
         if use_elements:
-            numbers = np.array(get_structure_indices(structure=self._structure), dtype="intc")
+            numbers = np.array(
+                get_structure_indices(structure=self._structure), dtype="intc"
+            )
         else:
-            numbers = np.ones_like(get_structure_indices(structure=self._structure), dtype="intc")
+            numbers = np.ones_like(
+                get_structure_indices(structure=self._structure), dtype="intc"
+            )
         if use_magmoms:
             return (
                 lattice,
@@ -372,7 +376,7 @@ class Symmetry(dict):
 
 
 def get_symmetry(
-        structure, use_magmoms=False, use_elements=True, symprec=1e-5, angle_tolerance=-1.0
+    structure, use_magmoms=False, use_elements=True, symprec=1e-5, angle_tolerance=-1.0
 ):
     """
 
