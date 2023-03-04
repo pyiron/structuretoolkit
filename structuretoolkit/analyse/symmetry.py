@@ -3,7 +3,6 @@
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import numpy as np
-from pyiron_base import deprecate
 from scipy.spatial import cKDTree
 import spglib
 import ast
@@ -353,15 +352,6 @@ class Symmetry(dict):
         new_structure = new_structure[: len(indices)]
         new_structure.positions = positions
         return new_structure
-
-    @deprecate("Use `get_primitive_cell(standardize=True)` instead")
-    def refine_cell(self):
-        return self.get_primitive_cell(standardize=True)
-
-    @property
-    @deprecate("Use `get_primitive_cell(standardize=False)` instead")
-    def primitive_cell(self):
-        return self.get_primitive_cell(standardize=False)
 
     def get_ir_reciprocal_mesh(
         self,

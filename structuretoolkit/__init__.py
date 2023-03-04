@@ -1,4 +1,5 @@
 # Analyse
+from structuretoolkit.analyse.distance import get_distances_array
 from structuretoolkit.analyse.neighbors import get_neighbors, get_neighborhood
 from structuretoolkit.analyse.phonopy import analyse_phonopy_equivalent_atoms
 from structuretoolkit.analyse.pyscal import (
