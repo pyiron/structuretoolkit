@@ -8,12 +8,12 @@ The `structuretoolkit` is currently under development.
 
 ## Example 
 ```python
-import structuretoolkit as st
+import structuretoolkit as stk
 from ase.build import bulk
 
 structure = bulk("Al", cubic=True)
-st.analyse_cna_adaptive(structure)
-st.plot3d(structure)
+stk.analyse_cna_adaptive(structure)
+stk.plot3d(structure)
 ```
 
 ## Features 

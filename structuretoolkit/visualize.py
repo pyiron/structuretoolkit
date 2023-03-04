@@ -291,7 +291,10 @@ def _plot3d(
             "The package nglview needs to be installed for the plot3d() function!"
         )
 
-    if magnetic_moments is True and np.sum(np.abs(structure.get_initial_magnetic_moments())) > 0:
+    if (
+        magnetic_moments is True
+        and np.sum(np.abs(structure.get_initial_magnetic_moments())) > 0
+    ):
         if len(structure.get_initial_magnetic_moments().shape) == 1:
             scalar_field = structure.get_initial_magnetic_moments()
         else:

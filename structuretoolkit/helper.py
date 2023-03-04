@@ -72,7 +72,9 @@ def get_vertical_length(structure, norm_order=2):
         norm_order (int): Norm order (cf. numpy.linalg.norm)
     """
     return np.linalg.det(structure.cell) / np.linalg.norm(
-        np.cross(np.roll(structure.cell, -1, axis=0), np.roll(structure.cell, 1, axis=0)),
+        np.cross(
+            np.roll(structure.cell, -1, axis=0), np.roll(structure.cell, 1, axis=0)
+        ),
         axis=-1,
         ord=norm_order,
     )
@@ -100,3 +102,16 @@ def get_wrapped_coordinates(structure, positions, epsilon=1.0e-8):
         )
     new_positions = np.einsum("ji,nj->ni", structure.cell, scaled_positions)
     return new_positions.reshape(np.asarray(positions).shape)
+
+
+def get_species_indices_dict(structure):
+    return {el: i for i, el in enumerate(sorted(structure.symbols.indices().keys()))}
+
+
+def get_structure_indices(structure):
+    element_indices_dict = get_species_indices_dict(structure=structure)
+    elements = np.array(structure.get_chemical_symbols())
+    indices = elements.copy()
+    for k, v in element_indices_dict.items():
+        indices[elements == k] = v
+    return indices.astype(int)

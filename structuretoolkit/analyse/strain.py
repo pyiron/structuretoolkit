@@ -1,5 +1,7 @@
 import numpy as np
 from scipy.spatial.transform import Rotation
+from structuretoolkit.analyse.neighbors import get_neighbors
+from structuretoolkit.analyse.pyscal import analyse_cna_adaptive
 
 
 class Strain:
@@ -136,7 +138,7 @@ class Strain:
 
     @staticmethod
     def _get_majority_phase(structure):
-        cna = structure.analyse.pyscal_cna_adaptive()
+        cna = analyse_cna_adaptive(atoms=structure)
         return np.asarray([k for k in cna.keys()])[np.argmax([v for v in cna.values()])]
 
     @staticmethod
@@ -152,8 +154,8 @@ class Strain:
     def ref_coord(self):
         """Reference local coordinates."""
         if self._ref_coord is None:
-            self._ref_coord = self.ref_structure.get_neighbors(
-                num_neighbors=self.num_neighbors
+            self._ref_coord = get_neighbors(
+                structure=self.ref_structure, num_neighbors=self.num_neighbors
             ).vecs[0]
         return self._ref_coord
 
@@ -161,8 +163,8 @@ class Strain:
     def coords(self):
         """Local coordinates of each atom."""
         if self._coords is None:
-            self._coords = self.structure.get_neighbors(
-                num_neighbors=self.num_neighbors
+            self._coords = get_neighbors(
+                structure=self.structure, num_neighbors=self.num_neighbors
             ).vecs
         return self._coords
 
@@ -188,7 +190,13 @@ class Strain:
         return 0.5 * (np.einsum("nij,nkj->nik", J, J) - np.eye(3))
 
 
-def get_strain(structure, ref_structure, num_neighbors=None, only_bulk_type=False):
+def get_strain(
+    structure,
+    ref_structure,
+    num_neighbors=None,
+    only_bulk_type=False,
+    return_object=False,
+):
     """
     Calculate local strain of each atom following the Lagrangian strain tensor:
 
@@ -225,9 +233,13 @@ def get_strain(structure, ref_structure, num_neighbors=None, only_bulk_type=Fals
         strain values they give similar results (i.e. when strain**2 can be neglected).
 
     """
-    return Strain(
+    strain_obj = Strain(
         structure=structure,
         ref_structure=ref_structure,
         num_neighbors=num_neighbors,
         only_bulk_type=only_bulk_type,
-    ).strain
+    )
+    if return_object:
+        return strain_obj
+    else:
+        return strain_obj.strain

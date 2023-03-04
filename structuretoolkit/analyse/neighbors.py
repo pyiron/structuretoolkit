@@ -11,7 +11,7 @@ from scipy.special import sph_harm
 from scipy.spatial import cKDTree
 import warnings
 import itertools
-from structuretoolkit.analyse import get_average_of_unique_labels
+from structuretoolkit.analyse.spatial import get_average_of_unique_labels
 from structuretoolkit.helper import get_extended_positions
 
 __author__ = "Joerg Neugebauer, Sam Waseda"
