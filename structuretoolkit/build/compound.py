@@ -1,6 +1,7 @@
 import numpy as np
 from ase.build import bulk
 from ase.spacegroup import crystal
+from structuretoolkit.analyse.neighbors import get_neighbors
 
 
 def B2(element_a, element_b, a=None):
@@ -203,6 +204,6 @@ def _bcc_lattice_constant_from_nn_distance(element):
 
     Works because the NN distance doesn't even care what crystal structure the regular unit cell is.
     """
-    return bulk(name=element).get_neighbors(num_neighbors=1).distances[
+    return get_neighbors(structure=bulk(name=element), num_neighbors=1).distances[
         0, 0
     ] * (2 / np.sqrt(3))

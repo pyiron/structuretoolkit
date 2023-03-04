@@ -1,0 +1,17 @@
+channels:
+- conda-forge
+dependencies:
+- aimsgb =0.1.1
+- ase =3.22.1
+- coveralls
+- coverage
+- codacy-coverage
+- matplotlib-base =3.7.0
+- numpy =1.24.2
+- pandas =1.5.3
+- phonopy =2.17.1
+- pymatgen =2022.11.7
+- pyscal =2.10.18
+- scikit-learn =1.2.1
+- scipy =1.10.0
+- spglib =2.0.2

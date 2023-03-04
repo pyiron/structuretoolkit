@@ -20,6 +20,7 @@ from structuretoolkit.analyse.spatial import (
     cluster_positions,
 )
 from structuretoolkit.analyse.strain import get_strain
+from structuretoolkit.analyse.symmetry import get_symmetry
 
 # Build
 from structuretoolkit.build.aimsgb import grainboundary_build, grainboundary_info
