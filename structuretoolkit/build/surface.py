@@ -1,6 +1,5 @@
 import numpy as np
-from ase.spacegroup import crystal
-from ase.build import surface
+from ase.build import bulk, surface
 from structuretoolkit.analyse.symmetry import get_symmetry
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 from pymatgen.io.ase import AseAtomsAdaptor
@@ -56,11 +55,11 @@ def high_index_surface_info(
     step_down_vector = (
         step_down_vector if step_down_vector is not None else [1, 1, 0]
     )
-
-    basis = crystal(
-        element=element,
-        bravais_basis=crystal_structure,
-        lattice_constant=lattice_constant,
+    basis = bulk(
+        name=element,
+        crystalstructure=crystal_structure,
+        a=lattice_constant,
+        cubic=True
     )
     sym = get_symmetry(structure=basis)
     eqvdirs = np.unique(
@@ -137,10 +136,11 @@ def high_index_surface(
     Returns:
         slab: pyiron_atomistics.atomistics.structure.atoms.Atoms instance Required surface
     """
-    basis = crystal(
-        element=element,
-        bravais_basis=crystal_structure,
-        lattice_constant=lattice_constant,
+    basis = bulk(
+        name=element,
+        crystalstructure=crystal_structure,
+        a=lattice_constant,
+        cubic=True
     )
     high_index_surface, _, _ = high_index_surface_info(
         element=element,
