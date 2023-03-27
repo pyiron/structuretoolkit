@@ -105,7 +105,8 @@ def get_wrapped_coordinates(structure, positions, epsilon=1.0e-8):
 
 
 def get_species_indices_dict(structure):
-    return {el: i for i, el in enumerate(sorted(structure.symbols.indices().keys()))}
+    # As of Python version 3.7, dictionaries are ordered.
+    return {el: i for i, el in enumerate(structure.symbols.indices().keys())}
 
 
 def get_structure_indices(structure):
@@ -115,3 +116,11 @@ def get_structure_indices(structure):
     for k, v in element_indices_dict.items():
         indices[elements == k] = v
     return indices.astype(int)
+
+
+def set_indices(structure, indices):
+    indices_dict = {
+        v: k for k, v in get_species_indices_dict(structure=structure).items()
+    }
+    structure.symbols = [indices_dict[i] for i in indices]
+    return structure
