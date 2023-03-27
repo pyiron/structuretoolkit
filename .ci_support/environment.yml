@@ -6,19 +6,13 @@ dependencies:
 - coveralls
 - coverage
 - codacy-coverage
-- defusedxml =0.7.1
-- h5py =3.8.0
-- matplotlib-base =3.7.1
-- mendeleev =0.12.1
-- mp-api =0.30.11
+- matplotlib-base =3.7.0
 - numpy =1.24.2
 - pandas =1.5.3
-- phonopy =2.17.2
-- pint =0.20.1
-- pyiron_base =0.5.34
-- pymatgen =2023.3.23
+- phonopy =2.17.1
+- pymatgen =2022.11.7
 - pyscal =2.10.18
-- scikit-learn =1.2.2
-- scipy =1.10.1
-- seekpath =2.0.1
+- scikit-learn =1.2.1
+- scipy =1.10.0
 - spglib =2.0.2
+- sqsgenerator =0.2
