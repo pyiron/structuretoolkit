@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.sparse import coo_matrix
 from ase.data import atomic_numbers
 
 
@@ -105,7 +106,8 @@ def get_wrapped_coordinates(structure, positions, epsilon=1.0e-8):
 
 
 def get_species_indices_dict(structure):
-    return {el: i for i, el in enumerate(sorted(structure.symbols.indices().keys()))}
+    # As of Python version 3.7, dictionaries are ordered.
+    return {el: i for i, el in enumerate(structure.symbols.indices().keys())}
 
 
 def get_structure_indices(structure):
@@ -115,3 +117,104 @@ def get_structure_indices(structure):
     for k, v in element_indices_dict.items():
         indices[elements == k] = v
     return indices.astype(int)
+
+
+def select_index(structure, element):
+    return structure.symbols.indices()[element]
+
+
+def set_indices(structure, indices):
+    indices_dict = {
+        v: k for k, v in get_species_indices_dict(structure=structure).items()
+    }
+    structure.symbols = [indices_dict[i] for i in indices]
+    return structure
+
+
+def get_average_of_unique_labels(labels, values):
+    """
+
+    This function returns the average values of those elements, which share the same labels
+
+    Example:
+
+    >>> labels = [0, 1, 0, 2]
+    >>> values = [0, 1, 2, 3]
+    >>> print(get_average_of_unique_labels(labels, values))
+    array([1, 1, 3])
+
+    """
+    labels = np.unique(labels, return_inverse=True)[1]
+    unique_labels = np.unique(labels)
+    mat = coo_matrix((np.ones_like(labels), (labels, np.arange(len(labels)))))
+    mean_values = np.asarray(
+        mat.dot(np.asarray(values).reshape(len(labels), -1)) / mat.sum(axis=1)
+    )
+    if np.prod(mean_values.shape).astype(int) == len(unique_labels):
+        return mean_values.flatten()
+    return mean_values
+
+
+def center_coordinates_in_unit_cell(structure, origin=0, eps=1e-4):
+    """
+    Wrap atomic coordinates within the supercell.
+
+    Modifies object in place and returns itself.
+
+    Args:
+        structure (ase.atoms.Atoms):
+        origin (float):  0 to confine between 0 and 1, -0.5 to confine between -0.5 and 0.5
+        eps (float): Tolerance to detect atoms at cell edges
+
+    Returns:
+        :class:`pyiron_atomistics.atomistics.structure.atoms.Atoms`: reference to this structure
+    """
+    if any(structure.pbc):
+        structure.set_scaled_positions(
+            np.mod(structure.get_scaled_positions(wrap=False) + eps, 1) - eps + origin
+        )
+    return structure
+
+
+def apply_strain(structure, epsilon, return_box=False, mode="linear"):
+    """
+    Apply a given strain on the structure. It applies the matrix `F` in the manner:
+
+    ```
+        new_cell = F @ current_cell
+    ```
+
+    Args:
+        epsilon (float/list/ndarray): epsilon matrix. If a single number is set, the same
+            strain is applied in each direction. If a 3-dim vector is set, it will be
+            multiplied by a unit matrix.
+        return_box (bool): whether to return a box. If set to True, only the returned box will
+            have the desired strain and the original box will stay unchanged.
+        mode (str): `linear` or `lagrangian`. If `linear`, `F` is equal to the epsilon - 1.
+            If `lagrangian`, epsilon is given by `(F^T * F - 1) / 2`. It raises an error if
+            the strain is not symmetric (if the shear components are given).
+    """
+    epsilon = np.array([epsilon]).flatten()
+    if len(epsilon) == 3 or len(epsilon) == 1:
+        epsilon = epsilon * np.eye(3)
+    epsilon = epsilon.reshape(3, 3)
+    if epsilon.min() < -1.0:
+        raise ValueError("Strain value too negative")
+    if return_box:
+        structure_copy = structure.copy()
+    else:
+        structure_copy = structure
+    cell = structure_copy.cell.copy()
+    if mode == "linear":
+        F = epsilon + np.eye(3)
+    elif mode == "lagrangian":
+        if not np.allclose(epsilon, epsilon.T):
+            raise ValueError("Strain must be symmetric if `mode = 'lagrangian'`")
+        E, V = np.linalg.eigh(2 * epsilon + np.eye(3))
+        F = np.einsum("ik,k,jk->ij", V, np.sqrt(E), V)
+    else:
+        raise ValueError("mode must be `linear` or `lagrangian`")
+    cell = np.matmul(F, cell)
+    structure_copy.set_cell(cell, scale_atoms=True)
+    if return_box:
+        return structure_copy
