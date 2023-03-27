@@ -7,7 +7,8 @@ from sklearn.cluster import AgglomerativeClustering, DBSCAN
 from scipy.sparse import coo_matrix
 from scipy.spatial import Voronoi, Delaunay
 from scipy.spatial import ConvexHull
-from structuretoolkit.helper import get_extended_positions, get_wrapped_coordinates
+from structuretoolkit.helper import get_extended_positions, get_wrapped_coordinates, get_vertical_length, get_average_of_unique_labels
+from structuretoolkit.analyse.neighbors import get_neighborhood
 
 
 __author__ = "Joerg Neugebauer, Sam Waseda"
@@ -49,30 +50,6 @@ def get_mean_positions(positions, cell, pbc, labels):
     # Add average displacement vector of each label to the reference point
     np.add.at(mean_positions, labels, (all_positions.T / counts[labels]).T)
     return mean_positions
-
-
-def get_average_of_unique_labels(labels, values):
-    """
-
-    This function returns the average values of those elements, which share the same labels
-
-    Example:
-
-    >>> labels = [0, 1, 0, 2]
-    >>> values = [0, 1, 2, 3]
-    >>> print(get_average_of_unique_labels(labels, values))
-    array([1, 1, 3])
-
-    """
-    labels = np.unique(labels, return_inverse=True)[1]
-    unique_labels = np.unique(labels)
-    mat = coo_matrix((np.ones_like(labels), (labels, np.arange(len(labels)))))
-    mean_values = np.asarray(
-        mat.dot(np.asarray(values).reshape(len(labels), -1)) / mat.sum(axis=1)
-    )
-    if np.prod(mean_values.shape).astype(int) == len(unique_labels):
-        return mean_values.flatten()
-    return mean_values
 
 
 class Interstitials:
@@ -206,8 +183,10 @@ class Interstitials:
         `pyiron_atomistics.structure.atoms.neighbors`.
         """
         if self._neigh is None:
-            self._neigh = self.structure.get_neighborhood(
-                self.positions, num_neighbors=self.num_neighbors
+            self._neigh = get_neighborhood(
+                structure=self.structure,
+                positions=self.positions,
+                num_neighbors=self.num_neighbors
             )
         return self._neigh
 
@@ -251,7 +230,7 @@ class Interstitials:
         return self._hull
 
     def _create_gridpoints(self, n_gridpoints_per_angstrom=5):
-        cell = self.structure.get_vertical_length()
+        cell = get_vertical_length(structure=self.structure)
         n_points = (n_gridpoints_per_angstrom * cell).astype(int)
         positions = np.meshgrid(
             *[np.linspace(0, 1, n_points[i], endpoint=False) for i in range(3)]
@@ -260,7 +239,7 @@ class Interstitials:
         return np.einsum("ji,nj->ni", self.structure.cell, positions)
 
     def _remove_too_close(self, min_distance=1):
-        neigh = self.structure.get_neighborhood(self.positions, num_neighbors=1)
+        neigh = get_neighborhood(structure=self.structure, positions=self.positions, num_neighbors=1)
         self.positions = self.positions[neigh.distances.flatten() > min_distance]
 
     def _set_interstitials_to_high_symmetry_points(self):
@@ -420,8 +399,10 @@ def get_layers(
     if id_list is not None and len(id_list) == 0:
         raise ValueError("id_list must contain at least one id")
     if wrap_atoms and planes is None:
-        positions, indices = structure.get_extended_positions(
-            width=distance_threshold, return_indices=True
+        positions, indices = get_extended_positions(
+            structure=structure,
+            width=distance_threshold,
+            return_indices=True
         )
         if id_list is not None:
             id_list = np.arange(len(structure))[np.array(id_list)]
@@ -502,7 +483,7 @@ def get_voronoi_vertices(
     >>> print(neigh.distances.min(axis=-1))
 
     """
-    voro = Voronoi(structure.get_extended_positions(width_buffer) + epsilon)
+    voro = Voronoi(get_extended_positions(structure=structure, width=width_buffer) + epsilon)
     xx = voro.vertices
     if distance_threshold > 0:
         cluster = AgglomerativeClustering(

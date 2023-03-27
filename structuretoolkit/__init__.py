@@ -1,5 +1,5 @@
 # Analyse
-from structuretoolkit.analyse.distance import get_distances_array
+from structuretoolkit.analyse.distance import get_distances_array, find_mic
 from structuretoolkit.analyse.neighbors import get_neighbors, get_neighborhood
 from structuretoolkit.analyse.phonopy import analyse_phonopy_equivalent_atoms
 from structuretoolkit.analyse.pyscal import (
@@ -35,5 +35,8 @@ from structuretoolkit.helper import (
     get_extended_positions,
     get_vertical_length,
     get_wrapped_coordinates,
+    select_index,
+    center_coordinates_in_unit_cell,
+    apply_strain
 )
 from structuretoolkit.visualize import plot3d
