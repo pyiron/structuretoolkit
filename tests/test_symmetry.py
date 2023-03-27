@@ -79,16 +79,13 @@ class TestAtoms(unittest.TestCase):
         Al_sc = Atoms("AlAl", scaled_positions=[(0, 0, 0), (0.5, 0.5, 0.5)], cell=cell)
         self.assertEqual(len(stk.get_symmetry(structure=Al_sc).get_ir_reciprocal_mesh([3, 3, 3])[0]), 27)
 
-    # Todo: Set indices currently does not work !!!
-    # def test_get_primitive_cell(self):
-    #     cell = 2.2 * np.identity(3)
-    #     basis = Atoms("AlFe", scaled_positions=[(0, 0, 0), (0.5, 0.5, 0.5)], cell=cell)
-    #     structure = basis.repeat([2, 2, 2])
-    #     sym = stk.get_symmetry(structure=structure)
-    #     self.assertEqual(len(basis), len(sym.get_primitive_cell(standardize=True)))
-    #     self.assertEqual(len(sym.primitive_cell), len(sym.get_primitive_cell(standardize=False)))
-    #     self.assertEqual(len(sym.refine_cell()), len(sym.get_primitive_cell(standardize=True)))
-    #     self.assertEqual(stk.get_symmetry(structure=sym.get_primitive_cell()).spacegroup["Number"], 221)
+    def test_get_primitive_cell(self):
+        cell = 2.2 * np.identity(3)
+        basis = Atoms("AlFe", scaled_positions=[(0, 0, 0), (0.5, 0.5, 0.5)], cell=cell)
+        structure = basis.repeat([2, 2, 2])
+        sym = stk.get_symmetry(structure=structure)
+        self.assertEqual(len(basis), len(sym.get_primitive_cell(standardize=True)))
+        self.assertEqual(stk.get_symmetry(structure=sym.get_primitive_cell()).spacegroup["Number"], 221)
 
     def test_get_equivalent_points(self):
         basis = Atoms("FeFe", positions=[[0.01, 0, 0], [0.5, 0.5, 0.5]], cell=np.identity(3))
