@@ -40,9 +40,9 @@ def get_config():
     cfg = VersioneerConfig()
     cfg.VCS = "git"
     cfg.style = "pep440-pre"
-    cfg.tag_prefix = "pyiron_atomistics-"
-    cfg.parentdir_prefix = "pyiron_atomistics"
-    cfg.versionfile_source = "pyiron_atomistics/_version.py"
+    cfg.tag_prefix = "structuretoolkit-"
+    cfg.parentdir_prefix = "structuretoolkit"
+    cfg.versionfile_source = "structuretoolkit/_version.py"
     cfg.verbose = False
     return cfg
 

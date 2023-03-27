@@ -2,16 +2,15 @@
 Setuptools based setup module
 """
 from setuptools import setup, find_packages
-
 import versioneer
 
 setup(
-    name='pyiron-atomistics',
+    name='structuretoolkit',
     version=versioneer.get_version(),
-    description='pyiron - an integrated development environment (IDE) for computational materials science.',
+    description='structuretoolkit - to analyse, build and visualise atomistic structures.',
     long_description='http://pyiron.org',
 
-    url='https://github.com/pyiron/pyiron_atomistics',
+    url='https://github.com/pyiron/structuretoolkit',
     author='Max-Planck-Institut für Eisenforschung GmbH - Computational Materials Design (CM) Department',
     author_email='janssen@mpie.de',
     license='BSD',
@@ -22,7 +21,6 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Intended Audience :: Science/Research',
         'Operating System :: OS Independent',
-        'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
@@ -30,36 +28,17 @@ setup(
     ],
 
     keywords='pyiron',
-    packages=find_packages(exclude=[
-        "*tests*", 
-        "*docs*", 
-        "*binder*", 
-        "*.devcontainer*", 
-        "*notebooks*",
-        "*.ci_support*", 
-        "*test_benchmarks*", 
-        "*test_integration*", 
-        "*.github*"
-    ]),
+    packages=find_packages(exclude=["*tests*", "*docs*", "*binder*", "*conda*", "*notebooks*", "*.ci_support*"]),
     install_requires=[
         'aimsgb==0.1.1',
         'ase==3.22.1',
-        'defusedxml==0.7.1',
-        'h5py==3.8.0',
-        'matplotlib==3.7.1',
-        'mendeleev==0.12.1',
-        'mp-api==0.30.11',
+        'matplotlib==3.7.0',
         'numpy==1.24.2',
-        'pandas==1.5.3',
-        'phonopy==2.17.2',
-        'pint==0.20.1',
-        'pyiron_base==0.5.34',
-        'pymatgen==2023.3.23',
-        'scipy==1.10.1',
-        'seekpath==2.0.1',
-        'scikit-learn==1.2.2',
+        'phonopy==2.17.1',
+        'pymatgen==2022.11.7',
+        'scipy==1.10.0',
+        'scikit-learn==1.2.1',
         'spglib==2.0.2',
     ],
     cmdclass=versioneer.get_cmdclass(),
-
-    )
+)

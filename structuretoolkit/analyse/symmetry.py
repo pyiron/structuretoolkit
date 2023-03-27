@@ -3,10 +3,12 @@
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import numpy as np
-from pyiron_base import deprecate
 from scipy.spatial import cKDTree
 import spglib
 import ast
+
+import structuretoolkit.helper
+from structuretoolkit.helper import get_structure_indices
 
 __author__ = "Joerg Neugebauer, Sam Waseda"
 __copyright__ = (
@@ -240,9 +242,13 @@ class Symmetry(dict):
         if use_magmoms is None:
             use_magmoms = self._use_magmoms
         if use_elements:
-            numbers = np.array(self._structure.indices, dtype="intc")
+            numbers = np.array(
+                get_structure_indices(structure=self._structure), dtype="intc"
+            )
         else:
-            numbers = np.ones_like(self._structure.indices, dtype="intc")
+            numbers = np.ones_like(
+                get_structure_indices(structure=self._structure), dtype="intc"
+            )
         if use_magmoms:
             return (
                 lattice,
@@ -347,19 +353,12 @@ class Symmetry(dict):
         positions = (cell.T @ positions.T).T
         new_structure = self._structure.copy()
         new_structure.cell = cell
-        new_structure.indices[: len(indices)] = indices
         new_structure = new_structure[: len(indices)]
+        new_structure = structuretoolkit.helper.set_indices(
+            structure=new_structure, indices=indices
+        )
         new_structure.positions = positions
         return new_structure
-
-    @deprecate("Use `get_primitive_cell(standardize=True)` instead")
-    def refine_cell(self):
-        return self.get_primitive_cell(standardize=True)
-
-    @property
-    @deprecate("Use `get_primitive_cell(standardize=False)` instead")
-    def primitive_cell(self):
-        return self.get_primitive_cell(standardize=False)
 
     def get_ir_reciprocal_mesh(
         self,
@@ -377,3 +376,29 @@ class Symmetry(dict):
         if mesh is None:
             raise SymmetryError(spglib.spglib.spglib_error.message)
         return mesh
+
+
+def get_symmetry(
+    structure, use_magmoms=False, use_elements=True, symprec=1e-5, angle_tolerance=-1.0
+):
+    """
+
+    Args:
+        use_magmoms (bool): Whether to consider magnetic moments (cf.
+        get_initial_magnetic_moments())
+        use_elements (bool): If False, chemical elements will be ignored
+        symprec (float): Symmetry search precision
+        angle_tolerance (float): Angle search tolerance
+
+    Returns:
+        symmetry (:class:`pyiron.atomistics.structure.symmetry.Symmetry`): Symmetry class
+
+
+    """
+    return Symmetry(
+        structure=structure,
+        use_magmoms=use_magmoms,
+        use_elements=use_elements,
+        symprec=symprec,
+        angle_tolerance=angle_tolerance,
+    )

@@ -1,5 +1,7 @@
 import numpy as np
 from scipy.spatial.transform import Rotation
+from structuretoolkit.analyse.neighbors import get_neighbors
+from structuretoolkit.analyse.pyscal import analyse_cna_adaptive
 
 
 class Strain:
@@ -13,10 +15,10 @@ class Strain:
 
     Example:
 
-    >>> from pyiron_atomistics import Project
-    >>> pr = Project('.')
-    >>> bulk = pr.create.structure.bulk('Fe', cubic=True)
-    >>> structure = bulk.apply_strain(np.random.random((3,3))*0.1, return_box=True)
+    >>> from ase.build import bulk
+    >>> import structuretoolkit as st
+    >>> bulk = bulk('Fe', cubic=True)
+    >>> structure = st.get_strain(bulk, np.random.random((3,3))*0.1, return_box=True)
     >>> Strain(structure, bulk).strain
 
     """
@@ -136,7 +138,7 @@ class Strain:
 
     @staticmethod
     def _get_majority_phase(structure):
-        cna = structure.analyse.pyscal_cna_adaptive()
+        cna = analyse_cna_adaptive(atoms=structure)
         return np.asarray([k for k in cna.keys()])[np.argmax([v for v in cna.values()])]
 
     @staticmethod
@@ -152,8 +154,8 @@ class Strain:
     def ref_coord(self):
         """Reference local coordinates."""
         if self._ref_coord is None:
-            self._ref_coord = self.ref_structure.get_neighbors(
-                num_neighbors=self.num_neighbors
+            self._ref_coord = get_neighbors(
+                structure=self.ref_structure, num_neighbors=self.num_neighbors
             ).vecs[0]
         return self._ref_coord
 
@@ -161,8 +163,8 @@ class Strain:
     def coords(self):
         """Local coordinates of each atom."""
         if self._coords is None:
-            self._coords = self.structure.get_neighbors(
-                num_neighbors=self.num_neighbors
+            self._coords = get_neighbors(
+                structure=self.structure, num_neighbors=self.num_neighbors
             ).vecs
         return self._coords
 
@@ -186,3 +188,58 @@ class Strain:
         if self.only_bulk_type:
             J[self._nullify_non_bulk] = np.eye(3)
         return 0.5 * (np.einsum("nij,nkj->nik", J, J) - np.eye(3))
+
+
+def get_strain(
+    structure,
+    ref_structure,
+    num_neighbors=None,
+    only_bulk_type=False,
+    return_object=False,
+):
+    """
+    Calculate local strain of each atom following the Lagrangian strain tensor:
+
+    strain = (F^T x F - 1)/2
+
+    where F is the atomic deformation gradient.
+
+    Args:
+        structure (ase.atoms.Atoms): strained structures
+        ref_structure (ase.atoms.Atoms): Reference bulk structure
+            (against which the strain is calculated)
+        num_neighbors (int): Number of neighbors to take into account to calculate the local
+            frame. If not specified, it is estimated based on cna analysis (only available if
+            the bulk structure is bcc, fcc or hcp).
+        only_bulk_type (bool): Whether to calculate the strain of all atoms or only for those
+            which cna considers has the same crystal structure as the bulk. Those which have
+            a different crystal structure will get 0 strain.
+
+    Returns:
+        ((n_atoms, 3, 3)-array): Strain tensors
+
+    Example:
+
+    >>> from ase.build import bulk
+    >>> import structuretoolkit as st
+    >>> bulk = bulk('Fe', cubic=True)
+    >>> structure = st.get_strain(bulk, np.random.random((3,3))*0.1, return_box=True)
+    >>> Strain(structure, bulk).strain
+
+    .. attention:: Differs from :meth:`.Atoms.apply_strain`!
+        This strain is not the same as the strain applied in `Atoms.apply_strain`, which
+        multiplies the strain tensor (plus identity matrix) with the basis vectors, while
+        here it follows the definition given by the Lagrangian strain tensor. For small
+        strain values they give similar results (i.e. when strain**2 can be neglected).
+
+    """
+    strain_obj = Strain(
+        structure=structure,
+        ref_structure=ref_structure,
+        num_neighbors=num_neighbors,
+        only_bulk_type=only_bulk_type,
+    )
+    if return_object:
+        return strain_obj
+    else:
+        return strain_obj.strain

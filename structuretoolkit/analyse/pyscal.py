@@ -3,13 +3,9 @@
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import numpy as np
-from pyiron_base import state
-import pyiron_atomistics.atomistics.structure.atoms
+from ase.atoms import Atoms
 import pyscal.core as pc
 from sklearn import cluster
-from pyiron_base import Deprecator
-
-deprecate = Deprecator()
 
 __author__ = "Sarath Menon, Jan Janssen"
 __copyright__ = (
@@ -23,7 +19,6 @@ __status__ = "development"
 __date__ = "Nov 6, 2019"
 
 
-@deprecate(arguments={"clustering": "use n_clusters=None instead of clustering=False."})
 def get_steinhardt_parameter_structure(
     atoms,
     neighbor_method="cutoff",
@@ -31,7 +26,6 @@ def get_steinhardt_parameter_structure(
     n_clusters=2,
     q=None,
     averaged=False,
-    clustering=None,
 ):
     """
     Calculate Steinhardts parameters
@@ -51,8 +45,6 @@ def get_steinhardt_parameter_structure(
     """
     sys = pyiron_to_pyscal_system(atoms)
     q = (4, 6) if q is None else q
-    if clustering == False:
-        n_clusters = None
 
     sys.find_neighbors(method=neighbor_method, cutoff=cutoff)
 
@@ -265,10 +257,9 @@ def pyiron_to_pyscal_system(atoms):
     Returns:
         Pyscal system: See the pyscal documentation.
     """
-    state.publications.add(publication())
     sys = pc.System()
     sys.read_inputfile(
-        pyiron_atomistics.atomistics.structure.atoms.pyiron_to_ase(atoms),
+        atoms,
         format="ase",
     )
     return sys
@@ -321,21 +312,3 @@ def analyse_find_solids(
     atoms = sys.atoms
     solids = [atom for atom in atoms if atom.solid]
     return len(solids)
-
-
-def publication():
-    return {
-        "pyscal": {
-            "Menon2019": {
-                "doi": "10.21105/joss.01824",
-                "url": "https://doi.org/10.21105/joss.01824",
-                "year": "2019",
-                "volume": "4",
-                "number": "43",
-                "pages": "1824",
-                "author": ["Sarath Menon", "Grisell Diaz Leines", "Jutta Rogal"],
-                "title": "pyscal: A python module for structural analysis of atomic environments",
-                "journal": "Journal of Open Source Software",
-            }
-        }
-    }

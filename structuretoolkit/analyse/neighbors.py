@@ -6,13 +6,12 @@ import numpy as np
 from sklearn.cluster import AgglomerativeClustering
 from scipy.sparse import coo_matrix
 from scipy.special import gamma
-from pyiron_base import DataContainer, FlattenedStorage
-from pyiron_atomistics.atomistics.structure.analyse import get_average_of_unique_labels
 from scipy.spatial.transform import Rotation
 from scipy.special import sph_harm
+from scipy.spatial import cKDTree
 import warnings
-from pyiron_base import deprecate
 import itertools
+from structuretoolkit.helper import get_extended_positions, get_average_of_unique_labels
 
 __author__ = "Joerg Neugebauer, Sam Waseda"
 __copyright__ = (
@@ -206,22 +205,6 @@ class Tree:
             for vv, dist in zip(value, self.filled.distances)
         ]
 
-    @property
-    @deprecate("Use mode", version="1.0.0")
-    def allow_ragged(self):
-        """
-        Whether to allow ragged list of distancs/vectors/indices or fill empty slots with numpy.inf
-        to get rectangular arrays
-        """
-        return self._mode["ragged"]
-
-    @allow_ragged.setter
-    @deprecate("Use `mode='ragged'`", version="1.0.0")
-    def allow_ragged(self, new_bool):
-        if not isinstance(new_bool, bool):
-            raise ValueError("allow_ragged must be a boolean")
-        self._set_mode(self._allow_ragged_to_mode(new_bool))
-
     def _allow_ragged_to_mode(self, new_bool):
         if new_bool is None:
             return self.mode
@@ -351,7 +334,7 @@ class Tree:
         ):
             raise ValueError("Specify num_neighbors or cutoff_radius")
         elif num_neighbors is None and self.num_neighbors is None:
-            volume = self._ref_structure.get_volume(per_atom=True)
+            volume = self._ref_structure.get_volume() / len(self._ref_structure)
             width_buffer = 1 + width_buffer
             width_buffer *= get_volume_of_n_sphere_in_p_norm(3, self.norm_order)
             num_neighbors = max(14, int(width_buffer * cutoff_radius**3 / volume))
@@ -646,7 +629,7 @@ class Neighbors(Tree):
         """
         chemical_symbols = np.tile(["v"], self.filled.indices.shape).astype("<U2")
         cond = self.filled.indices < len(self._ref_structure)
-        chemical_symbols[cond] = self._ref_structure.get_chemical_symbols()[
+        chemical_symbols[cond] = np.array(self._ref_structure.get_chemical_symbols())[
             self.filled.indices[cond]
         ]
         return chemical_symbols
@@ -840,7 +823,7 @@ class Neighbors(Tree):
         ).reshape(-1, 3)
         shell_max = np.max(pairs[:, -1]) + 1
         if chemical_pair is not None:
-            c = self._ref_structure.get_chemical_symbols()
+            c = np.array(self._ref_structure.get_chemical_symbols())
             pairs = pairs[
                 np.all(
                     np.sort(c[pairs[:, :2]], axis=-1) == np.sort(chemical_pair), axis=-1
@@ -1116,164 +1099,141 @@ def get_volume_of_n_sphere_in_p_norm(n=3, p=2):
     return (2 * gamma(1 + 1 / p)) ** n / gamma(1 + n / p)
 
 
-class NeighborsTrajectory(DataContainer):
+def get_neighbors(
+    structure,
+    num_neighbors=12,
+    tolerance=2,
+    id_list=None,
+    cutoff_radius=np.inf,
+    width_buffer=1.2,
+    mode="filled",
+    norm_order=2,
+):
     """
-    This class generates the neighbors for a given atomistic trajectory. The resulting indices, distances, and vectors
-    are stored as numpy arrays.
+
+    Args:
+        num_neighbors (int): number of neighbors
+        tolerance (int): tolerance (round decimal points) used for computing neighbor shells
+        id_list (list): list of atoms the neighbors are to be looked for
+        cutoff_radius (float): Upper bound of the distance to which the search must be done
+        width_buffer (float): width of the layer to be added to account for pbc.
+        mode (str): Representation of per-atom quantities (distances etc.). Choose from
+            'filled', 'ragged' and 'flattened'.
+        norm_order (int): Norm to use for the neighborhood search and shell recognition. The
+            definition follows the conventional Lp norm (cf.
+            https://en.wikipedia.org/wiki/Lp_space). This is an feature and for anything
+            other than norm_order=2, there is no guarantee that this works flawlessly.
+
+    Returns:
+
+        pyiron.atomistics.structure.atoms.Neighbors: Neighbors instances with the neighbor
+            indices, distances and vectors
+
     """
-
-    def __new__(cls, *args, **kwargs):
-        instance = super().__new__(cls, *args, **kwargs)
-        object.__setattr__(instance, "_has_structure", None)
-        return instance
-
-    def __init__(
-        self,
-        init=None,
-        has_structure=None,
-        num_neighbors=12,
-        table_name="neighbors_traj",
-        store=None,
-        **kwargs,
-    ):
-        """
-
-        Args:
-            has_structure (:class:`.HasStructure`): object containing the structures to compute the neighbors on
-            num_neighbors (int): The cutoff for the number of neighbors
-            table_name (str): Table name for the base `DataContainer` (stores this object as a group in a HDF5 file with
-                              this name)
-            store (FlattenedStorage): internal storage that should be used to store the neighborhood information,
-                                      creates a new one if not provided; if provided and not empty it must be compatible
-                                      with the lengths of the structures in `has_structure`, but this is *not* checked
-            **kwargs (dict): Additional arguments to be passed to the `get_neighbors()` routine
-                             (eg. cutoff_radius, norm_order , etc.)
-        """
-        super().__init__(init=init, table_name=table_name)
-        self._flat_store = store if store is not None else FlattenedStorage()
-        self._flat_store.add_array(
-            "indices", dtype=np.int64, shape=(num_neighbors,), per="element", fill=-1
-        )
-        self._flat_store.add_array(
-            "distances", dtype=np.float64, shape=(num_neighbors,), per="element"
-        )
-        self._flat_store.add_array(
-            "vecs", dtype=np.float64, shape=(num_neighbors, 3), per="element"
-        )
-        self._flat_store.add_array(
-            "shells", dtype=np.int64, shape=(num_neighbors,), per="element"
-        )
-        self._num_neighbors = num_neighbors
-        self._get_neighbors_kwargs = kwargs
-        self.has_structure = has_structure
-
-    @property
-    def has_structure(self):
-        return self._has_structure
-
-    @has_structure.setter
-    def has_structure(self, value):
-        if value is not None:
-            self._has_structure = value
-            self._compute_neighbors()
-
-    @property
-    def indices(self):
-        """
-        Neighbour indices (excluding itself) of each atom computed using the get_neighbors_traj() method
-
-        If the structures have different number of atoms, the array will have -1 on indices that are invalid.
-
-        Returns:
-            numpy.ndarray: An int array of dimension N_steps / stride x N_atoms x N_neighbors
-        """
-        return self._flat_store.get_array_filled("indices")
-
-    @property
-    def distances(self):
-        """
-        Neighbour distances (excluding itself) of each atom computed using the get_neighbors_traj() method
-
-        If the structures have different number of atoms, the array will have NaN on indices that are invalid.
-
-        Returns:
-            numpy.ndarray: A float array of dimension N_steps / stride x N_atoms x N_neighbors
-        """
-        return self._flat_store.get_array_filled("distances")
-
-    @property
-    def vecs(self):
-        """
-        Neighbour vectors (excluding itself) of each atom computed using the get_neighbors_traj() method
-
-        If the structures have different number of atoms, the array will have NaN on indices that are invalid.
-
-        Returns:
-            numpy.ndarray: A float array of dimension N_steps / stride x N_atoms x N_neighbors x 3
-        """
-        return self._flat_store.get_array_filled("vecs")
-
-    @property
-    def shells(self):
-        """
-        Neighbor shell indices (excluding itself) of each atom computed using the get_neighbors_traj() method.
-
-        For trajectories with non constant amount of particles this array may contain -1 for invalid values, i.e.
-
-        Returns:
-            ndarray: An int array of dimension N_steps / stride x N_atoms x N_neighbors x 3
-        """
-        return self._flat_store.get_array_filled("shells")
-
-    @property
-    def num_neighbors(self):
-        """
-        The maximum number of neighbors to be computed
-
-        Returns:
-
-            int: The max number of neighbors
-        """
-        return self._num_neighbors
-
-    def _compute_neighbors(self):
-        for i, struct in enumerate(self._has_structure.iter_structures()):
-            if (
-                i < len(self._flat_store)
-                and (self._flat_store["indices", i] != -1).all()
-            ):
-                # store already has valid entries for this structure, so skip it
-                continue
-            # Change the `allow_ragged` based on the changes in get_neighbors()
-            neigh = struct.get_neighbors(
-                num_neighbors=self._num_neighbors,
-                allow_ragged=False,
-                **self._get_neighbors_kwargs,
-            )
-            if i >= len(self._flat_store):
-                self._flat_store.add_chunk(
-                    len(struct),
-                    indices=neigh.indices,
-                    distances=neigh.distances,
-                    vecs=neigh.vecs,
-                    shells=neigh.shells,
-                )
-            else:
-                self._flat_store.set_array("indices", i, neigh.indices)
-                self._flat_store.set_array("distances", i, neigh.distances)
-                self._flat_store.set_array("vecs", i, neigh.vecs)
-                self._flat_store.set_array("shells", i, neigh.shells)
-        return (
-            self._flat_store.get_array_filled("indices"),
-            self._flat_store.get_array_filled("distances"),
-            self._flat_store.get_array_filled("vecs"),
-        )
-
-    @deprecate(
-        "This has no effect, neighbors are automatically called on instantiation."
+    neigh = _get_neighbors(
+        structure=structure,
+        num_neighbors=num_neighbors,
+        tolerance=tolerance,
+        id_list=id_list,
+        cutoff_radius=cutoff_radius,
+        width_buffer=width_buffer,
+        norm_order=norm_order,
     )
-    def compute_neighbors(self):
-        """
-        Compute the neighbors across the trajectory
-        """
-        pass
+    neigh._set_mode(mode)
+    return neigh
+
+
+def _get_neighbors(
+    structure,
+    num_neighbors=12,
+    tolerance=2,
+    id_list=None,
+    cutoff_radius=np.inf,
+    width_buffer=1.2,
+    get_tree=False,
+    norm_order=2,
+):
+    if num_neighbors is not None and num_neighbors <= 0:
+        raise ValueError("invalid number of neighbors")
+    if width_buffer < 0:
+        raise ValueError("width_buffer must be a positive float")
+    if get_tree:
+        neigh = Tree(ref_structure=structure)
+    else:
+        neigh = Neighbors(ref_structure=structure, tolerance=tolerance)
+    neigh._norm_order = norm_order
+    width = neigh._estimate_width(
+        num_neighbors=num_neighbors,
+        cutoff_radius=cutoff_radius,
+        width_buffer=width_buffer,
+    )
+    extended_positions, neigh._wrapped_indices = get_extended_positions(
+        structure=structure, width=width, return_indices=True, norm_order=norm_order
+    )
+    neigh._extended_positions = extended_positions
+    neigh._tree = cKDTree(extended_positions)
+    if get_tree:
+        return neigh
+    positions = structure.positions
+    if id_list is not None:
+        positions = positions[np.array(id_list)]
+    neigh._get_neighborhood(
+        positions=positions,
+        num_neighbors=num_neighbors,
+        cutoff_radius=cutoff_radius,
+        exclude_self=True,
+        width_buffer=width_buffer,
+    )
+    if neigh._check_width(width=width, pbc=structure.pbc):
+        warnings.warn(
+            "width_buffer may have been too small - "
+            "most likely not all neighbors properly assigned"
+        )
+    return neigh
+
+
+def get_neighborhood(
+    structure,
+    positions,
+    num_neighbors=12,
+    cutoff_radius=np.inf,
+    width_buffer=1.2,
+    mode="filled",
+    norm_order=2,
+):
+    """
+
+    Args:
+        structure:
+        position: Position in a box whose neighborhood information is analysed
+        num_neighbors (int): Number of nearest neighbors
+        cutoff_radius (float): Upper bound of the distance to which the search is to be done
+        width_buffer (float): Width of the layer to be added to account for pbc.
+        mode (str): Representation of per-atom quantities (distances etc.). Choose from
+            'filled', 'ragged' and 'flattened'.
+        norm_order (int): Norm to use for the neighborhood search and shell recognition. The
+            definition follows the conventional Lp norm (cf.
+            https://en.wikipedia.org/wiki/Lp_space). This is an feature and for anything
+            other than norm_order=2, there is no guarantee that this works flawlessly.
+
+    Returns:
+
+        pyiron.atomistics.structure.atoms.Tree: Neighbors instances with the neighbor
+            indices, distances and vectors
+
+    """
+
+    neigh = _get_neighbors(
+        structure=structure,
+        num_neighbors=num_neighbors,
+        cutoff_radius=cutoff_radius,
+        width_buffer=width_buffer,
+        get_tree=True,
+        norm_order=norm_order,
+    )
+    neigh._set_mode(mode)
+    return neigh._get_neighborhood(
+        positions=positions,
+        num_neighbors=num_neighbors,
+        cutoff_radius=cutoff_radius,
+    )
