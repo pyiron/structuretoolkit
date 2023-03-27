@@ -29,7 +29,7 @@ class TestAtoms(unittest.TestCase):
     def test_generate_equivalent_points(self):
         a_0 = 4
         structure = bulk('Al', cubic=True, a=a_0)
-        sym = structure.get_symmetry()
+        sym = stk.get_symmetry(structure)
         self.assertEqual(
             len(structure),
             len(sym.generate_equivalent_points([0, 0, 0.5 * a_0]))
@@ -40,7 +40,7 @@ class TestAtoms(unittest.TestCase):
         y = np.tile(y, len(sym_x))
         sym_x = sym_x.reshape(-1, 3)
         xy = np.round(
-            [structure.get_neighborhood(sym_x, num_neighbors=1).distances.flatten(), y],
+            [stk.get_neighborhood(structure, sym_x, num_neighbors=1).distances.flatten(), y],
             decimals=8
         )
         self.assertEqual(
