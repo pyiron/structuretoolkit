@@ -7,7 +7,12 @@ from sklearn.cluster import AgglomerativeClustering, DBSCAN
 from scipy.sparse import coo_matrix
 from scipy.spatial import Voronoi, Delaunay
 from scipy.spatial import ConvexHull
-from structuretoolkit.helper import get_extended_positions, get_wrapped_coordinates, get_vertical_length, get_average_of_unique_labels
+from structuretoolkit.helper import (
+    get_extended_positions,
+    get_wrapped_coordinates,
+    get_vertical_length,
+    get_average_of_unique_labels,
+)
 from structuretoolkit.analyse.neighbors import get_neighborhood
 
 
@@ -186,7 +191,7 @@ class Interstitials:
             self._neigh = get_neighborhood(
                 structure=self.structure,
                 positions=self.positions,
-                num_neighbors=self.num_neighbors
+                num_neighbors=self.num_neighbors,
             )
         return self._neigh
 
@@ -239,7 +244,9 @@ class Interstitials:
         return np.einsum("ji,nj->ni", self.structure.cell, positions)
 
     def _remove_too_close(self, min_distance=1):
-        neigh = get_neighborhood(structure=self.structure, positions=self.positions, num_neighbors=1)
+        neigh = get_neighborhood(
+            structure=self.structure, positions=self.positions, num_neighbors=1
+        )
         self.positions = self.positions[neigh.distances.flatten() > min_distance]
 
     def _set_interstitials_to_high_symmetry_points(self):
@@ -400,9 +407,7 @@ def get_layers(
         raise ValueError("id_list must contain at least one id")
     if wrap_atoms and planes is None:
         positions, indices = get_extended_positions(
-            structure=structure,
-            width=distance_threshold,
-            return_indices=True
+            structure=structure, width=distance_threshold, return_indices=True
         )
         if id_list is not None:
             id_list = np.arange(len(structure))[np.array(id_list)]
@@ -483,7 +488,9 @@ def get_voronoi_vertices(
     >>> print(neigh.distances.min(axis=-1))
 
     """
-    voro = Voronoi(get_extended_positions(structure=structure, width=width_buffer) + epsilon)
+    voro = Voronoi(
+        get_extended_positions(structure=structure, width=width_buffer) + epsilon
+    )
     xx = voro.vertices
     if distance_threshold > 0:
         cluster = AgglomerativeClustering(

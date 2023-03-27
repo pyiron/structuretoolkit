@@ -37,6 +37,6 @@ from structuretoolkit.helper import (
     get_wrapped_coordinates,
     select_index,
     center_coordinates_in_unit_cell,
-    apply_strain
+    apply_strain,
 )
 from structuretoolkit.visualize import plot3d
