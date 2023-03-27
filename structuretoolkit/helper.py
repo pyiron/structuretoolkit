@@ -120,8 +120,7 @@ def get_structure_indices(structure):
 
 def set_indices(structure, indices):
     indices_dict = {
-        v: k
-        for k, v in get_species_indices_dict(structure=structure).items()
+        v: k for k, v in get_species_indices_dict(structure=structure).items()
     }
     structure.symbols = [indices_dict[i] for i in indices]
     return structure
