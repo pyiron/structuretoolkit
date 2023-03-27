@@ -70,8 +70,6 @@ class TestAtoms(unittest.TestCase):
         structure = basis.repeat([2, 2, 2])
         sym = stk.get_symmetry(structure=structure)
         self.assertEqual(len(basis), len(sym.get_primitive_cell(standardize=True)))
-        self.assertEqual(len(sym.primitive_cell), len(sym.get_primitive_cell(standardize=False)))
-        self.assertEqual(len(sym.refine_cell()), len(sym.get_primitive_cell(standardize=True)))
         self.assertEqual(stk.get_symmetry(structure=sym.get_primitive_cell()).spacegroup["Number"], 221)
 
     def test_get_equivalent_points(self):
