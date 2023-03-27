@@ -334,7 +334,7 @@ class Tree:
         ):
             raise ValueError("Specify num_neighbors or cutoff_radius")
         elif num_neighbors is None and self.num_neighbors is None:
-            volume = self._ref_structure.get_volume(per_atom=True)
+            volume = self._ref_structure.get_volume() / len(self._ref_structure)
             width_buffer = 1 + width_buffer
             width_buffer *= get_volume_of_n_sphere_in_p_norm(3, self.norm_order)
             num_neighbors = max(14, int(width_buffer * cutoff_radius**3 / volume))
@@ -629,7 +629,7 @@ class Neighbors(Tree):
         """
         chemical_symbols = np.tile(["v"], self.filled.indices.shape).astype("<U2")
         cond = self.filled.indices < len(self._ref_structure)
-        chemical_symbols[cond] = self._ref_structure.get_chemical_symbols()[
+        chemical_symbols[cond] = np.array(self._ref_structure.get_chemical_symbols())[
             self.filled.indices[cond]
         ]
         return chemical_symbols
@@ -823,7 +823,7 @@ class Neighbors(Tree):
         ).reshape(-1, 3)
         shell_max = np.max(pairs[:, -1]) + 1
         if chemical_pair is not None:
-            c = self._ref_structure.get_chemical_symbols()
+            c = np.array(self._ref_structure.get_chemical_symbols())
             pairs = pairs[
                 np.all(
                     np.sort(c[pairs[:, :2]], axis=-1) == np.sort(chemical_pair), axis=-1
