@@ -1,6 +1,6 @@
 # structuretoolkit 
 
-[![Unittests](https://github.com/pyiron/structuretoolkit/actions/workflows/unittests.yml/badge.svg)
+[![Unittests](https://github.com/pyiron/structuretoolkit/actions/workflows/unittests.yml/badge.svg)](https://github.com/pyiron/structuretoolkit/actions/workflows/unittests.yml)
 [![Coverage Status](https://coveralls.io/repos/github/pyiron/structuretoolkit/badge.svg?branch=main)](https://coveralls.io/github/pyiron/structuretoolkit?branch=main)
 
 Originally developed as part of the `pyiron_atomistics` module the `structuretoolkit` was release as standalone library
