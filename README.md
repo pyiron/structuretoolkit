@@ -1,4 +1,8 @@
 # structuretoolkit 
+
+[![Unittests](https://github.com/pyiron/structuretoolkit/actions/workflows/unittests.yml/badge.svg)]
+[![Coverage Status](https://coveralls.io/repos/github/pyiron/structuretoolkit/badge.svg?branch=main)](https://coveralls.io/github/pyiron/structuretoolkit?branch=main)
+
 Originally developed as part of the `pyiron_atomistics` module the `structuretoolkit` was release as standalone library
 for analysing, building and visualising atomistic structures. Internally it uses the `ase.atoms.Atoms` class to 
 represent atomistic structures in python. The `structuretoolkit` is integrated inside `pyiron_atomistics`.
