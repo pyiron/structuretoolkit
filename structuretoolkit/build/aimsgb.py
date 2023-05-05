@@ -58,7 +58,7 @@ def grainboundary_build(
         axis : Rotational axis for the GB you want to construct (for example, axis=[1,0,0])
         sigma (int) : The sigma value of the GB you want to construct (for example, sigma=5)
         plane: The grain boundary plane of the GB you want to construct (for example, plane=[2,1,0])
-        initial_struct : Initial bulk structure from which you want to construct the GB (a pyiron
+        initial_struct : Initial bulk structure from which you want to construct the GB (a ase
                         structure object).
         delete_layer : To delete layers of the GB. For example, delete_layer='1b0t1b0t'. The first
                        4 characters is for first grain and the other 4 is for second grain. b means

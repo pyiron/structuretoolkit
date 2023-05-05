@@ -50,7 +50,7 @@ class Symmetry(dict):
     ):
         """
         Args:
-            structure (:class:`pyiron.atomistics.structure.atoms.Atoms`): reference Atom structure.
+            structure (:class:`ase.atoms.Atoms`): reference Atom structure.
             use_magmoms (bool): Whether to consider magnetic moments (cf.
             get_initial_magnetic_moments())
             use_elements (bool): If False, chemical elements will be ignored
@@ -334,7 +334,7 @@ class Symmetry(dict):
             use_elements (bool): If False, chemical elements will be ignored
 
         Returns:
-            (pyiron_atomistics.atomistics.structure.atoms.Atoms): Primitive cell
+            (ase.atoms.Atoms): Primitive cell
 
         Example (assume `basis` is a primitive cell):
 
@@ -391,7 +391,7 @@ def get_symmetry(
         angle_tolerance (float): Angle search tolerance
 
     Returns:
-        symmetry (:class:`pyiron.atomistics.structure.symmetry.Symmetry`): Symmetry class
+        symmetry (:class:`structuretoolkit.analyse.symmetry.Symmetry`): Symmetry class
 
 
     """

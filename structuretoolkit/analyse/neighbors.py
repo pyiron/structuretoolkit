@@ -51,7 +51,7 @@ class Tree:
     def __init__(self, ref_structure):
         """
         Args:
-            ref_structure (pyiron_atomistics.atomistics.structure.atoms.Atoms): Reference
+            ref_structure (ase.atoms.Atoms): Reference
                 structure.
         """
         self._distances = None
@@ -399,7 +399,7 @@ class Tree:
 
         Returns:
 
-            pyiron.atomistics.structure.atoms.Tree: Neighbors instances with the neighbor indices,
+            structuretoolkit.analyse.neighbors.Tree: Neighbors instances with the neighbor indices,
                 distances and vectors
 
         """
@@ -799,8 +799,8 @@ class Neighbors(Tree):
 
 
         Example:
-            from pyiron_atomistics import Project
-            structure = Project('.').create_structure('Fe', 'bcc', 2.83).repeat(2)
+            from ase.build import bulk
+            structure = bulk('Fe', 'bcc', 2.83).repeat(2)
             J = -0.1 # Ising parameter
             magmoms = 2*np.random.random((len(structure)), 3)-1 # Random magnetic moments between -1 and 1
             neigh = structure.get_neighbors(num_neighbors=8) # Iron first shell
@@ -1126,7 +1126,7 @@ def get_neighbors(
 
     Returns:
 
-        pyiron.atomistics.structure.atoms.Neighbors: Neighbors instances with the neighbor
+        structuretoolkit.analyse.neighbors.Neighbors: Neighbors instances with the neighbor
             indices, distances and vectors
 
     """
@@ -1218,7 +1218,7 @@ def get_neighborhood(
 
     Returns:
 
-        pyiron.atomistics.structure.atoms.Tree: Neighbors instances with the neighbor
+        structuretoolkit.analyse.neighbors.Tree: Neighbors instances with the neighbor
             indices, distances and vectors
 
     """
