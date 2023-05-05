@@ -138,7 +138,7 @@ class Strain:
 
     @staticmethod
     def _get_majority_phase(structure):
-        cna = analyse_cna_adaptive(atoms=structure)
+        cna = analyse_cna_adaptive(structure=structure)
         return np.asarray([k for k in cna.keys()])[np.argmax([v for v in cna.values()])]
 
     @staticmethod

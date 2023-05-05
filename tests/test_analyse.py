@@ -79,13 +79,13 @@ class TestAtoms(unittest.TestCase):
             "FeFe", scaled_positions=[(0, 0, 0), (0.5, 0.5, 0.5)], cell=np.identity(3)
         )
         self.assertTrue(
-            stk.analyse_cna_adaptive(atoms=basis)["bcc"] == 2
+            stk.analyse_cna_adaptive(structure=basis)["bcc"] == 2
         )
 
     def test_pyscal_centro_symmetry(self):
         basis = bulk(name='Fe', a=2.8, crystalstructure='bcc', cubic=True)
         self.assertTrue(
-            all([np.isclose(v, 0.0) for v in stk.analyse_centro_symmetry(atoms=basis, num_neighbors=8)])
+            all([np.isclose(v, 0.0) for v in stk.analyse_centro_symmetry(structure=basis, num_neighbors=8)])
         )
 
     def test_get_voronoi_vertices(self):

@@ -18,7 +18,7 @@ __status__ = "development"
 __date__ = "Sep 1, 2018"
 
 
-def analyse_phonopy_equivalent_atoms(atoms, symprec=1e-5, angle_tolerance=-1.0):
+def analyse_phonopy_equivalent_atoms(structure, symprec=1e-5, angle_tolerance=-1.0):
     """
     Args: (read phonopy.structure.spglib for more details)
         symprec:
@@ -29,9 +29,9 @@ def analyse_phonopy_equivalent_atoms(atoms, symprec=1e-5, angle_tolerance=-1.0):
                 is used to judge symmetry.
 
     """
-    positions = atoms.get_scaled_positions()
-    cell = atoms.cell
-    types = atoms.get_chemical_symbols()
+    positions = structure.get_scaled_positions()
+    cell = structure.cell
+    types = structure.get_chemical_symbols()
     types = list(types)
     natom = len(types)
     positions = np.reshape(np.array(positions), (natom, 3))
