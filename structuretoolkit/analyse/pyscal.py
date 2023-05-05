@@ -20,7 +20,7 @@ __date__ = "Nov 6, 2019"
 
 
 def get_steinhardt_parameter_structure(
-    atoms,
+    structure,
     neighbor_method="cutoff",
     cutoff=0,
     n_clusters=2,
@@ -31,7 +31,7 @@ def get_steinhardt_parameter_structure(
     Calculate Steinhardts parameters
 
     Args:
-        atoms (Atoms): The structure to analyse.
+        structure (Atoms): The structure to analyse.
         neighbor_method (str) : can be ['cutoff', 'voronoi']. (Default is 'cutoff'.)
         cutoff (float) : Can be 0 for adaptive cutoff or any other value. (Default is 0, adaptive.)
         n_clusters (int/None) : Number of clusters for K means clustering or None to not cluster. (Default is 2.)
@@ -43,7 +43,7 @@ def get_steinhardt_parameter_structure(
         numpy.ndarray: (number of q's, number of atoms) shaped array of q parameters
         numpy.ndarray: If `clustering=True`, an additional per-atom array of cluster ids is also returned
     """
-    sys = pyiron_to_pyscal_system(atoms)
+    sys = pyiron_to_pyscal_system(structure)
     q = (4, 6) if q is None else q
 
     sys.find_neighbors(method=neighbor_method, cutoff=cutoff)
@@ -61,27 +61,27 @@ def get_steinhardt_parameter_structure(
         return sysq
 
 
-def analyse_centro_symmetry(atoms, num_neighbors=12):
+def analyse_centro_symmetry(structure, num_neighbors=12):
     """
     Analyse centrosymmetry parameter
 
     Args:
-        atoms: Atoms object
+        structure: Atoms object
         num_neighbors (int) : number of neighbors
 
     Returns:
         csm (list) : list of centrosymmetry parameter
     """
-    sys = pyiron_to_pyscal_system(atoms)
+    sys = pyiron_to_pyscal_system(structure)
     return np.array(sys.calculate_centrosymmetry(nmax=num_neighbors))
 
 
-def analyse_diamond_structure(atoms, mode="total", ovito_compatibility=False):
+def analyse_diamond_structure(structure, mode="total", ovito_compatibility=False):
     """
     Analyse diamond structure
 
     Args:
-        atoms: Atoms object
+        structure: Atoms object
         mode ("total"/"numeric"/"str"): Controls the style and level
         of detail of the output.
             - total : return number of atoms belonging to each structure
@@ -93,7 +93,7 @@ def analyse_diamond_structure(atoms, mode="total", ovito_compatibility=False):
     Returns:
         (depends on `mode`)
     """
-    sys = pyiron_to_pyscal_system(atoms)
+    sys = pyiron_to_pyscal_system(structure)
     diamond_dict = sys.identify_diamond()
 
     ovito_identifiers = [
@@ -178,12 +178,12 @@ def analyse_diamond_structure(atoms, mode="total", ovito_compatibility=False):
         )
 
 
-def analyse_cna_adaptive(atoms, mode="total", ovito_compatibility=False):
+def analyse_cna_adaptive(structure, mode="total", ovito_compatibility=False):
     """
     Use common neighbor analysis
 
     Args:
-        atoms (pyiron_atomistics.structure.atoms.Atoms): The structure to analyze.
+        structure (pyiron_atomistics.structure.atoms.Atoms): The structure to analyze.
         mode ("total"/"numeric"/"str"): Controls the style and level
             of detail of the output.
             - total : return number of atoms belonging to each structure
@@ -195,7 +195,7 @@ def analyse_cna_adaptive(atoms, mode="total", ovito_compatibility=False):
     Returns:
         (depends on `mode`)
     """
-    sys = pyiron_to_pyscal_system(atoms)
+    sys = pyiron_to_pyscal_system(structure)
     if mode not in ["total", "numeric", "str"]:
         raise ValueError("Unsupported mode")
 
@@ -216,8 +216,8 @@ def analyse_cna_adaptive(atoms, mode="total", ovito_compatibility=False):
         else:
             return {o: cna[p] for o, p in zip(ovito_parameter, pyscal_parameter)}
     else:
-        atoms = sys.atoms
-        cnalist = np.array([atom.structure for atom in atoms])
+        structure = sys.atoms
+        cnalist = np.array([atom.structure for atom in structure])
         if mode == "numeric":
             return cnalist
         elif mode == "str":
@@ -233,40 +233,40 @@ def analyse_cna_adaptive(atoms, mode="total", ovito_compatibility=False):
             )
 
 
-def analyse_voronoi_volume(atoms):
+def analyse_voronoi_volume(structure):
     """
     Calculate the Voronoi volume of atoms
 
     Args:
-        atoms : (pyiron_atomistics.structure.atoms.Atoms): The structure to analyze.
+        structure : (pyiron_atomistics.structure.atoms.Atoms): The structure to analyze.
     """
-    sys = pyiron_to_pyscal_system(atoms)
+    sys = pyiron_to_pyscal_system(structure)
     sys.find_neighbors(method="voronoi")
-    atoms = sys.atoms
-    return np.array([atom.volume for atom in atoms])
+    structure = sys.atoms
+    return np.array([atom.volume for atom in structure])
 
 
-def pyiron_to_pyscal_system(atoms):
+def pyiron_to_pyscal_system(structure):
     """
     Converts atoms to ase atoms and than to a pyscal system.
     Also adds the pyscal publication.
 
     Args:
-        atoms (pyiron atoms): Structure to convert.
+        structure (pyiron atoms): Structure to convert.
 
     Returns:
         Pyscal system: See the pyscal documentation.
     """
     sys = pc.System()
     sys.read_inputfile(
-        atoms,
+        structure,
         format="ase",
     )
     return sys
 
 
 def analyse_find_solids(
-    atoms,
+    structure,
     neighbor_method="cutoff",
     cutoff=0,
     bonds=0.5,
@@ -296,7 +296,7 @@ def analyse_find_solids(
         int: number of solids,
         pyscal system: pyscal system when return_sys=True
     """
-    sys = pyiron_to_pyscal_system(atoms)
+    sys = pyiron_to_pyscal_system(structure)
     sys.find_neighbors(method=neighbor_method, cutoff=cutoff)
     sys.find_solids(
         bonds=bonds,
@@ -309,6 +309,6 @@ def analyse_find_solids(
     )
     if return_sys:
         return sys
-    atoms = sys.atoms
-    solids = [atom for atom in atoms if atom.solid]
+    structure = sys.atoms
+    solids = [atom for atom in structure if atom.solid]
     return len(solids)
