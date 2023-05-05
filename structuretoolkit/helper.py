@@ -167,7 +167,7 @@ def center_coordinates_in_unit_cell(structure, origin=0, eps=1e-4):
         eps (float): Tolerance to detect atoms at cell edges
 
     Returns:
-        :class:`pyiron_atomistics.atomistics.structure.atoms.Atoms`: reference to this structure
+        :class:`ase.atoms.Atoms`: reference to this structure
     """
     if any(structure.pbc):
         structure.set_scaled_positions(

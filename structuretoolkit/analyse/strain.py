@@ -29,9 +29,9 @@ class Strain:
         """
 
         Args:
-            structure (pyiron_atomistics.atomistics.structure.Atoms): Structure to calculate the
+            structure (ase.atoms.Atoms): Structure to calculate the
                 strain values.
-            ref_structure (pyiron_atomistics.atomistics.structure.Atoms): Reference bulk structure
+            ref_structure (ase.atoms.Atoms): Reference bulk structure
                 (against which the strain is calculated)
             num_neighbors (int): Number of neighbors to take into account to calculate the local
                 frame. If not specified, it is estimated based on cna analysis (only available if

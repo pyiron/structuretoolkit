@@ -134,7 +134,7 @@ def high_index_surface(
         vacuum (float): Thickness of vacuum on the top of the slab. default:10
 
     Returns:
-        slab: pyiron_atomistics.atomistics.structure.atoms.Atoms instance Required surface
+        slab: ase.atoms.Atoms instance Required surface
     """
     basis = bulk(
         name=element,

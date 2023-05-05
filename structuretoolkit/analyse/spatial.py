@@ -185,7 +185,7 @@ class Interstitials:
         Neighborhood information of each interstitial candidate and their surrounding atoms. E.g.
         `class.neigh.distances[0][0]` gives the distance from the first interstitial candidate to
         its nearest neighboring atoms. The functionalities of `neigh` follow those of
-        `pyiron_atomistics.structure.atoms.neighbors`.
+        `structuretoolkit.analyse.neighbors`.
         """
         if self._neigh is None:
             self._neigh = get_neighborhood(
@@ -578,7 +578,7 @@ def cluster_positions(
     Example I:
 
     ```
-    analyse = Analyze(some_pyiron_structure)
+    analyse = Analyze(some_ase_structure)
     positions = analyse.cluster_points(eps=2)
     ```
 
@@ -589,7 +589,7 @@ def cluster_positions(
     Example II:
 
     ```
-    analyse = Analyze(some_pyiron_structure)
+    analyse = Analyze(some_ase_structure)
     print(analyse.cluster_positions([3*[0.], 3*[1.]], eps=3))
     ```
 
