@@ -883,7 +883,7 @@ class Neighbors(Tree):
         distance_threshold=None,
         n_clusters=None,
         linkage="complete",
-        affinity="euclidean",
+        metric="euclidean",
     ):
         """
         Method to group vectors which have similar values. This method should be used as a part of
@@ -900,7 +900,7 @@ class Neighbors(Tree):
             linkage (str): Which linkage criterion to use. The linkage criterion determines which
                 distance to use between sets of observation. The algorithm will merge the pairs of
                 cluster that minimize this criterion. (cf. sklearn.cluster.AgglomerativeClustering)
-            affinity (str/callable): Metric used to compute the linkage. Can be `euclidean`, `l1`,
+            metric (str/callable): Metric used to compute the linkage. Can be `euclidean`, `l1`,
                 `l2`, `manhattan`, `cosine`, or `precomputed`. If linkage is `ward`, only
                 `euclidean` is accepted.
 
@@ -912,7 +912,7 @@ class Neighbors(Tree):
             distance_threshold=distance_threshold,
             n_clusters=n_clusters,
             linkage=linkage,
-            affinity=affinity,
+            metric=metric,
         ).fit(dr)
         self._cluster_vecs.cluster_centers_ = get_average_of_unique_labels(
             self._cluster_vecs.labels_, dr
@@ -926,7 +926,7 @@ class Neighbors(Tree):
         distance_threshold=None,
         n_clusters=None,
         linkage="complete",
-        affinity="euclidean",
+        metric="euclidean",
         use_vecs=False,
     ):
         """
@@ -945,7 +945,7 @@ class Neighbors(Tree):
             linkage (str): Which linkage criterion to use. The linkage criterion determines which
                 distance to use between sets of observation. The algorithm will merge the pairs of
                 cluster that minimize this criterion. (cf. sklearn.cluster.AgglomerativeClustering)
-            affinity (str/callable): Metric used to compute the linkage. Can be `euclidean`, `l1`,
+            metric (str/callable): Metric used to compute the linkage. Can be `euclidean`, `l1`,
                 `l2`, `manhattan`, `cosine`, or `precomputed`. If linkage is `ward`, only
                 `euclidean` is accepted.
             use_vecs (bool): Whether to form clusters for vecs beforehand. If true, the distances
@@ -970,7 +970,7 @@ class Neighbors(Tree):
             distance_threshold=distance_threshold,
             n_clusters=n_clusters,
             linkage=linkage,
-            affinity=affinity,
+            metric=metric,
         ).fit(dr.reshape(-1, 1))
         self._cluster_dist.cluster_centers_ = get_average_of_unique_labels(
             self._cluster_dist.labels_, dr
