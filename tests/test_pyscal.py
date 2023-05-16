@@ -78,6 +78,7 @@ class Testpyscal(unittest.TestCase):
         self.assertLess(np.abs(np.mean(vols) - 16.0), 1E-3)
 
 
+@unittest.skipIf(skip_pyscal_test, "pyscal is not installed, so the pyscal tests are skipped.")
 class Testpyscalatoms(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
