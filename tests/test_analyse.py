@@ -9,11 +9,18 @@ from ase.atom import Atom
 from ase.atoms import Atoms
 from scipy.spatial import Voronoi
 from ase.lattice.cubic import BodyCenteredCubic
-from sklearn.cluster import AgglomerativeClustering, DBSCAN
 import structuretoolkit as stk
 
 
+try:
+    from sklearn.cluster import AgglomerativeClustering, DBSCAN
+    skip_cluster_test = False
+except ImportError:
+    skip_cluster_test = True
+
+
 class TestAtoms(unittest.TestCase):
+    @unittest.skipIf(skip_cluster_test, "sklearn is not installed, so the cluster tests are skipped.")
     def test_get_layers(self):
         a_0 = 4
         struct = bulk(name='Al', a=a_0, crystalstructure='fcc', cubic=True).repeat(10)

@@ -4,6 +4,12 @@ import numpy as np
 from ase.build import bulk
 import structuretoolkit as stk
 
+try:
+    import pyscal
+    skip_pyscal_test = False
+except ImportError:
+    skip_pyscal_test = True
+
 
 class TestAtoms(unittest.TestCase):
     @classmethod
@@ -11,6 +17,7 @@ class TestAtoms(unittest.TestCase):
         bulk_structure = bulk('Fe', cubic=True)
         cls.strain = stk.analyse.get_strain(structure=bulk_structure, ref_structure=bulk_structure, return_object=True)
 
+    @unittest.skipIf(skip_pyscal_test, "pyscal is not installed, so the pyscal tests are skipped.")
     def test_number_of_neighbors(self):
         self.assertEqual(self.strain.num_neighbors, 8)
         bulk_structure = bulk('Al', cubic=True)

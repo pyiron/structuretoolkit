@@ -1,6 +1,6 @@
 # This workflow is used to run the unittest of pyiron
 
-name: MMinimal Installation Test
+name: Minimal Installation Test
 
 on:
   push:

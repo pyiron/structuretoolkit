@@ -8,8 +8,21 @@ from ase.build import bulk
 from ase.atoms import Atoms
 import structuretoolkit as stk
 
+try:
+    import pyscal
+    skip_pyscal_test = False
+except ImportError:
+    skip_pyscal_test = True
+
+
+try:
+    import spglib
+    skip_spglib_test = False
+except ImportError:
+    skip_spglib_test = True
 
 class TestAtoms(unittest.TestCase):
+    @unittest.skipIf(skip_spglib_test, "spglib is not installed, so the spglib tests are skipped.")
     def test_get_arg_equivalent_sites(self):
         a_0 = 4.0
         structure = bulk('Al', cubic=True, a=a_0).repeat(2)
@@ -25,6 +38,7 @@ class TestAtoms(unittest.TestCase):
         with self.assertRaises(ValueError):
             stk.analyse.get_symmetry(structure=structure).get_arg_equivalent_sites([0, 0, 0])
 
+    @unittest.skipIf(skip_spglib_test, "spglib is not installed, so the spglib tests are skipped.")
     def test_generate_equivalent_points(self):
         a_0 = 4
         structure = bulk('Al', cubic=True, a=a_0)
@@ -48,6 +62,7 @@ class TestAtoms(unittest.TestCase):
             msg="order of generated points does not match the original order"
         )
 
+    @unittest.skipIf(skip_spglib_test, "spglib is not installed, so the spglib tests are skipped.")
     def test_get_symmetry(self):
         cell = 2.2 * np.identity(3)
         Al = Atoms("AlAl", positions=[(0, 0, 0), (0.5, 0.5, 0.5)], cell=cell, pbc=True).repeat(2)
@@ -67,17 +82,20 @@ class TestAtoms(unittest.TestCase):
         w = stk.analyse.get_symmetry(structure=Al).symmetrize_vectors(v)
         self.assertAlmostEqual(np.absolute(w[:, 0]).sum(), np.linalg.norm(w, axis=-1).sum())
 
+    @unittest.skipIf(skip_spglib_test, "spglib is not installed, so the spglib tests are skipped.")
     def test_get_symmetry_dataset(self):
         cell = 2.2 * np.identity(3)
         Al_sc = Atoms("AlAl", scaled_positions=[(0, 0, 0), (0.5, 0.5, 0.5)], cell=cell)
         Al_sc = Al_sc.repeat([2, 2, 2])
         self.assertEqual(stk.analyse.get_symmetry(structure=Al_sc).info["number"], 229)
 
+    @unittest.skipIf(skip_spglib_test, "spglib is not installed, so the spglib tests are skipped.")
     def test_get_ir_reciprocal_mesh(self):
         cell = 2.2 * np.identity(3)
         Al_sc = Atoms("AlAl", scaled_positions=[(0, 0, 0), (0.5, 0.5, 0.5)], cell=cell)
         self.assertEqual(len(stk.analyse.get_symmetry(structure=Al_sc).get_ir_reciprocal_mesh([3, 3, 3])[0]), 27)
 
+    @unittest.skipIf(skip_spglib_test, "spglib is not installed, so the spglib tests are skipped.")
     def test_get_primitive_cell(self):
         cell = 2.2 * np.identity(3)
         basis = Atoms("AlFe", scaled_positions=[(0, 0, 0), (0.5, 0.5, 0.5)], cell=cell)
@@ -91,6 +109,7 @@ class TestAtoms(unittest.TestCase):
         arr = stk.analyse.get_symmetry(structure=basis).generate_equivalent_points([0, 0, 0.5])
         self.assertAlmostEqual(np.linalg.norm(arr - np.array([0.51, 0.5, 0]), axis=-1).min(), 0)
 
+    @unittest.skipIf(skip_spglib_test, "spglib is not installed, so the spglib tests are skipped.")
     def test_get_space_group(self):
         cell = 2.2 * np.identity(3)
         Al_sc = Atoms("AlAl", scaled_positions=[(0, 0, 0), (0.5, 0.5, 0.5)], cell=cell)
@@ -125,6 +144,7 @@ class TestAtoms(unittest.TestCase):
         Mg_hcp = Atoms("Mg4", scaled_positions=pos, cell=cell)
         self.assertEqual(stk.analyse.get_symmetry(structure=Mg_hcp).spacegroup["Number"], 194)
 
+    @unittest.skipIf(skip_spglib_test, "spglib is not installed, so the spglib tests are skipped.")
     def test_permutations(self):
         structure = bulk('Al', cubic=True).repeat(2)
         x_vacancy = structure.positions[0]
@@ -139,6 +159,7 @@ class TestAtoms(unittest.TestCase):
             vec[i] = v
             self.assertAlmostEqual(np.linalg.norm(all_vectors - vec, axis=(-1, -2)).min(), 0,)
 
+    @unittest.skipIf(skip_pyscal_test, "pyscal is not installed, so the pyscal tests are skipped.")
     def test_arg_equivalent_vectors(self):
         structure = bulk('Al', cubic=True).repeat(2)
         self.assertEqual(np.unique(stk.analyse.get_symmetry(structure=structure).arg_equivalent_vectors).squeeze(), 0)
@@ -149,6 +170,7 @@ class TestAtoms(unittest.TestCase):
         dx_round = np.round(np.absolute(dx), decimals=3)
         self.assertEqual(len(np.unique(dx_round + arg_v)), len(np.unique(arg_v)))
 
+    @unittest.skipIf(skip_spglib_test, "spglib is not installed, so the spglib tests are skipped.")
     def test_error(self):
         """spglib errors should be wrapped in a SymmetryError."""
 
