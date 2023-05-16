@@ -8,7 +8,20 @@ from ase.build import bulk
 from ase.atoms import Atoms
 import structuretoolkit as stk
 
+try:
+    import pyscal
+    skip_pyscal_test = False
+except ImportError:
+    skip_pyscal_test = True
 
+
+try:
+    import spglib
+    skip_spglib_test = False
+except ImportError:
+    skip_spglib_test = True
+
+@unittest.skipIf(skip_spglib_test, "spglib is not installed, so the spglib tests are skipped.")
 class TestAtoms(unittest.TestCase):
     def test_get_arg_equivalent_sites(self):
         a_0 = 4.0

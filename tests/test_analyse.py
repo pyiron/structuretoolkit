@@ -9,11 +9,25 @@ from ase.atom import Atom
 from ase.atoms import Atoms
 from scipy.spatial import Voronoi
 from ase.lattice.cubic import BodyCenteredCubic
-from sklearn.cluster import AgglomerativeClustering, DBSCAN
 import structuretoolkit as stk
 
 
+try:
+    from sklearn.cluster import AgglomerativeClustering, DBSCAN
+    skip_cluster_test = False
+except ImportError:
+    skip_cluster_test = True
+
+
+try:
+    import pyscal
+    skip_pyscal_test = False
+except ImportError:
+    skip_pyscal_test = True
+
+
 class TestAtoms(unittest.TestCase):
+    @unittest.skipIf(skip_cluster_test, "sklearn is not installed, so the cluster tests are skipped.")
     def test_get_layers(self):
         a_0 = 4
         struct = bulk(name='Al', a=a_0, crystalstructure='fcc', cubic=True).repeat(10)
@@ -54,11 +68,13 @@ class TestAtoms(unittest.TestCase):
             "Overriding cluster method with DBSCAN does not return the same results for symmetric structure."
         )
 
+    @unittest.skipIf(skip_cluster_test, "sklearn is not installed, so the cluster tests are skipped.")
     def test_get_layers_other_planes(self):
         structure = bulk(name='Fe', a=3.5, crystalstructure='fcc', cubic=True).repeat(2)
         layers = stk.analyse.get_layers(structure=structure, planes=[1, 1, 1])
         self.assertEqual(np.unique(layers).tolist(), [0, 1, 2, 3, 4])
 
+    @unittest.skipIf(skip_cluster_test, "sklearn is not installed, so the cluster tests are skipped.")
     def test_get_layers_with_strain(self):
         structure = bulk(name='Fe', a=2.8, crystalstructure='bcc', cubic=True).repeat(2)
         layers = stk.analyse.get_layers(structure=structure).tolist()
@@ -67,6 +83,7 @@ class TestAtoms(unittest.TestCase):
             layers, stk.analyse.get_layers(structure=structure, planes=np.linalg.inv(structure.cell).T).tolist()
         )
 
+    @unittest.skipIf(skip_cluster_test, "sklearn is not installed, so the cluster tests are skipped.")
     def test_get_layers_across_pbc(self):
         structure = bulk(name='Fe', a=2.8, crystalstructure='bcc', cubic=True).repeat(2)
         layers = stk.analyse.get_layers(structure=structure)
@@ -74,6 +91,7 @@ class TestAtoms(unittest.TestCase):
         structure = stk.common.center_coordinates_in_unit_cell(structure=structure)
         self.assertEqual(len(np.unique(layers[stk.analyse.get_layers(structure=structure)[:, 0] == 0, 0])), 1)
 
+    @unittest.skipIf(skip_pyscal_test, "pyscal is not installed, so the pyscal tests are skipped.")
     def test_pyscal_cna_adaptive(self):
         basis = Atoms(
             "FeFe", scaled_positions=[(0, 0, 0), (0.5, 0.5, 0.5)], cell=np.identity(3)
@@ -82,17 +100,20 @@ class TestAtoms(unittest.TestCase):
             stk.analyse.get_adaptive_cna_descriptors(structure=basis)["bcc"] == 2
         )
 
+    @unittest.skipIf(skip_pyscal_test, "pyscal is not installed, so the pyscal tests are skipped.")
     def test_pyscal_centro_symmetry(self):
         basis = bulk(name='Fe', a=2.8, crystalstructure='bcc', cubic=True)
         self.assertTrue(
             all([np.isclose(v, 0.0) for v in stk.analyse.get_centro_symmetry_descriptors(structure=basis, num_neighbors=8)])
         )
 
+    @unittest.skipIf(skip_cluster_test, "sklearn is not installed, so the cluster tests are skipped.")
     def test_get_voronoi_vertices(self):
         basis = bulk(name='Al', a=4, crystalstructure='fcc', cubic=True)
         self.assertEqual(len(stk.analyse.get_voronoi_vertices(structure=basis)), 12)
         self.assertEqual(len(stk.analyse.get_voronoi_vertices(structure=basis, distance_threshold=2)), 1)
 
+    @unittest.skipIf(skip_cluster_test, "sklearn is not installed, so the cluster tests are skipped.")
     def test_get_interstitials_bcc(self):
         bcc = bulk('Fe', cubic=True)
         x_octa_ref = bcc.positions[:, None, :]+0.5*bcc.cell[None, :, :]
@@ -114,6 +135,7 @@ class TestAtoms(unittest.TestCase):
             ).min(axis=0).sum(), 0
         )
 
+    @unittest.skipIf(skip_cluster_test, "sklearn is not installed, so the cluster tests are skipped.")
     def test_get_interstitials_fcc(self):
         fcc = bulk('Al', cubic=True)
         a_0 = fcc.cell[0, 0]
@@ -190,6 +212,7 @@ class TestAtoms(unittest.TestCase):
             structure.positions[stk.analyse.get_voronoi_neighbors(structure=structure)], axis=-2
         )), axis=-1).flatten().max(), a_0)
 
+    @unittest.skipIf(skip_cluster_test, "sklearn is not installed, so the cluster tests are skipped.")
     def test_cluster_positions(self):
         structure_bulk = bulk('Fe', cubic=True)
         self.assertEqual(len(stk.analyse.get_cluster_positions(structure=structure_bulk)), len(structure_bulk))

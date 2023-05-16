@@ -8,7 +8,14 @@ from ase.build import bulk
 from ase.atoms import Atoms
 import structuretoolkit as stk
 
+try:
+    import pyscal
+    skip_pyscal_test = False
+except ImportError:
+    skip_pyscal_test = True
 
+
+@unittest.skipIf(skip_pyscal_test, "pyscal is not installed, so the pyscal tests are skipped.")
 class Testpyscal(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -71,6 +78,7 @@ class Testpyscal(unittest.TestCase):
         self.assertLess(np.abs(np.mean(vols) - 16.0), 1E-3)
 
 
+@unittest.skipIf(skip_pyscal_test, "pyscal is not installed, so the pyscal tests are skipped.")
 class Testpyscalatoms(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

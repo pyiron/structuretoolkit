@@ -1,8 +1,22 @@
 import unittest
 import structuretoolkit as stk
 
+try:
+    import pymatgen
+    skip_pymatgen_test = False
+except ImportError:
+    skip_pymatgen_test = True
+
+
+try:
+    import spglib
+    skip_spglib_test = False
+except ImportError:
+    skip_spglib_test = True
+
 
 class TestHighIndexSurface(unittest.TestCase):
+    @unittest.skipIf(skip_pymatgen_test, "pymatgen is not installed, so the surface tests are skipped.")
     def test_high_index_surface(self):
         slab = stk.build.high_index_surface(
             element='Ni',
@@ -20,6 +34,7 @@ class TestHighIndexSurface(unittest.TestCase):
 
         self.assertEqual(len(slab), 60)
 
+    @unittest.skipIf(skip_spglib_test, "spglib is not installed, so the surface info tests are skipped.")
     def test_high_index_surface_info(self):
         h, s, k = stk.build.get_high_index_surface_info(
             element='Ni',

@@ -6,7 +6,14 @@ import unittest
 from ase.build import bulk
 import structuretoolkit as stk
 
+try:
+    import aimsgb
+    skip_aimsgb_test = False
+except ImportError:
+    skip_aimsgb_test = True
 
+
+@unittest.skipIf(skip_aimsgb_test, "aimsgb is not installed, so the aimsgb tests are skipped.")
 class TestAimsgb(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

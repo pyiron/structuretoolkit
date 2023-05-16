@@ -8,6 +8,12 @@ from ase.build import bulk
 import numpy as np
 import structuretoolkit as stk
 
+try:
+    import spglib
+    skip_spglib_test = False
+except ImportError:
+    skip_spglib_test = True
+
 
 class TestCompound(unittest.TestCase):
     def test_B2(self):
@@ -31,6 +37,7 @@ class TestCompound(unittest.TestCase):
         self.assertEqual(len(c14), 12, "Wrong number of atoms in C14 structure.")
         self.assertEqual(c14.get_chemical_formula(), "Cu8Mg4", "Wrong chemical formula.")
 
+    @unittest.skipIf(skip_spglib_test, "spglib is not installed, so the C15 tests are skipped.")
     def test_C15(self):
         """
         Tests based on Xie et al., JMR 2021 (DOI:10.1557/s43578-021-00237-y).

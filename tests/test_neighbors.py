@@ -9,6 +9,19 @@ import structuretoolkit as stk
 from ase.atoms import Atoms
 import warnings
 
+try:
+    import pyscal
+    skip_pyscal_test = False
+except ImportError:
+    skip_pyscal_test = True
+
+
+try:
+    import sklearn
+    skip_sklearn_test = False
+except ImportError:
+    skip_sklearn_test = True
+
 
 class TestAtoms(unittest.TestCase):
     @classmethod
@@ -150,6 +163,10 @@ class TestAtoms(unittest.TestCase):
             np.all(np.isclose(distances, neigh.get_neighborhood(new_positions, num_neighbors=13).distances[:,1:]))
         )
 
+    @unittest.skipIf(
+        skip_sklearn_test,
+        "scikit-learn is not installed, so the clustering tests are skipped."
+    )
     def test_get_global_shells(self):
         structure = bulk('Al', a=4, cubic=True).repeat(2)
         neigh = stk.analyse.get_neighbors(structure=structure)
@@ -172,6 +189,10 @@ class TestAtoms(unittest.TestCase):
         self.assertTrue(np.array_equal(shells, neigh.get_global_shells(cluster_by_vecs=True)))
         self.assertFalse(np.array_equal(shells, neigh.get_global_shells()))
 
+    @unittest.skipIf(
+        skip_sklearn_test,
+        "scikit-learn is not installed, so the clustering tests are skipped."
+    )
     def test_get_local_shells(self):
         structure = bulk('Al', a=4, cubic=True).repeat(2)
         neigh = stk.analyse.get_neighbors(structure=structure)
@@ -187,6 +208,10 @@ class TestAtoms(unittest.TestCase):
         self.assertTrue(np.array_equal(shells, neigh.get_local_shells(cluster_by_vecs=True)))
         self.assertFalse(np.array_equal(shells, neigh.get_local_shells()))
 
+    @unittest.skipIf(
+        skip_sklearn_test,
+        "scikit-learn is not installed, so the clustering tests are skipped."
+    )
     def test_get_global_shells_ragged(self):
         structure = bulk('Al', a=4, cubic=True).repeat(2)
         del structure[0]
@@ -203,6 +228,10 @@ class TestAtoms(unittest.TestCase):
         self.assertEqual(np.sum([len(s) == 11 for s in neigh.get_global_shells(cluster_by_vecs=True)]), 12)
         self.assertEqual(np.sum([len(s) == 11 for s in neigh.get_global_shells(cluster_by_distances=True, cluster_by_vecs=True)]), 12)
 
+    @unittest.skipIf(
+        skip_sklearn_test,
+        "scikit-learn is not installed, so the clustering tests are skipped."
+    )
     def test_get_local_shells_ragged(self):
         structure = bulk('Al', a=4, cubic=True).repeat(2)
         del structure[0]
@@ -379,6 +408,10 @@ class TestAtoms(unittest.TestCase):
         with self.assertRaises(KeyError):
             neigh = stk.analyse.get_neighbors(structure=basis, mode='random_key')
 
+    @unittest.skipIf(
+        skip_pyscal_test,
+        "pyscal is not installed, so the centro symmetry descriptor based tests are skipped."
+    )
     def test_centrosymmetry(self):
         structure = bulk('Fe').repeat(4)
         cs = stk.analyse.get_neighbors(structure=structure, num_neighbors=8).centrosymmetry
