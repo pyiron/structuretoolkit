@@ -4,8 +4,7 @@
 
 import numpy as np
 from ase.atoms import Atoms
-import pyscal.core as pc
-from sklearn import cluster
+from structuretoolkit.common.pyscal import ase_to_pyscal
 
 __author__ = "Sarath Menon, Jan Janssen"
 __copyright__ = (
@@ -19,7 +18,7 @@ __status__ = "development"
 __date__ = "Nov 6, 2019"
 
 
-def get_steinhardt_parameter_structure(
+def get_steinhardt_parameters(
     structure,
     neighbor_method="cutoff",
     cutoff=0,
@@ -43,7 +42,7 @@ def get_steinhardt_parameter_structure(
         numpy.ndarray: (number of q's, number of atoms) shaped array of q parameters
         numpy.ndarray: If `clustering=True`, an additional per-atom array of cluster ids is also returned
     """
-    sys = ase_to_pyscal_system(structure)
+    sys = ase_to_pyscal(structure)
     q = (4, 6) if q is None else q
 
     sys.find_neighbors(method=neighbor_method, cutoff=cutoff)
@@ -53,6 +52,8 @@ def get_steinhardt_parameter_structure(
     sysq = np.array(sys.get_qvals(q, averaged=averaged))
 
     if n_clusters is not None:
+        from sklearn import cluster
+
         cl = cluster.KMeans(n_clusters=n_clusters)
 
         ind = cl.fit(list(zip(*sysq))).labels_
@@ -61,7 +62,7 @@ def get_steinhardt_parameter_structure(
         return sysq
 
 
-def analyse_centro_symmetry(structure, num_neighbors=12):
+def get_centro_symmetry_descriptors(structure, num_neighbors=12):
     """
     Analyse centrosymmetry parameter
 
@@ -72,11 +73,13 @@ def analyse_centro_symmetry(structure, num_neighbors=12):
     Returns:
         csm (list) : list of centrosymmetry parameter
     """
-    sys = ase_to_pyscal_system(structure)
+    sys = ase_to_pyscal(structure)
     return np.array(sys.calculate_centrosymmetry(nmax=num_neighbors))
 
 
-def analyse_diamond_structure(structure, mode="total", ovito_compatibility=False):
+def get_diamond_structure_descriptors(
+    structure, mode="total", ovito_compatibility=False
+):
     """
     Analyse diamond structure
 
@@ -93,7 +96,7 @@ def analyse_diamond_structure(structure, mode="total", ovito_compatibility=False
     Returns:
         (depends on `mode`)
     """
-    sys = ase_to_pyscal_system(structure)
+    sys = ase_to_pyscal(structure)
     diamond_dict = sys.identify_diamond()
 
     ovito_identifiers = [
@@ -178,7 +181,7 @@ def analyse_diamond_structure(structure, mode="total", ovito_compatibility=False
         )
 
 
-def analyse_cna_adaptive(structure, mode="total", ovito_compatibility=False):
+def get_adaptive_cna_descriptors(structure, mode="total", ovito_compatibility=False):
     """
     Use common neighbor analysis
 
@@ -195,7 +198,7 @@ def analyse_cna_adaptive(structure, mode="total", ovito_compatibility=False):
     Returns:
         (depends on `mode`)
     """
-    sys = ase_to_pyscal_system(structure)
+    sys = ase_to_pyscal(structure)
     if mode not in ["total", "numeric", "str"]:
         raise ValueError("Unsupported mode")
 
@@ -233,39 +236,20 @@ def analyse_cna_adaptive(structure, mode="total", ovito_compatibility=False):
             )
 
 
-def analyse_voronoi_volume(structure):
+def get_voronoi_volumes(structure):
     """
     Calculate the Voronoi volume of atoms
 
     Args:
         structure : (ase.atoms.Atoms): The structure to analyze.
     """
-    sys = ase_to_pyscal_system(structure)
+    sys = ase_to_pyscal(structure)
     sys.find_neighbors(method="voronoi")
     structure = sys.atoms
     return np.array([atom.volume for atom in structure])
 
 
-def ase_to_pyscal_system(structure):
-    """
-    Converts atoms to ase atoms and than to a pyscal system.
-    Also adds the pyscal publication.
-
-    Args:
-        structure (ase.atoms.Atoms): Structure to convert.
-
-    Returns:
-        Pyscal system: See the pyscal documentation.
-    """
-    sys = pc.System()
-    sys.read_inputfile(
-        structure,
-        format="ase",
-    )
-    return sys
-
-
-def analyse_find_solids(
+def find_solids(
     structure,
     neighbor_method="cutoff",
     cutoff=0,
@@ -296,7 +280,7 @@ def analyse_find_solids(
         int: number of solids,
         pyscal system: pyscal system when return_sys=True
     """
-    sys = ase_to_pyscal_system(structure)
+    sys = ase_to_pyscal(structure)
     sys.find_neighbors(method=neighbor_method, cutoff=cutoff)
     sys.find_solids(
         bonds=bonds,

@@ -30,15 +30,20 @@ setup(
     keywords='pyiron',
     packages=find_packages(exclude=["*tests*", "*docs*", "*binder*", "*conda*", "*notebooks*", "*.ci_support*"]),
     install_requires=[
-        'aimsgb==0.1.1',
         'ase==3.22.1',
-        'matplotlib==3.7.0',
-        'numpy==1.24.2',
-        'phonopy==2.17.1',
-        'pymatgen==2022.11.7',
-        'scipy==1.10.0',
-        'scikit-learn==1.2.1',
-        'spglib==2.0.2',
+        'matplotlib==3.7.0',  # ase already requires matplotlib
+        'numpy==1.24.2',  # ase already requires numpy
+        'scipy==1.10.0',  # ase already requires scipy
     ],
+    extras_require={
+        "grainboundary": ['aimsgb==0.1.1', 'pymatgen==2022.11.7'],
+        "pyscal": ['pyscal2==2.10.20'],
+        "nglview": ['nglview==3.0.4'],
+        "plotly": ['plotly==5.14.1'],
+        "clusters": ['scikit-learn==1.2.1'],
+        "symmetry": ['spglib==2.0.2'],
+        "surface": ['spglib==2.0.2', 'pymatgen==2022.11.7'],
+        "phonopy": ['phonopy==2.17.1', 'spglib==2.0.2'],
+    },
     cmdclass=versioneer.get_cmdclass(),
 )

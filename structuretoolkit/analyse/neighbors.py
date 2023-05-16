@@ -3,7 +3,6 @@
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import numpy as np
-from sklearn.cluster import AgglomerativeClustering
 from scipy.sparse import coo_matrix
 from scipy.special import gamma
 from scipy.spatial.transform import Rotation
@@ -11,7 +10,10 @@ from scipy.special import sph_harm
 from scipy.spatial import cKDTree
 import warnings
 import itertools
-from structuretoolkit.helper import get_extended_positions, get_average_of_unique_labels
+from structuretoolkit.common.helper import (
+    get_extended_positions,
+    get_average_of_unique_labels,
+)
 
 __author__ = "Joerg Neugebauer, Sam Waseda"
 __copyright__ = (
@@ -905,6 +907,8 @@ class Neighbors(Tree):
                 `euclidean` is accepted.
 
         """
+        from sklearn.cluster import AgglomerativeClustering
+
         if distance_threshold is None and n_clusters is None:
             distance_threshold = np.min(self.filled.distances)
         dr = self.flattened.vecs
@@ -952,6 +956,8 @@ class Neighbors(Tree):
                 obtained from the clustered vectors is used for the distance clustering. Otherwise
                 neigh.distances is used.
         """
+        from sklearn.cluster import AgglomerativeClustering
+
         if distance_threshold is None:
             distance_threshold = 0.1 * np.min(self.flattened.distances)
         dr = self.flattened.distances

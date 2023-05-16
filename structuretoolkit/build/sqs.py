@@ -5,7 +5,6 @@ from multiprocessing import cpu_count
 from ase.data import atomic_numbers
 from ase.atoms import Atoms
 import numpy as np
-from sqsgenerator import sqs_optimize
 from typing import Dict, Optional, Union, Iterable
 
 
@@ -101,7 +100,7 @@ def transpose(it):
     return zip(*it)
 
 
-def get_sqs_structures(
+def sqs_structures(
     structure: Atoms,
     mole_fractions: Dict[str, Union[float, int]],
     weights: Optional[Dict[int, float]] = None,
@@ -119,6 +118,7 @@ def get_sqs_structures(
     minimal: Optional[bool] = True,
     similar: Optional[bool] = True,
 ):
+    from sqsgenerator import sqs_optimize
     composition = mole_fractions_to_composition(mole_fractions, len(structure))
 
     settings = dict(

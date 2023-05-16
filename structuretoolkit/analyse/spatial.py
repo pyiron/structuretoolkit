@@ -3,11 +3,10 @@
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import numpy as np
-from sklearn.cluster import AgglomerativeClustering, DBSCAN
 from scipy.sparse import coo_matrix
 from scipy.spatial import Voronoi, Delaunay
 from scipy.spatial import ConvexHull
-from structuretoolkit.helper import (
+from structuretoolkit.common.helper import (
     get_extended_positions,
     get_wrapped_coordinates,
     get_vertical_length,
@@ -261,6 +260,8 @@ class Interstitials:
         self.positions = self.positions[variance < min_var + variance_buffer]
 
     def _cluster_points(self, eps=0.1):
+        from sklearn.cluster import DBSCAN
+
         if eps == 0:
             return
         extended_positions, indices = get_extended_positions(
@@ -428,6 +429,8 @@ def get_layers(
             "ij,i,nj->ni", mat, 1 / np.linalg.norm(mat, axis=-1), positions
         )
     if cluster_method is None:
+        from sklearn.cluster import AgglomerativeClustering
+
         cluster_method = AgglomerativeClustering(
             linkage="complete",
             n_clusters=None,
@@ -493,6 +496,8 @@ def get_voronoi_vertices(
     )
     xx = voro.vertices
     if distance_threshold > 0:
+        from sklearn.cluster import AgglomerativeClustering
+
         cluster = AgglomerativeClustering(
             linkage="single", distance_threshold=distance_threshold, n_clusters=None
         )
@@ -567,7 +572,7 @@ def get_delaunay_neighbors(structure, width_buffer: float = 10.0) -> np.ndarray:
     )
 
 
-def cluster_positions(
+def get_cluster_positions(
     structure, positions=None, eps=1, buffer_width=None, return_labels=False
 ):
     """
@@ -609,6 +614,8 @@ def cluster_positions(
         positions (numpy.ndarray): Mean positions
         label (numpy.ndarray): Labels of the positions (returned when `return_labels = True`)
     """
+    from sklearn.cluster import DBSCAN
+
     positions = structure.positions if positions is None else np.array(positions)
     if buffer_width is None:
         buffer_width = eps
