@@ -117,6 +117,7 @@ def sqs_structures(
     shell_distances: Optional[Iterable[int]] = None,
     minimal: Optional[bool] = True,
     similar: Optional[bool] = True,
+    return_statistics: Optional[bool] = False,
 ):
     from sqsgenerator import sqs_optimize
     composition = mole_fractions_to_composition(mole_fractions, len(structure))
@@ -151,4 +152,7 @@ def sqs_structures(
     structures, sro_breakdown = transpose(map(remap_sqs_results, results.values()))
     num_iterations = iterations
     cycle_time = np.average(list(map_dict(np.average, timings).values()))
-    return structures, sro_breakdown, num_iterations, cycle_time
+    if not return_statistics:
+        return structures
+    else:
+        return structures, sro_breakdown, num_iterations, cycle_time
