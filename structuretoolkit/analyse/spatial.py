@@ -6,7 +6,7 @@ import numpy as np
 from scipy.sparse import coo_matrix
 from scipy.spatial import Voronoi, Delaunay
 from scipy.spatial import ConvexHull
-from structuretoolkit.analyse.helper import (
+from structuretoolkit.common.helper import (
     get_extended_positions,
     get_wrapped_coordinates,
     get_vertical_length,

@@ -21,15 +21,6 @@ from structuretoolkit.analyse.spatial import (
     get_cluster_positions
 )
 from structuretoolkit.analyse.strain import get_strain
-from structuretoolkit.analyse.helper import (
-    get_atomic_numbers,
-    get_extended_positions,
-    get_vertical_length,
-    get_wrapped_coordinates,
-    select_index,
-    center_coordinates_in_unit_cell,
-    apply_strain,
-)
 
 
 def get_symmetry(structure, use_magmoms=False, use_elements=True, symprec=1e-5, angle_tolerance=-1.0):

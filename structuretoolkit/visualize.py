@@ -5,7 +5,7 @@
 import numpy as np
 import warnings
 from scipy.interpolate import interp1d
-from structuretoolkit.analyse.helper import get_atomic_numbers
+from structuretoolkit.common.helper import get_atomic_numbers
 
 __author__ = "Joerg Neugebauer, Sudarsan Surendralal"
 __copyright__ = (

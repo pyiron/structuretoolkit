@@ -7,7 +7,7 @@ from scipy.spatial import cKDTree
 import spglib
 import ast
 
-import structuretoolkit.analyse.helper
+import structuretoolkit.common.helper
 
 __author__ = "Joerg Neugebauer, Sam Waseda"
 __copyright__ = (
@@ -242,12 +242,12 @@ class Symmetry(dict):
             use_magmoms = self._use_magmoms
         if use_elements:
             numbers = np.array(
-                structuretoolkit.analyse.helper.get_structure_indices(structure=self._structure),
+                structuretoolkit.common.helper.get_structure_indices(structure=self._structure),
                 dtype="intc"
             )
         else:
             numbers = np.ones_like(
-                structuretoolkit.analyse.helper.get_structure_indices(structure=self._structure),
+                structuretoolkit.common.helper.get_structure_indices(structure=self._structure),
                 dtype="intc"
             )
         if use_magmoms:
@@ -355,7 +355,7 @@ class Symmetry(dict):
         new_structure = self._structure.copy()
         new_structure.cell = cell
         new_structure = new_structure[: len(indices)]
-        new_structure = structuretoolkit.analyse.helper.set_indices(
+        new_structure = structuretoolkit.common.helper.set_indices(
             structure=new_structure, indices=indices
         )
         new_structure.positions = positions
