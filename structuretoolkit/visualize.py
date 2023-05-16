@@ -6,7 +6,7 @@ import numpy as np
 import warnings
 from matplotlib.colors import rgb2hex
 from scipy.interpolate import interp1d
-from structuretoolkit.helper import get_atomic_numbers
+from structuretoolkit.analyse.helper import get_atomic_numbers
 
 __author__ = "Joerg Neugebauer, Sudarsan Surendralal"
 __copyright__ = (
