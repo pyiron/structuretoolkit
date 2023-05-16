@@ -10,46 +10,54 @@ represent atomistic structures in python. The `structuretoolkit` is integrated i
 ## Disclaimer 
 The `structuretoolkit` is currently under development. 
 
-## Example 
+## Example
+
 ```python
 import structuretoolkit as stk
 from ase.build import bulk
 
 structure = bulk("Al", cubic=True)
-stk.analyse_cna_adaptive(structure)
+stk.analyse.get_adaptive_cna_descriptors(structure)
 stk.plot3d(structure)
 ```
 
 ## Features 
 ### Analysis
-* `get_neighbors`
-* `get_neighborhood`
-* `analyse_phonopy_equivalent_atoms`
-* `get_steinhardt_parameter_structure`
-* `analyse_centro_symmetry` 
-* `analyse_diamond_structure` 
-* `analyse_cna_adaptive` 
-* `analyse_voronoi_volume` 
-* `analyse_find_solids`
-* `get_mean_positions`
-* `get_average_of_unique_labels`
-* `get_interstitials`
-* `get_layers`
-* `get_voronoi_vertices`
-* `get_voronoi_neighbors`
-* `get_delaunay_neighbors`
-* `cluster_positions`
-* `get_strain`
+* `stk.analyse.get_neighbors()`
+* `stk.analyse.get_neighborhood()`
+* `stk.analyse.get_equivalent_atoms()`
+* `stk.analyse.get_steinhardt_parameters()`
+* `stk.analyse.get_centro_symmetry_descriptors()` 
+* `stk.analyse.get_diamond_structure_descriptors()` 
+* `stk.analyse.get_adaptive_cna_descriptors()` 
+* `stk.analyse.get_voronoi_volumes()` 
+* `stk.analyse.find_solids()`
+* `stk.analyse.get_mean_positions()`
+* `stk.analyse.get_average_of_unique_labels()`
+* `stk.analyse.get_interstitials()`
+* `stk.analyse.get_layers()`
+* `stk.analyse.get_voronoi_vertices()`
+* `stk.analyse.get_voronoi_neighbors()`
+* `stk.analyse.get_delaunay_neighbors()`
+* `stk.analyse.get_cluster_positions()`
+* `stk.analyse.get_strain()`
 
 ### Build
-* `grainboundary_build`
-* `grainboundary_info`
-* `get_sqs_structures`
-* `B2`
-* `C14`
-* `C15`
-* `C36`
-* `D03`
+* `stk.build.get_grainboundary_info()`
+* `stk.build.grainboundary()`
+* `stk.build.high_index_surface()`
+* `stk.build.get_high_index_surface_info()`
+* `stk.build.sqs_structures()`
+* `stk.build.B2()`
+* `stk.build.C14()`
+* `stk.build.C15()`
+* `stk.build.C36()`
+* `stk.build.D03()`
 
 ### Visualize 
-* `plot3d`
+* `stk.visualize.plot3d()`
+
+### Common 
+* `stk.common.ase_to_pymatgen()`
+* `stk.common.pymatgen_to_ase()`
+* `stk.common.ase_to_pyscal()`

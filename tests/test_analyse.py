@@ -18,25 +18,25 @@ class TestAtoms(unittest.TestCase):
         a_0 = 4
         struct = bulk(name='Al', a=a_0, crystalstructure='fcc', cubic=True).repeat(10)
         struct_pure = struct.copy()
-        layers = stk.get_layers(structure=struct)
+        layers = stk.analyse.get_layers(structure=struct)
         self.assertAlmostEqual(np.linalg.norm(layers-np.rint(2*struct.positions/a_0).astype(int)), 0)
         struct.append(Atom(symbol='C', position=np.random.random(3)))
         self.assertEqual(
-            np.linalg.norm(layers-stk.get_layers(structure=struct, id_list=stk.select_index(structure=struct, element='Al'))), 0
+            np.linalg.norm(layers-stk.analyse.get_layers(structure=struct, id_list=stk.analyse.select_index(structure=struct, element='Al'))), 0
         )
         self.assertEqual(
-            np.linalg.norm(layers-stk.get_layers(
+            np.linalg.norm(layers-stk.analyse.get_layers(
                 structure=struct,
-                id_list=stk.select_index(structure=struct, element='Al'),
+                id_list=stk.analyse.select_index(structure=struct, element='Al'),
                 wrap_atoms=False
             )), 0
         )
         with self.assertRaises(ValueError):
-            _ = stk.get_layers(structure=struct, distance_threshold=0)
+            _ = stk.analyse.get_layers(structure=struct, distance_threshold=0)
         with self.assertRaises(ValueError):
-            _ = stk.get_layers(structure=stk, id_list=[])
+            _ = stk.analyse.get_layers(structure=struct, id_list=[])
 
-        self.assertTrue(np.all(stk.get_layers(structure=struct) == stk.get_layers(
+        self.assertTrue(np.all(stk.analyse.get_layers(structure=struct) == stk.analyse.get_layers(
             structure=struct,
             cluster_method=AgglomerativeClustering(
                 linkage='complete',
@@ -46,7 +46,7 @@ class TestAtoms(unittest.TestCase):
         ), "Overriding cluster method with default parameters does not return the same results.")
         self.assertTrue(
             np.all(
-                stk.get_layers(structure=struct_pure) == stk.get_layers(
+                stk.analyse.get_layers(structure=struct_pure) == stk.analyse.get_layers(
                     structure=struct_pure,
                     cluster_method=DBSCAN(eps=0.01)
                 )
@@ -56,48 +56,48 @@ class TestAtoms(unittest.TestCase):
 
     def test_get_layers_other_planes(self):
         structure = bulk(name='Fe', a=3.5, crystalstructure='fcc', cubic=True).repeat(2)
-        layers = stk.get_layers(structure=structure, planes=[1, 1, 1])
+        layers = stk.analyse.get_layers(structure=structure, planes=[1, 1, 1])
         self.assertEqual(np.unique(layers).tolist(), [0, 1, 2, 3, 4])
 
     def test_get_layers_with_strain(self):
         structure = bulk(name='Fe', a=2.8, crystalstructure='bcc', cubic=True).repeat(2)
-        layers = stk.get_layers(structure=structure).tolist()
-        stk.apply_strain(structure=structure, epsilon=0.1*(np.random.random((3, 3))-0.5))
+        layers = stk.analyse.get_layers(structure=structure).tolist()
+        stk.analyse.apply_strain(structure=structure, epsilon=0.1*(np.random.random((3, 3))-0.5))
         self.assertEqual(
-            layers, stk.get_layers(structure=structure, planes=np.linalg.inv(structure.cell).T).tolist()
+            layers, stk.analyse.get_layers(structure=structure, planes=np.linalg.inv(structure.cell).T).tolist()
         )
 
     def test_get_layers_across_pbc(self):
         structure = bulk(name='Fe', a=2.8, crystalstructure='bcc', cubic=True).repeat(2)
-        layers = stk.get_layers(structure=structure)
+        layers = stk.analyse.get_layers(structure=structure)
         structure.cell[1, 0] += 0.01
-        structure = stk.center_coordinates_in_unit_cell(structure=structure)
-        self.assertEqual(len(np.unique(layers[stk.get_layers(structure=structure)[:, 0] == 0, 0])), 1)
+        structure = stk.analyse.center_coordinates_in_unit_cell(structure=structure)
+        self.assertEqual(len(np.unique(layers[stk.analyse.get_layers(structure=structure)[:, 0] == 0, 0])), 1)
 
     def test_pyscal_cna_adaptive(self):
         basis = Atoms(
             "FeFe", scaled_positions=[(0, 0, 0), (0.5, 0.5, 0.5)], cell=np.identity(3)
         )
         self.assertTrue(
-            stk.analyse_cna_adaptive(structure=basis)["bcc"] == 2
+            stk.analyse.get_adaptive_cna_descriptors(structure=basis)["bcc"] == 2
         )
 
     def test_pyscal_centro_symmetry(self):
         basis = bulk(name='Fe', a=2.8, crystalstructure='bcc', cubic=True)
         self.assertTrue(
-            all([np.isclose(v, 0.0) for v in stk.analyse_centro_symmetry(structure=basis, num_neighbors=8)])
+            all([np.isclose(v, 0.0) for v in stk.analyse.get_centro_symmetry_descriptors(structure=basis, num_neighbors=8)])
         )
 
     def test_get_voronoi_vertices(self):
         basis = bulk(name='Al', a=4, crystalstructure='fcc', cubic=True)
-        self.assertEqual(len(stk.get_voronoi_vertices(structure=basis)), 12)
-        self.assertEqual(len(stk.get_voronoi_vertices(structure=basis, distance_threshold=2)), 1)
+        self.assertEqual(len(stk.analyse.get_voronoi_vertices(structure=basis)), 12)
+        self.assertEqual(len(stk.analyse.get_voronoi_vertices(structure=basis, distance_threshold=2)), 1)
 
     def test_get_interstitials_bcc(self):
         bcc = bulk('Fe', cubic=True)
         x_octa_ref = bcc.positions[:, None, :]+0.5*bcc.cell[None, :, :]
         x_octa_ref = x_octa_ref.reshape(-1, 3)
-        x_octa_ref = stk.get_wrapped_coordinates(structure=bcc, positions=x_octa_ref)
+        x_octa_ref = stk.analyse.get_wrapped_coordinates(structure=bcc, positions=x_octa_ref)
         int_octa = stk.get_interstitials(structure=bcc, num_neighbors=6)
         self.assertEqual(len(int_octa.positions), len(x_octa_ref))
         self.assertAlmostEqual(
@@ -105,8 +105,8 @@ class TestAtoms(unittest.TestCase):
                 x_octa_ref[:, None, :]-int_octa.positions[None, :, :], axis=-1
             ).min(axis=0).sum(), 0
         )
-        int_tetra = stk.get_interstitials(structure=bcc, num_neighbors=4)
-        x_tetra_ref = stk.get_wrapped_coordinates(structure=bcc, positions=stk.get_voronoi_vertices(structure=bcc))
+        int_tetra = stk.analyse.get_interstitials(structure=bcc, num_neighbors=4)
+        x_tetra_ref = stk.analyse.get_wrapped_coordinates(structure=bcc, positions=stk.get_voronoi_vertices(structure=bcc))
         self.assertEqual(len(int_tetra.positions), len(x_tetra_ref))
         self.assertAlmostEqual(
             np.linalg.norm(
@@ -118,8 +118,8 @@ class TestAtoms(unittest.TestCase):
         fcc = bulk('Al', cubic=True)
         a_0 = fcc.cell[0, 0]
         x_tetra_ref = 0.25*a_0*np.ones(3)*np.array([[1], [-1]])+fcc.positions[:, None, :]
-        x_tetra_ref = stk.get_wrapped_coordinates(structure=fcc, positions=x_tetra_ref).reshape(-1, 3)
-        int_tetra = stk.get_interstitials(structure=fcc, num_neighbors=4)
+        x_tetra_ref = stk.analyse.get_wrapped_coordinates(structure=fcc, positions=x_tetra_ref).reshape(-1, 3)
+        int_tetra = stk.analyse.get_interstitials(structure=fcc, num_neighbors=4)
         self.assertEqual(len(int_tetra.positions), len(x_tetra_ref))
         self.assertAlmostEqual(
             np.linalg.norm(
@@ -127,8 +127,8 @@ class TestAtoms(unittest.TestCase):
             ).min(axis=0).sum(), 0
         )
         x_octa_ref = 0.5*a_0*np.array([1, 0, 0])+fcc.positions
-        x_octa_ref = stk.get_wrapped_coordinates(structure=fcc, positions=x_octa_ref)
-        int_octa = stk.get_interstitials(structure=fcc, num_neighbors=6)
+        x_octa_ref = stk.analyse.get_wrapped_coordinates(structure=fcc, positions=x_octa_ref)
+        int_octa = stk.analyse.get_interstitials(structure=fcc, num_neighbors=6)
         self.assertEqual(len(int_octa.positions), len(x_octa_ref))
         self.assertAlmostEqual(
             np.linalg.norm(x_octa_ref[:, None, :]-int_octa.positions[None, :, :], axis=-1).min(axis=0).sum(), 0
@@ -192,11 +192,11 @@ class TestAtoms(unittest.TestCase):
 
     def test_cluster_positions(self):
         structure_bulk = bulk('Fe', cubic=True)
-        self.assertEqual(len(stk.cluster_positions(structure=structure_bulk)), len(structure_bulk))
+        self.assertEqual(len(stk.get_cluster_positions(structure=structure_bulk)), len(structure_bulk))
         positions = np.append(structure_bulk.positions, structure_bulk.positions, axis=0)
-        self.assertEqual(len(stk.cluster_positions(structure=structure_bulk, positions=positions)), len(structure_bulk))
+        self.assertEqual(len(stk.get_cluster_positions(structure=structure_bulk, positions=positions)), len(structure_bulk))
         self.assertEqual(
-            stk.cluster_positions(structure=structure_bulk, positions=np.zeros((2, 3)), return_labels=True)[1].tolist(),
+            stk.get_cluster_positions(structure=structure_bulk, positions=np.zeros((2, 3)), return_labels=True)[1].tolist(),
             [0, 0]
         )
 

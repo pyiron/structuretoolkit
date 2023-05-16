@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.spatial.transform import Rotation
 from structuretoolkit.analyse.neighbors import get_neighbors
-from structuretoolkit.analyse.pyscal import analyse_cna_adaptive
+from structuretoolkit.analyse.pyscal import get_adaptive_cna_descriptors
 
 
 class Strain:
@@ -138,7 +138,7 @@ class Strain:
 
     @staticmethod
     def _get_majority_phase(structure):
-        cna = analyse_cna_adaptive(structure=structure)
+        cna = get_adaptive_cna_descriptors(structure=structure)
         return np.asarray([k for k in cna.keys()])[np.argmax([v for v in cna.values()])]
 
     @staticmethod

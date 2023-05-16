@@ -16,9 +16,9 @@ class TestAimsgb(unittest.TestCase):
         axis = [0, 0, 1]
         sigma = 5
         plane = [1, 2, 0]
-        gb1 = stk.grainboundary_build(axis, sigma, plane, self.fcc_basis)  # Default thicknesses expected to be 1
+        gb1 = stk.build.grainboundary(axis, sigma, plane, self.fcc_basis)  # Default thicknesses expected to be 1
         uc_a, uc_b = 2, 3  # Make grains thicker
-        gb2 = stk.grainboundary_build(axis, sigma, plane, self.fcc_basis, uc_a=uc_a, uc_b=uc_b)
+        gb2 = stk.build.grainboundary(axis, sigma, plane, self.fcc_basis, uc_a=uc_a, uc_b=uc_b)
         self.assertEqual(
             ((uc_a + uc_b)/2)*len(gb1), len(gb2),
             msg="Expected structure to be bigger in proportion to grain thickness"

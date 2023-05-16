@@ -21,7 +21,7 @@ class TestHighIndexSurface(unittest.TestCase):
         self.assertEqual(len(slab), 60)
 
     def test_high_index_surface_info(self):
-        h, s, k = stk.high_index_surface_info(
+        h, s, k = stk.get_high_index_surface_info(
             element='Ni',
             crystal_structure='fcc',
             lattice_constant=3.526,
@@ -38,7 +38,7 @@ class TestHighIndexSurface(unittest.TestCase):
         self.assertEqual(len(k), 3)
         self.assertEqual(len(s), 3)
         with self.assertRaises(ValueError):
-            stk.high_index_surface_info(
+            stk.get_high_index_surface_info(
                 element='Ni',
                 crystal_structure='fcc',
                 lattice_constant=3.526,

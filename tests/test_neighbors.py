@@ -389,7 +389,7 @@ class TestAtoms(unittest.TestCase):
         self.assertGreater(neigh.centrosymmetry.min(), 0)
         self.assertTrue(
             np.allclose(
-                neigh.centrosymmetry, stk.analyse_centro_symmetry(structure=structure, num_neighbors=8)
+                neigh.centrosymmetry, stk.get_centro_symmetry_descriptors(structure=structure, num_neighbors=8)
             )
         )
 

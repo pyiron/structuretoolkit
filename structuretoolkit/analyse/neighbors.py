@@ -3,7 +3,6 @@
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import numpy as np
-from sklearn.cluster import AgglomerativeClustering
 from scipy.sparse import coo_matrix
 from scipy.special import gamma
 from scipy.spatial.transform import Rotation
@@ -905,6 +904,7 @@ class Neighbors(Tree):
                 `euclidean` is accepted.
 
         """
+        from sklearn.cluster import AgglomerativeClustering
         if distance_threshold is None and n_clusters is None:
             distance_threshold = np.min(self.filled.distances)
         dr = self.flattened.vecs
@@ -952,6 +952,7 @@ class Neighbors(Tree):
                 obtained from the clustered vectors is used for the distance clustering. Otherwise
                 neigh.distances is used.
         """
+        from sklearn.cluster import AgglomerativeClustering
         if distance_threshold is None:
             distance_threshold = 0.1 * np.min(self.flattened.distances)
         dr = self.flattened.distances

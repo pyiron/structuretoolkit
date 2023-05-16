@@ -4,7 +4,6 @@
 
 import numpy as np
 import warnings
-from matplotlib.colors import rgb2hex
 from scipy.interpolate import interp1d
 from structuretoolkit.analyse.helper import get_atomic_numbers
 
@@ -652,6 +651,7 @@ def _scalars_to_hex_colors(scalar_field, start=None, end=None, cmap=None):
     Returns:
         (list): The corresponding hex codes for each scalar value passed in.
     """
+    from matplotlib.colors import rgb2hex
     if start is None:
         start = np.amin(scalar_field)
     if end is None:

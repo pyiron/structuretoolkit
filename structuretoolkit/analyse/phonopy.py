@@ -3,8 +3,6 @@
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import numpy as np
-from phonopy.structure.atoms import PhonopyAtoms
-import spglib as spg
 
 __author__ = "Osamu Waseda"
 __copyright__ = (
@@ -18,7 +16,7 @@ __status__ = "development"
 __date__ = "Sep 1, 2018"
 
 
-def analyse_phonopy_equivalent_atoms(structure, symprec=1e-5, angle_tolerance=-1.0):
+def get_equivalent_atoms(structure, symprec=1e-5, angle_tolerance=-1.0):
     """
     Args: (read phonopy.structure.spglib for more details)
         symprec:
@@ -29,6 +27,8 @@ def analyse_phonopy_equivalent_atoms(structure, symprec=1e-5, angle_tolerance=-1
                 is used to judge symmetry.
 
     """
+    import spglib as spg
+    from phonopy.structure.atoms import PhonopyAtoms
     positions = structure.get_scaled_positions()
     cell = structure.cell
     types = structure.get_chemical_symbols()

@@ -54,7 +54,7 @@ class TestCompound(unittest.TestCase):
         b_id = unique_ids[np.argwhere(symbols[unique_ids] == b_type)[0, 0]]
         unique_ids = [a_id, b_id]  # Now with guaranteed ordering
 
-        csa = stk.analyse_centro_symmetry(structure)[unique_ids]
+        csa = stk.get_centro_symmetry_descriptors(structure)[unique_ids]
         self.assertLess(1, csa[0], msg="A site for AB_2 C15 should be significantly non-centro-symmetric.")
         self.assertAlmostEqual(0, csa[1], msg="B site for AB_2 C15 should be nearly centro-symmetric.")
 

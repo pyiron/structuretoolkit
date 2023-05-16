@@ -4,13 +4,13 @@ from structuretoolkit.analyse import (
     find_mic,
     get_neighbors,
     get_neighborhood,
-    analyse_phonopy_equivalent_atoms,
-    get_steinhardt_parameter_structure,
-    analyse_centro_symmetry,
-    analyse_diamond_structure,
-    analyse_cna_adaptive,
-    analyse_voronoi_volume,
-    analyse_find_solids,
+    get_equivalent_atoms as analyse_phonopy_equivalent_atoms,
+    get_steinhardt_parameters as get_steinhardt_parameter_structure,
+    get_centro_symmetry_descriptors as analyse_centro_symmetry,
+    get_diamond_structure_descriptors as analyse_diamond_structure,
+    get_adaptive_cna_descriptors as analyse_cna_adaptive,
+    get_voronoi_volumes as analyse_voronoi_volume,
+    find_solids as analyse_find_solids,
     get_mean_positions,
     get_average_of_unique_labels,
     get_interstitials,
@@ -18,7 +18,7 @@ from structuretoolkit.analyse import (
     get_voronoi_vertices,
     get_voronoi_neighbors,
     get_delaunay_neighbors,
-    cluster_positions,
+    get_cluster_positions as cluster_positions,
     get_strain,
     get_symmetry,
     get_atomic_numbers,
@@ -32,19 +32,26 @@ from structuretoolkit.analyse import (
 
 # Build
 from structuretoolkit.build import (
-    grainboundary_build,
-    grainboundary_info,
+    grainboundary as grainboundary_build,
+    get_grainboundary_info as grainboundary_info,
     B2,
     C14,
     C15,
     C36,
     D03,
-    get_sqs_structures,
+    sqs_structures as get_sqs_structures,
     high_index_surface,
-    high_index_surface_info
+    get_high_index_surface_info as high_index_surface_info
 )
 
 # Visualize
 from structuretoolkit.visualize import (
     plot3d
+)
+
+# Common
+from structuretoolkit.common import (
+    ase_to_pymatgen,
+    pymatgen_to_ase,
+    ase_to_pyscal
 )

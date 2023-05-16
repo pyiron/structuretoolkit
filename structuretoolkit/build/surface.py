@@ -1,11 +1,10 @@
 import numpy as np
 from ase.build import bulk, surface
-from structuretoolkit.analyse.symmetry import get_symmetry
-from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
-from pymatgen.io.ase import AseAtomsAdaptor
+from structuretoolkit.analyse import get_symmetry
+from structuretoolkit.common.pymatgen import ase_to_pymatgen, pymatgen_to_ase
 
 
-def high_index_surface_info(
+def get_high_index_surface_info(
         element,
         crystal_structure,
         lattice_constant,
@@ -136,13 +135,14 @@ def high_index_surface(
     Returns:
         slab: ase.atoms.Atoms instance Required surface
     """
+    from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
     basis = bulk(
         name=element,
         crystalstructure=crystal_structure,
         a=lattice_constant,
         cubic=True
     )
-    high_index_surface, _, _ = high_index_surface_info(
+    high_index_surface, _, _ = get_high_index_surface_info(
         element=element,
         crystal_structure=crystal_structure,
         lattice_constant=lattice_constant,
@@ -155,10 +155,9 @@ def high_index_surface(
         length_kink=length_kink,
     )
     surf = surface(basis, high_index_surface, layers, vacuum)
-    adapter = AseAtomsAdaptor()
-    sga = SpacegroupAnalyzer(adapter.get_structure(atoms=surf))
-    pmg_refined = sga.get_refined_structure()
-    slab = adapter.get_atoms(structure=pmg_refined)
+    slab = pymatgen_to_ase(
+        SpacegroupAnalyzer(ase_to_pymatgen(structure=surf)).get_refined_structure()
+    )
     slab.positions[:, 2] = slab.positions[:, 2] - np.min(slab.positions[:, 2])
     slab.set_pbc(True)
     return slab

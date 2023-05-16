@@ -2,8 +2,7 @@
 # Copyright (c) Max-Planck-Institut für Eisenforschung GmbH - Computational Materials Design (CM) Department
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
-from aimsgb import GrainBoundary, Grain, GBInformation
-from pymatgen.io.ase import AseAtomsAdaptor
+from structuretoolkit.common.pymatgen import ase_to_pymatgen, pymatgen_to_ase
 
 __author__ = "Ujjal Saikia"
 __copyright__ = (
@@ -17,7 +16,7 @@ __status__ = "production"
 __date__ = "Feb 26, 2021"
 
 
-def grainboundary_info(axis, max_sigma):
+def get_grainboundary_info(axis, max_sigma):
     """
     Provides a list of possible GB structures for a given rotational axis and upto the given maximum sigma value.
 
@@ -37,10 +36,11 @@ def grainboundary_info(axis, max_sigma):
     To construct the grain boundary select a GB plane and sigma value from the list and pass it to the
     GBBuilder.gb_build() function along with the rotational axis and initial bulk structure.
     """
+    from aimsgb import GBInformation
     return GBInformation(axis=axis, max_sigma=max_sigma)
 
 
-def grainboundary_build(
+def grainboundary(
     axis,
     sigma,
     plane,
@@ -76,8 +76,8 @@ def grainboundary_build(
     Returns:
         :class:`.Atoms`: final grain boundary structure
     """
-    adapter = AseAtomsAdaptor()
-    basis_pymatgen = adapter.get_structure(atoms=initial_struct, cls=None)
+    from aimsgb import GrainBoundary, Grain
+    basis_pymatgen = ase_to_pymatgen(structure=initial_struct)
     grain_init = Grain(
         basis_pymatgen.lattice, basis_pymatgen.species, basis_pymatgen.frac_coords
     )
@@ -90,7 +90,7 @@ def grainboundary_build(
         uc_b=uc_b,
     )
 
-    return adapter.get_atoms(
+    return pymatgen_to_ase(
         structure=gb_obj.build_gb(
             to_primitive=to_primitive,
             delete_layer=delete_layer,
