@@ -8,7 +8,14 @@ from ase.build import bulk
 from ase.atoms import Atoms
 import structuretoolkit as stk
 
+try:
+    import pyscal
+    skip_pyscal_test = False
+except ImportError:
+    skip_pyscal_test = True
 
+
+@unittest.skipIf(skip_pyscal_test, "pyscal is not installed, so the pyscal tests are skipped.")
 class Testpyscal(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
