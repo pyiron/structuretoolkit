@@ -1,0 +1,2 @@
+class SymmetryError(Exception):
+    pass

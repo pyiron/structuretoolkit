@@ -97,8 +97,8 @@ class TestAtoms(unittest.TestCase):
         bcc = bulk('Fe', cubic=True)
         x_octa_ref = bcc.positions[:, None, :]+0.5*bcc.cell[None, :, :]
         x_octa_ref = x_octa_ref.reshape(-1, 3)
-        x_octa_ref = stk.analyse.get_wrapped_coordinates(structure=bcc, positions=x_octa_ref)
-        int_octa = stk.get_interstitials(structure=bcc, num_neighbors=6)
+        x_octa_ref = stk.common.get_wrapped_coordinates(structure=bcc, positions=x_octa_ref)
+        int_octa = stk.analyse.get_interstitials(structure=bcc, num_neighbors=6)
         self.assertEqual(len(int_octa.positions), len(x_octa_ref))
         self.assertAlmostEqual(
             np.linalg.norm(
@@ -106,7 +106,7 @@ class TestAtoms(unittest.TestCase):
             ).min(axis=0).sum(), 0
         )
         int_tetra = stk.analyse.get_interstitials(structure=bcc, num_neighbors=4)
-        x_tetra_ref = stk.analyse.get_wrapped_coordinates(structure=bcc, positions=stk.get_voronoi_vertices(structure=bcc))
+        x_tetra_ref = stk.common.get_wrapped_coordinates(structure=bcc, positions=stk.get_voronoi_vertices(structure=bcc))
         self.assertEqual(len(int_tetra.positions), len(x_tetra_ref))
         self.assertAlmostEqual(
             np.linalg.norm(
@@ -118,7 +118,7 @@ class TestAtoms(unittest.TestCase):
         fcc = bulk('Al', cubic=True)
         a_0 = fcc.cell[0, 0]
         x_tetra_ref = 0.25*a_0*np.ones(3)*np.array([[1], [-1]])+fcc.positions[:, None, :]
-        x_tetra_ref = stk.analyse.get_wrapped_coordinates(structure=fcc, positions=x_tetra_ref).reshape(-1, 3)
+        x_tetra_ref = stk.common.get_wrapped_coordinates(structure=fcc, positions=x_tetra_ref).reshape(-1, 3)
         int_tetra = stk.analyse.get_interstitials(structure=fcc, num_neighbors=4)
         self.assertEqual(len(int_tetra.positions), len(x_tetra_ref))
         self.assertAlmostEqual(
@@ -127,7 +127,7 @@ class TestAtoms(unittest.TestCase):
             ).min(axis=0).sum(), 0
         )
         x_octa_ref = 0.5*a_0*np.array([1, 0, 0])+fcc.positions
-        x_octa_ref = stk.analyse.get_wrapped_coordinates(structure=fcc, positions=x_octa_ref)
+        x_octa_ref = stk.common.get_wrapped_coordinates(structure=fcc, positions=x_octa_ref)
         int_octa = stk.analyse.get_interstitials(structure=fcc, num_neighbors=6)
         self.assertEqual(len(int_octa.positions), len(x_octa_ref))
         self.assertAlmostEqual(
@@ -166,11 +166,11 @@ class TestAtoms(unittest.TestCase):
         voro = Voronoi(structure.positions[:, :2])
         center = voro.vertices[np.linalg.norm(voro.vertices-structure.cell.diagonal()[:2]*0.5, axis=-1).argmin()]
         structure.positions[:, 2] += b/(2*np.pi)*np.arctan2(*(structure.positions[:, :2]-center).T[::-1])
-        structure = stk.center_coordinates_in_unit_cell(structure=structure)
+        structure = stk.common.center_coordinates_in_unit_cell(structure=structure)
         r_0 = 0.9*L/2
         r = np.linalg.norm(structure.positions[:, :2]-center, axis=-1)
         core_region = (r < r_0)*(r > 10)
-        strain = stk.get_strain(structure=structure, ref_structure=structure_bulk, num_neighbors=8)
+        strain = stk.analyse.get_strain(structure=structure, ref_structure=structure_bulk, num_neighbors=8)
         strain = strain[core_region]
         positions = structure.positions[core_region, :2]
         x = positions-center
@@ -183,20 +183,20 @@ class TestAtoms(unittest.TestCase):
         structure_bulk = bulk('Fe', cubic=True)
         a_0 = structure_bulk.cell[0, 0]
         structure = structure_bulk.repeat(3)
-        self.assertAlmostEqual(np.linalg.norm(stk.find_mic(structure=structure, v=np.diff(
-            structure.positions[stk.get_delaunay_neighbors(structure=structure)], axis=-2
+        self.assertAlmostEqual(np.linalg.norm(stk.analyse.find_mic(structure=structure, v=np.diff(
+            structure.positions[stk.analyse.get_delaunay_neighbors(structure=structure)], axis=-2
         )), axis=-1).flatten().max(), a_0)
-        self.assertAlmostEqual(np.linalg.norm(stk.find_mic(structure=structure, v=np.diff(
-            structure.positions[stk.get_voronoi_neighbors(structure=structure)], axis=-2
+        self.assertAlmostEqual(np.linalg.norm(stk.analyse.find_mic(structure=structure, v=np.diff(
+            structure.positions[stk.analyse.get_voronoi_neighbors(structure=structure)], axis=-2
         )), axis=-1).flatten().max(), a_0)
 
     def test_cluster_positions(self):
         structure_bulk = bulk('Fe', cubic=True)
-        self.assertEqual(len(stk.get_cluster_positions(structure=structure_bulk)), len(structure_bulk))
+        self.assertEqual(len(stk.analyse.get_cluster_positions(structure=structure_bulk)), len(structure_bulk))
         positions = np.append(structure_bulk.positions, structure_bulk.positions, axis=0)
-        self.assertEqual(len(stk.get_cluster_positions(structure=structure_bulk, positions=positions)), len(structure_bulk))
+        self.assertEqual(len(stk.analyse.get_cluster_positions(structure=structure_bulk, positions=positions)), len(structure_bulk))
         self.assertEqual(
-            stk.get_cluster_positions(structure=structure_bulk, positions=np.zeros((2, 3)), return_labels=True)[1].tolist(),
+            stk.analyse.get_cluster_positions(structure=structure_bulk, positions=np.zeros((2, 3)), return_labels=True)[1].tolist(),
             [0, 0]
         )
 

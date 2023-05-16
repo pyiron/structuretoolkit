@@ -68,4 +68,5 @@ from structuretoolkit.common import (
     select_index,
     center_coordinates_in_unit_cell,
     apply_strain,
+    SymmetryError
 )

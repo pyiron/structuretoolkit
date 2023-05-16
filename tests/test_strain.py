@@ -9,12 +9,12 @@ class TestAtoms(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         bulk_structure = bulk('Fe', cubic=True)
-        cls.strain = stk.get_strain(structure=bulk_structure, ref_structure=bulk_structure, return_object=True)
+        cls.strain = stk.analyse.get_strain(structure=bulk_structure, ref_structure=bulk_structure, return_object=True)
 
     def test_number_of_neighbors(self):
         self.assertEqual(self.strain.num_neighbors, 8)
         bulk_structure = bulk('Al', cubic=True)
-        strain = stk.get_strain(structure=bulk_structure, ref_structure=bulk_structure, return_object=True)
+        strain = stk.analyse.get_strain(structure=bulk_structure, ref_structure=bulk_structure, return_object=True)
         self.assertEqual(strain.num_neighbors, 12)
 
     def test_get_angle(self):

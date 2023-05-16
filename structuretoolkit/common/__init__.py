@@ -9,3 +9,4 @@ from structuretoolkit.common.helper import (
     center_coordinates_in_unit_cell,
     apply_strain,
 )
+from structuretoolkit.common.error import SymmetryError

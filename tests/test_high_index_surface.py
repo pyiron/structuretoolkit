@@ -4,7 +4,7 @@ import structuretoolkit as stk
 
 class TestHighIndexSurface(unittest.TestCase):
     def test_high_index_surface(self):
-        slab = stk.high_index_surface(
+        slab = stk.build.high_index_surface(
             element='Ni',
             crystal_structure='fcc',
             lattice_constant=3.526,
@@ -21,7 +21,7 @@ class TestHighIndexSurface(unittest.TestCase):
         self.assertEqual(len(slab), 60)
 
     def test_high_index_surface_info(self):
-        h, s, k = stk.get_high_index_surface_info(
+        h, s, k = stk.build.get_high_index_surface_info(
             element='Ni',
             crystal_structure='fcc',
             lattice_constant=3.526,
@@ -38,7 +38,7 @@ class TestHighIndexSurface(unittest.TestCase):
         self.assertEqual(len(k), 3)
         self.assertEqual(len(s), 3)
         with self.assertRaises(ValueError):
-            stk.get_high_index_surface_info(
+            stk.build.get_high_index_surface_info(
                 element='Ni',
                 crystal_structure='fcc',
                 lattice_constant=3.526,
