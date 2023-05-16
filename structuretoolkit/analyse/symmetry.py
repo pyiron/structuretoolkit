@@ -242,13 +242,17 @@ class Symmetry(dict):
             use_magmoms = self._use_magmoms
         if use_elements:
             numbers = np.array(
-                structuretoolkit.common.helper.get_structure_indices(structure=self._structure),
-                dtype="intc"
+                structuretoolkit.common.helper.get_structure_indices(
+                    structure=self._structure
+                ),
+                dtype="intc",
             )
         else:
             numbers = np.ones_like(
-                structuretoolkit.common.helper.get_structure_indices(structure=self._structure),
-                dtype="intc"
+                structuretoolkit.common.helper.get_structure_indices(
+                    structure=self._structure
+                ),
+                dtype="intc",
             )
         if use_magmoms:
             return (

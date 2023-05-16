@@ -18,12 +18,14 @@ from structuretoolkit.analyse.spatial import (
     get_voronoi_vertices,
     get_voronoi_neighbors,
     get_delaunay_neighbors,
-    get_cluster_positions
+    get_cluster_positions,
 )
 from structuretoolkit.analyse.strain import get_strain
 
 
-def get_symmetry(structure, use_magmoms=False, use_elements=True, symprec=1e-5, angle_tolerance=-1.0):
+def get_symmetry(
+    structure, use_magmoms=False, use_elements=True, symprec=1e-5, angle_tolerance=-1.0
+):
     """
     Args:
         structure (ase.atoms.Atoms): Atomistic Structure object
@@ -36,10 +38,11 @@ def get_symmetry(structure, use_magmoms=False, use_elements=True, symprec=1e-5, 
         symmetry (:class:`structuretoolkit.analyse.symmetry.Symmetry`): Symmetry class
     """
     from structuretoolkit.analyse.symmetry import get_symmetry
+
     return get_symmetry(
         structure=structure,
         use_magmoms=use_magmoms,
         use_elements=use_elements,
         symprec=symprec,
-        angle_tolerance=angle_tolerance
+        angle_tolerance=angle_tolerance,
     )

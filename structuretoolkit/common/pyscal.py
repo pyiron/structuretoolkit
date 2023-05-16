@@ -10,6 +10,7 @@ def ase_to_pyscal(structure):
         Pyscal system: See the pyscal documentation.
     """
     import pyscal.core as pc
+
     sys = pc.System()
     sys.read_inputfile(
         filename=structure,

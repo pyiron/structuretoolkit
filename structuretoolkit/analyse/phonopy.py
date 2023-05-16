@@ -29,6 +29,7 @@ def get_equivalent_atoms(structure, symprec=1e-5, angle_tolerance=-1.0):
     """
     import spglib as spg
     from phonopy.structure.atoms import PhonopyAtoms
+
     positions = structure.get_scaled_positions()
     cell = structure.cell
     types = structure.get_chemical_symbols()

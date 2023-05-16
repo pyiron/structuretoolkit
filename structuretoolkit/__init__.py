@@ -52,9 +52,7 @@ from structuretoolkit.build import (
 )
 
 # Visualize
-from structuretoolkit.visualize import (
-    plot3d
-)
+from structuretoolkit.visualize import plot3d
 
 # Common
 from structuretoolkit.common import (
@@ -68,5 +66,5 @@ from structuretoolkit.common import (
     select_index,
     center_coordinates_in_unit_cell,
     apply_strain,
-    SymmetryError
+    SymmetryError,
 )

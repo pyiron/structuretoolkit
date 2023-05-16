@@ -53,6 +53,7 @@ def get_steinhardt_parameters(
 
     if n_clusters is not None:
         from sklearn import cluster
+
         cl = cluster.KMeans(n_clusters=n_clusters)
 
         ind = cl.fit(list(zip(*sysq))).labels_
@@ -76,7 +77,9 @@ def get_centro_symmetry_descriptors(structure, num_neighbors=12):
     return np.array(sys.calculate_centrosymmetry(nmax=num_neighbors))
 
 
-def get_diamond_structure_descriptors(structure, mode="total", ovito_compatibility=False):
+def get_diamond_structure_descriptors(
+    structure, mode="total", ovito_compatibility=False
+):
     """
     Analyse diamond structure
 

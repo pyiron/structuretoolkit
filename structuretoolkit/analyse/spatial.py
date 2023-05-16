@@ -261,6 +261,7 @@ class Interstitials:
 
     def _cluster_points(self, eps=0.1):
         from sklearn.cluster import DBSCAN
+
         if eps == 0:
             return
         extended_positions, indices = get_extended_positions(
@@ -429,6 +430,7 @@ def get_layers(
         )
     if cluster_method is None:
         from sklearn.cluster import AgglomerativeClustering
+
         cluster_method = AgglomerativeClustering(
             linkage="complete",
             n_clusters=None,
@@ -495,6 +497,7 @@ def get_voronoi_vertices(
     xx = voro.vertices
     if distance_threshold > 0:
         from sklearn.cluster import AgglomerativeClustering
+
         cluster = AgglomerativeClustering(
             linkage="single", distance_threshold=distance_threshold, n_clusters=None
         )
@@ -612,6 +615,7 @@ def get_cluster_positions(
         label (numpy.ndarray): Labels of the positions (returned when `return_labels = True`)
     """
     from sklearn.cluster import DBSCAN
+
     positions = structure.positions if positions is None else np.array(positions)
     if buffer_width is None:
         buffer_width = eps

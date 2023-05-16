@@ -652,6 +652,7 @@ def _scalars_to_hex_colors(scalar_field, start=None, end=None, cmap=None):
         (list): The corresponding hex codes for each scalar value passed in.
     """
     from matplotlib.colors import rgb2hex
+
     if start is None:
         start = np.amin(scalar_field)
     if end is None:

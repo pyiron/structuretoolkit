@@ -10,7 +10,10 @@ from scipy.special import sph_harm
 from scipy.spatial import cKDTree
 import warnings
 import itertools
-from structuretoolkit.common.helper import get_extended_positions, get_average_of_unique_labels
+from structuretoolkit.common.helper import (
+    get_extended_positions,
+    get_average_of_unique_labels,
+)
 
 __author__ = "Joerg Neugebauer, Sam Waseda"
 __copyright__ = (
@@ -905,6 +908,7 @@ class Neighbors(Tree):
 
         """
         from sklearn.cluster import AgglomerativeClustering
+
         if distance_threshold is None and n_clusters is None:
             distance_threshold = np.min(self.filled.distances)
         dr = self.flattened.vecs
@@ -953,6 +957,7 @@ class Neighbors(Tree):
                 neigh.distances is used.
         """
         from sklearn.cluster import AgglomerativeClustering
+
         if distance_threshold is None:
             distance_threshold = 0.1 * np.min(self.flattened.distances)
         dr = self.flattened.distances
