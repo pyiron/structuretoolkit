@@ -8,6 +8,7 @@ import spglib
 import ast
 
 import structuretoolkit.common.helper
+from structuretoolkit.common.error import SymmetryError
 
 __author__ = "Joerg Neugebauer, Sam Waseda"
 __copyright__ = (
@@ -19,10 +20,6 @@ __maintainer__ = "Sam Waseda"
 __email__ = "waseda@mpie.de"
 __status__ = "production"
 __date__ = "Sep 1, 2017"
-
-
-class SymmetryError(Exception):
-    pass
 
 
 class Symmetry(dict):

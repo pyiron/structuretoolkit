@@ -22,12 +22,12 @@ class TestAtoms(unittest.TestCase):
         self.assertAlmostEqual(np.linalg.norm(layers-np.rint(2*struct.positions/a_0).astype(int)), 0)
         struct.append(Atom(symbol='C', position=np.random.random(3)))
         self.assertEqual(
-            np.linalg.norm(layers-stk.analyse.get_layers(structure=struct, id_list=stk.analyse.select_index(structure=struct, element='Al'))), 0
+            np.linalg.norm(layers-stk.analyse.get_layers(structure=struct, id_list=stk.common.select_index(structure=struct, element='Al'))), 0
         )
         self.assertEqual(
             np.linalg.norm(layers-stk.analyse.get_layers(
                 structure=struct,
-                id_list=stk.analyse.select_index(structure=struct, element='Al'),
+                id_list=stk.common.select_index(structure=struct, element='Al'),
                 wrap_atoms=False
             )), 0
         )
@@ -62,7 +62,7 @@ class TestAtoms(unittest.TestCase):
     def test_get_layers_with_strain(self):
         structure = bulk(name='Fe', a=2.8, crystalstructure='bcc', cubic=True).repeat(2)
         layers = stk.analyse.get_layers(structure=structure).tolist()
-        stk.analyse.apply_strain(structure=structure, epsilon=0.1*(np.random.random((3, 3))-0.5))
+        stk.common.apply_strain(structure=structure, epsilon=0.1*(np.random.random((3, 3))-0.5))
         self.assertEqual(
             layers, stk.analyse.get_layers(structure=structure, planes=np.linalg.inv(structure.cell).T).tolist()
         )
@@ -71,7 +71,7 @@ class TestAtoms(unittest.TestCase):
         structure = bulk(name='Fe', a=2.8, crystalstructure='bcc', cubic=True).repeat(2)
         layers = stk.analyse.get_layers(structure=structure)
         structure.cell[1, 0] += 0.01
-        structure = stk.analyse.center_coordinates_in_unit_cell(structure=structure)
+        structure = stk.common.center_coordinates_in_unit_cell(structure=structure)
         self.assertEqual(len(np.unique(layers[stk.analyse.get_layers(structure=structure)[:, 0] == 0, 0])), 1)
 
     def test_pyscal_cna_adaptive(self):

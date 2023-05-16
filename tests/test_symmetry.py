@@ -155,7 +155,7 @@ class TestAtoms(unittest.TestCase):
         structure = bulk('Al')
         structure += structure[-1]
         with self.assertRaises(stk.common.SymmetryError):
-            stk.get_symmetry(structure=structure)
+            stk.analyse.get_symmetry(structure=structure)
 
 
 if __name__ == "__main__":

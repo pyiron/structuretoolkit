@@ -22,7 +22,7 @@ class Testpyscal(unittest.TestCase):
         Test a simple ase to pyscal conversion
         """
         self.assertEqual(len(self.structure), 256)
-        self.assertEqual(len(stk.common.ase_to_pyscal(self.structure)), 256)
+        self.assertEqual(len(stk.common.ase_to_pyscal(self.structure).atoms), 256)
 
     def test_steinhardt_parameters_returns(self):
         self.assertEqual(2, len(stk.analyse.get_steinhardt_parameters(self.structure)),
