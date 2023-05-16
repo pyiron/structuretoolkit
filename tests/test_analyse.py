@@ -106,7 +106,7 @@ class TestAtoms(unittest.TestCase):
             ).min(axis=0).sum(), 0
         )
         int_tetra = stk.analyse.get_interstitials(structure=bcc, num_neighbors=4)
-        x_tetra_ref = stk.common.get_wrapped_coordinates(structure=bcc, positions=stk.get_voronoi_vertices(structure=bcc))
+        x_tetra_ref = stk.common.get_wrapped_coordinates(structure=bcc, positions=stk.analyse.get_voronoi_vertices(structure=bcc))
         self.assertEqual(len(int_tetra.positions), len(x_tetra_ref))
         self.assertAlmostEqual(
             np.linalg.norm(
