@@ -1,6 +1,6 @@
 import numpy as np
-from scipy.sparse import coo_matrix
 from ase.data import atomic_numbers
+from scipy.sparse import coo_matrix
 
 
 def get_atomic_numbers(structure):

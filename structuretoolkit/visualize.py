@@ -2,9 +2,11 @@
 # Copyright (c) Max-Planck-Institut für Eisenforschung GmbH - Computational Materials Design (CM) Department
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
-import numpy as np
 import warnings
+
+import numpy as np
 from scipy.interpolate import interp1d
+
 from structuretoolkit.common.helper import get_atomic_numbers
 
 __author__ = "Joerg Neugebauer, Sudarsan Surendralal"

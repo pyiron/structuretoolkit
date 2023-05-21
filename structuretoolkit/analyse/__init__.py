@@ -1,24 +1,23 @@
-from structuretoolkit.analyse.distance import get_distances_array, find_mic
-from structuretoolkit.analyse.neighbors import get_neighbors, get_neighborhood
+from structuretoolkit.analyse.distance import find_mic, get_distances_array
+from structuretoolkit.analyse.neighbors import get_neighborhood, get_neighbors
 from structuretoolkit.analyse.phonopy import get_equivalent_atoms
 from structuretoolkit.analyse.pyscal import (
-    get_steinhardt_parameters,
+    find_solids,
+    get_adaptive_cna_descriptors,
     get_centro_symmetry_descriptors,
     get_diamond_structure_descriptors,
-    get_adaptive_cna_descriptors,
+    get_steinhardt_parameters,
     get_voronoi_volumes,
-    find_solids,
-    ase_to_pyscal,
 )
 from structuretoolkit.analyse.spatial import (
-    get_mean_positions,
     get_average_of_unique_labels,
+    get_cluster_positions,
+    get_delaunay_neighbors,
     get_interstitials,
     get_layers,
-    get_voronoi_vertices,
+    get_mean_positions,
     get_voronoi_neighbors,
-    get_delaunay_neighbors,
-    get_cluster_positions,
+    get_voronoi_vertices,
 )
 from structuretoolkit.analyse.strain import get_strain
 
