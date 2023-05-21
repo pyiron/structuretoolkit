@@ -2,10 +2,11 @@
 # Copyright (c) Max-Planck-Institut für Eisenforschung GmbH - Computational Materials Design (CM) Department
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
-import numpy as np
-from scipy.spatial import cKDTree
-import spglib
 import ast
+
+import numpy as np
+import spglib
+from scipy.spatial import cKDTree
 
 import structuretoolkit.common.helper
 from structuretoolkit.common.error import SymmetryError

@@ -4,6 +4,7 @@
 
 import numpy as np
 from ase.atoms import Atoms
+
 from structuretoolkit.common.pyscal import ase_to_pyscal
 
 __author__ = "Sarath Menon, Jan Janssen"

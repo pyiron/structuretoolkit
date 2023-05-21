@@ -4,16 +4,15 @@
 
 import numpy as np
 from scipy.sparse import coo_matrix
-from scipy.spatial import Voronoi, Delaunay
-from scipy.spatial import ConvexHull
-from structuretoolkit.common.helper import (
-    get_extended_positions,
-    get_wrapped_coordinates,
-    get_vertical_length,
-    get_average_of_unique_labels,
-)
-from structuretoolkit.analyse.neighbors import get_neighborhood
+from scipy.spatial import ConvexHull, Delaunay, Voronoi
 
+from structuretoolkit.analyse.neighbors import get_neighborhood
+from structuretoolkit.common.helper import (
+    get_average_of_unique_labels,
+    get_extended_positions,
+    get_vertical_length,
+    get_wrapped_coordinates,
+)
 
 __author__ = "Joerg Neugebauer, Sam Waseda"
 __copyright__ = (

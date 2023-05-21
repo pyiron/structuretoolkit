@@ -2,17 +2,18 @@
 # Copyright (c) Max-Planck-Institut für Eisenforschung GmbH - Computational Materials Design (CM) Department
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
+import itertools
+import warnings
+
 import numpy as np
 from scipy.sparse import coo_matrix
-from scipy.special import gamma
-from scipy.spatial.transform import Rotation
-from scipy.special import sph_harm
 from scipy.spatial import cKDTree
-import warnings
-import itertools
+from scipy.spatial.transform import Rotation
+from scipy.special import gamma, sph_harm
+
 from structuretoolkit.common.helper import (
-    get_extended_positions,
     get_average_of_unique_labels,
+    get_extended_positions,
 )
 
 __author__ = "Joerg Neugebauer, Sam Waseda"
