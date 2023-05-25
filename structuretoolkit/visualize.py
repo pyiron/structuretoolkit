@@ -7,8 +7,6 @@ import warnings
 import numpy as np
 from scipy.interpolate import interp1d
 
-from structuretoolkit.common.helper import get_atomic_numbers
-
 __author__ = "Joerg Neugebauer, Sudarsan Surendralal"
 __copyright__ = (
     "Copyright 2021, Max-Planck-Institut für Eisenforschung GmbH - "
@@ -184,7 +182,7 @@ def _plot3d_plotly(
     if select_atoms is None:
         select_atoms = np.arange(len(structure))
     elements = structure.get_chemical_symbols()
-    atomic_numbers = get_atomic_numbers(structure=structure)
+    atomic_numbers = structure.get_atomic_numbers()
     if scalar_field is None:
         scalar_field = elements
     fig = px.scatter_3d(
@@ -302,7 +300,7 @@ def _plot3d(
             vector_field = structure.get_initial_magnetic_moments()
 
     elements = structure.get_chemical_symbols()
-    atomic_numbers = get_atomic_numbers(structure=structure)
+    atomic_numbers = structure.get_atomic_numbers()
     positions = structure.positions
 
     # If `select_atoms` was given, visualize only a subset of the `parent_basis`
