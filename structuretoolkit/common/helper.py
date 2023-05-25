@@ -4,7 +4,7 @@ from scipy.sparse import coo_matrix
 
 
 def get_atomic_numbers(structure):
-    return [atomic_numbers[el] for el in structure.get_chemical_symbols(parent=True)]
+    return structure.get_atomic_numbers()
 
 
 def get_extended_positions(
