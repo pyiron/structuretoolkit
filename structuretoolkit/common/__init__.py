@@ -2,7 +2,6 @@ from structuretoolkit.common.error import SymmetryError
 from structuretoolkit.common.helper import (
     apply_strain,
     center_coordinates_in_unit_cell,
-    get_atomic_numbers,
     get_extended_positions,
     get_vertical_length,
     get_wrapped_coordinates,

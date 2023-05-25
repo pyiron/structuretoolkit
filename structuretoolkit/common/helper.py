@@ -3,10 +3,6 @@ from ase.data import atomic_numbers
 from scipy.sparse import coo_matrix
 
 
-def get_atomic_numbers(structure):
-    return [atomic_numbers[el] for el in structure.get_chemical_symbols()]
-
-
 def get_extended_positions(
     structure, width, return_indices=False, norm_order=2, positions=None
 ):
