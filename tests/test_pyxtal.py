@@ -1,4 +1,4 @@
-from unittest import TestCase
+from unittest import TestCase, skipIf
 from ase import Atoms
 from structuretoolkit.build.pyxtal import pyxtal
 
@@ -10,7 +10,7 @@ except ImportError:
     skip_pyxtal_test = True
 
 
-@unittest.skipIf(skip_pyxtal_test, "pyxtal is not installed, so the pyxtal tests are skipped.")
+@skipIf(skip_pyxtal_test, "pyxtal is not installed, so the pyxtal tests are skipped.")
 class TestPyxtal(TestCase):
 
     def test_args_raised(self):
