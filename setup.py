@@ -36,7 +36,7 @@ setup(
         'scipy==1.10.1',  # ase already requires scipy
     ],
     extras_require={
-        "grainboundary": ['aimsgb==0.1.3', 'pymatgen==2023.5.31'],
+        "grainboundary": ['aimsgb==1.0.1', 'pymatgen==2023.5.31'],
         "pyscal": ['pyscal2==2.10.18'],
         "nglview": ['nglview==3.0.5'],
         "plotly": ['plotly==5.14.1'],
