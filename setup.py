@@ -43,7 +43,7 @@ setup(
         "clusters": ['scikit-learn==1.2.2'],
         "symmetry": ['spglib==2.0.2'],
         "surface": ['spglib==2.0.2', 'pymatgen==2023.5.31'],
-        "phonopy": ['phonopy==2.19.1', 'spglib==2.0.2'],
+        "phonopy": ['phonopy==2.20.0', 'spglib==2.0.2'],
     },
     cmdclass=versioneer.get_cmdclass(),
 )
