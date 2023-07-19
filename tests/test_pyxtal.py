@@ -5,7 +5,7 @@ except ImportError:
     skip_pyxtal_test = True
 
 
-from unittest import TestCase
+from unittest import TestCase, skipIf
 from ase import Atoms
 from structuretoolkit.build.pyxtal import pyxtal
 
