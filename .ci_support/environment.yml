@@ -15,3 +15,4 @@ dependencies:
 - scipy =1.10.1
 - spglib =2.0.2
 - sqsgenerator =0.2
+- pyxtal =0.5.8
