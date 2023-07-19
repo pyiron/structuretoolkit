@@ -39,7 +39,7 @@ setup(
         "grainboundary": ['aimsgb==0.1.3', 'pymatgen==2023.5.31'],
         "pyscal": ['pyscal2==2.10.18'],
         "nglview": ['nglview==3.0.5'],
-        "plotly": ['plotly==5.14.1'],
+        "plotly": ['plotly==5.15.0'],
         "clusters": ['scikit-learn==1.2.2'],
         "symmetry": ['spglib==2.0.2'],
         "surface": ['spglib==2.0.2', 'pymatgen==2023.5.31'],
