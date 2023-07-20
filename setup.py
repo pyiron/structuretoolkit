@@ -44,6 +44,7 @@ setup(
         "symmetry": ['spglib==2.0.2'],
         "surface": ['spglib==2.0.2', 'pymatgen==2023.7.17'],
         "phonopy": ['phonopy==2.20.0', 'spglib==2.0.2'],
+        "pyxtal": ['pyxtal==0.5.8']
     },
     cmdclass=versioneer.get_cmdclass(),
 )
