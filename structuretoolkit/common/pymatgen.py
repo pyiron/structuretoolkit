@@ -10,3 +10,9 @@ def pymatgen_to_ase(structure):
 
     adapter = AseAtomsAdaptor()
     return adapter.get_atoms(structure=structure)
+
+
+def pymatgen_read_from_file(*args, **kwargs):
+    from pymatgen.core import Structure
+
+    return pymatgen_to_ase(structure=Structure.from_file(*args, **kwargs))
