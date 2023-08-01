@@ -6,13 +6,14 @@ import numpy as np
 from scipy.sparse import coo_matrix
 from scipy.spatial import ConvexHull, Delaunay, Voronoi
 
-from structuretoolkit.analyse.neighbors import get_neighborhood
+from structuretoolkit.analyse.neighbors import get_neighborhood, get_neighbors
 from structuretoolkit.common.helper import (
     get_average_of_unique_labels,
     get_extended_positions,
     get_vertical_length,
     get_wrapped_coordinates,
 )
+from sklearn.cluster import DBSCAN
 
 __author__ = "Joerg Neugebauer, Sam Waseda"
 __copyright__ = (
@@ -139,6 +140,7 @@ class Interstitials:
         l_values=np.arange(2, 13),
         q_eps=0.3,
         var_ratio=5,
+        **args
     ):
         """
 
@@ -165,19 +167,33 @@ class Interstitials:
                 not be done.
         """
         if use_voronoi:
-            self.initial_positions = structure.analyse.get_voronoi_vertices()
+            self.initial_positions = get_voronoi_vertices(structure)
         else:
             self.initial_positions = create_gridpoints(
                 structure=structure, n_gridpoints_per_angstrom=n_gridpoints_per_angstrom
             )
-        self._neigh = structure.get_neighbors(num_neighbors=num_neighbors)
+        self._neigh = get_neighbors(structure=structure, num_neighbors=num_neighbors)
         self.workflow = [
-            {"f": remove_too_close, "args": {"structure": structure, "min_distance": min_distance}},
-            {"f": set_to_high_symmetry_points, "args": {"structure": structure, "neigh": self.neigh}},
-            {"f": structure.analyse.cluster_positions, "args": {"eps": x_eps}},
+            {
+                "f": remove_too_close,
+                "args": {"structure": structure, "min_distance": min_distance}
+            },
+            {
+                "f": set_to_high_symmetry_points,
+                "args": {"structure": structure, "neigh": self.neigh}
+            },
+            {
+                "f": lambda **args: get_cluster_positions(structure, **args),
+                "args": {"eps": x_eps}
+            },
             {
                 "f": cluster_by_steinhardt,
-                "args": {"neigh": self.neigh, "l_values": l_values, "q_eps": q_eps, "var_ratio": var_ratio}
+                "args": {
+                    "neigh": self.neigh,
+                    "l_values": l_values,
+                    "q_eps": q_eps,
+                    "var_ratio": var_ratio
+                }
             },
         ]
         self._positions = None
