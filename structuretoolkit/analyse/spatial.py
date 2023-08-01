@@ -13,7 +13,6 @@ from structuretoolkit.common.helper import (
     get_vertical_length,
     get_wrapped_coordinates,
 )
-from sklearn.cluster import DBSCAN
 
 __author__ = "Joerg Neugebauer, Sam Waseda"
 __copyright__ = (
@@ -87,6 +86,8 @@ def set_to_high_symmetry_points(positions, structure, neigh, decimals=4):
 
 
 def cluster_by_steinhardt(positions, neigh, l_values, q_eps, var_ratio, min_samples):
+    from sklearn.cluster import DBSCAN
+
     if min_samples is None:
         min_samples = min(len(neigh.distances), 5)
     neigh = neigh.get_neighborhood(positions)
@@ -600,6 +601,7 @@ def get_cluster_positions(
         positions (numpy.ndarray): Mean positions
         label (numpy.ndarray): Labels of the positions (returned when `return_labels = True`)
     """
+    from sklearn.cluster import DBSCAN
 
     positions = structure.positions if positions is None else np.array(positions)
     if buffer_width is None:
