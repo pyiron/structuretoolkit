@@ -107,16 +107,16 @@ class Interstitials:
 
     This class internally does the following steps:
 
-        1. Initialize grid points (or Voronoi vertices) which are considered as
+        0. Initialize grid points (or Voronoi vertices) which are considered as
             interstitial site candidates.
-        2. Eliminate points within a distance from the nearest neighboring atoms as
+        1. Eliminate points within a distance from the nearest neighboring atoms as
             given by `min_distance`
-        3. Initialize neighbor environment using `get_neighbors`
-        4. Shift interstitial candidates to the nearest symmetric points with respect to the
+        2. Shift interstitial candidates to the nearest symmetric points with respect to the
             neighboring atom sites/vertices.
-        5. Kick out points with large neighbor distance variances; this eliminates "irregular"
-            shaped interstitials
-        6. Cluster interstitial candidates to avoid point overlapping.
+        3. Cluster interstitial candidates to avoid point overlapping.
+        4. Cluster interstitial candidates by their Steinhardt parameters (cf. `l_values` for
+            the values of the spherical harmonics) and the variance of the distances and
+            take the group with the smallest average distance variance
 
     The interstitial sites can be obtained via `positions`
 
@@ -129,6 +129,19 @@ class Interstitials:
         - `get_steinhardt_parameters()`
         - `get_volumes()`
         - `get_areas()`
+
+    Troubleshooting:
+
+    Identifying interstitial sites is not a very easy task. The algorithm employed here will
+    probably do a good job, but if it fails, it might be good to look at the following points
+
+    - The intermediate results can be accessed via `run_workflow` by specifying the step number.
+    - The most vulnerable point is the last step, clustering by Steinhardt parameters. Take a
+        look at the step before and after. If the interstitial sites are present in the step
+        before the clustering by Steinhardt parameters, you might want to change the values of
+        `q_eps` and `var_ratio`. It might make a difference to use `l_values` as well.
+    - It might fail to find sites if the box is very small. In that case it might make sense to
+        set `min_samples` very low (you can take 1)
     """
 
     def __init__(
@@ -161,15 +174,17 @@ class Interstitials:
                 `min_distance` to 0 if no point should be removed.
             use_voronoi (bool): Use Voronoi vertices for the initial interstitial candidate
                 positions instead of grid points.
-            variance_buffer (bool): Maximum permitted variance value (in distance unit) of the
-                neighbor distance values with respect to the minimum value found for each point.
-                It should be close to 0 for perfect crystals and slightly higher values for
-                structures containing defects. Set `variance_buffer` to `numpy.inf` if no selection
-                by variance value should take place.
-            eps (float): Distance below which two interstitial candidate sites to be considered as
-                one site after the symmetrization of the points. Set `eps` to 0 if clustering should
-                not be done.
-        """
+            x_eps (bool): eps value for the clustering of interstitial candidate positions
+            l_values (list): list of values for the Steinhardt parameter values for the
+                classification of the interstitial candidate points
+            q_eps (float): eps value for the clustering of interstitial candidate points based
+                on Steinhardt parameters and distance variances. This might play a crucial role
+                in identifying the correct interstitial sites
+            var_ratio (float): factor to be multiplied to the variance values in order to give
+                a larger weight to the variances.
+            min_samples (int/None): `min_sample` in the point clustering.
+            neigh_argss (dict): arguments to be added to `get_neighbors`
+       """
         if use_voronoi:
             self.initial_positions = get_voronoi_vertices(structure)
         else:
@@ -295,9 +310,13 @@ def get_interstitials(
     n_gridpoints_per_angstrom=5,
     min_distance=1,
     use_voronoi=False,
-    variance_buffer=0.01,
-    n_iterations=2,
-    eps=0.1,
+    x_eps=0.1,
+    l_values=np.arange(2, 13),
+    q_eps=0.3,
+    var_ratio=5,
+    min_samples=None,
+    neigh_args={},
+    **args
 ):
     return Interstitials(
         structure=structure,
@@ -305,9 +324,13 @@ def get_interstitials(
         n_gridpoints_per_angstrom=n_gridpoints_per_angstrom,
         min_distance=min_distance,
         use_voronoi=use_voronoi,
-        variance_buffer=variance_buffer,
-        n_iterations=n_iterations,
-        eps=eps,
+        x_eps=x_eps,
+        l_values=l_values,
+        q_eps=q_eps,
+        var_ratio=var_ratio,
+        min_samples=min_samples,
+        neigh_args=neigh_args,
+        **args
     )
 
 
