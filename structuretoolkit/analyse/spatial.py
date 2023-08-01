@@ -96,7 +96,7 @@ def cluster_by_steinhardt(positions, neigh, l_values, q_eps, var_ratio, min_samp
     descriptors = np.concatenate((Q_values, [var * var_ratio]), axis=0)
     labels = db.fit_predict(descriptors.T)
     var_mean = np.array(
-        [np.mean(var[labels==ll]) for ll in np.unique(labels) if ll >= 0]
+        [np.mean(var[labels == ll]) for ll in np.unique(labels) if ll >= 0]
     )
     return positions[labels == np.argmin(var_mean)]
 
@@ -205,7 +205,7 @@ class Interstitials:
             },
             {
                 "f": lambda **args: get_cluster_positions(structure, **args),
-                "args": {"eps": x_eps}
+                "args": {"eps": x_eps},
             },
             {
                 "f": cluster_by_steinhardt,
