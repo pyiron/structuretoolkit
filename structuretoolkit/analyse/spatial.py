@@ -88,10 +88,12 @@ def set_to_high_symmetry_points(positions, structure, neigh, decimals=4):
     raise ValueError("High symmetry points could not be detected")
 
 
-def cluster_by_steinhardt(positions, neigh, l_values, q_eps, var_ratio):
+def cluster_by_steinhardt(positions, neigh, l_values, q_eps, var_ratio, min_samples):
+    if min_samples is None:
+        min_samples = min(len(neigh.distances), 5)
     neigh = neigh.get_neighborhood(positions)
     Q_values = np.array([neigh.get_steinhardt_parameter(ll) for ll in l_values])
-    db = DBSCAN(q_eps)
+    db = DBSCAN(q_eps, min_samples=min_samples)
     var = np.std(neigh.distances, axis=-1)
     descriptors = np.concatenate((Q_values, [var * var_ratio]), axis=0)
     labels = db.fit_predict(descriptors.T)
@@ -136,10 +138,12 @@ class Interstitials:
         n_gridpoints_per_angstrom=5,
         min_distance=1,
         use_voronoi=False,
-        x_eps=0.15,
+        x_eps=0.1,
         l_values=np.arange(2, 13),
         q_eps=0.3,
         var_ratio=5,
+        min_samples=None,
+        neigh_args={},
         **args
     ):
         """
@@ -172,7 +176,9 @@ class Interstitials:
             self.initial_positions = create_gridpoints(
                 structure=structure, n_gridpoints_per_angstrom=n_gridpoints_per_angstrom
             )
-        self._neigh = get_neighbors(structure=structure, num_neighbors=num_neighbors)
+        self._neigh = get_neighbors(
+            structure=structure, num_neighbors=num_neighbors, **neigh_args
+        )
         self.workflow = [
             {
                 "f": remove_too_close,
@@ -192,14 +198,17 @@ class Interstitials:
                     "neigh": self.neigh,
                     "l_values": l_values,
                     "q_eps": q_eps,
-                    "var_ratio": var_ratio
+                    "var_ratio": var_ratio,
+                    "min_samples": min_samples
                 }
             },
         ]
         self._positions = None
         self.structure = structure
 
-    def run_workflow(self, positions, steps=-1):
+    def run_workflow(self, positions=None, steps=-1):
+        if positions is None:
+            positions = self.initial_positions.copy()
         for ii, ww in enumerate(self.workflow):
             positions = ww["f"](positions=positions, **ww["args"])
             if ii == steps:
@@ -219,7 +228,7 @@ class Interstitials:
     @property
     def positions(self):
         if self._positions is None:
-            self._positions = self.run_workflow(self.initial_positions)
+            self._positions = self.run_workflow()
             self._neigh = self.neigh.get_neighborhood(self._positions)
         return self._positions
 
@@ -568,7 +577,6 @@ def get_cluster_positions(
         positions (numpy.ndarray): Mean positions
         label (numpy.ndarray): Labels of the positions (returned when `return_labels = True`)
     """
-    from sklearn.cluster import DBSCAN
 
     positions = structure.positions if positions is None else np.array(positions)
     if buffer_width is None:
