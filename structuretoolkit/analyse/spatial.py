@@ -67,9 +67,7 @@ def create_gridpoints(structure, n_gridpoints_per_angstrom=5):
 
 
 def remove_too_close(positions, structure, min_distance=1):
-    neigh = get_neighborhood(
-        structure=structure, positions=positions, num_neighbors=1
-    )
+    neigh = get_neighborhood(structure=structure, positions=positions, num_neighbors=1)
     return positions[neigh.distances.flatten() > min_distance]
 
 
@@ -80,10 +78,10 @@ def set_to_high_symmetry_points(positions, structure, neigh, decimals=4):
         if np.allclose(dx, 0):
             return positions
         positions += dx
-        positions = get_wrapped_coordinates(
-            structure=structure, positions=positions
-        )
-        unique_indices = np.unique(np.round(positions, decimals=decimals), axis=0, return_index=True)[1]
+        positions = get_wrapped_coordinates(structure=structure, positions=positions)
+        unique_indices = np.unique(
+            np.round(positions, decimals=decimals), axis=0, return_index=True
+        )[1]
         positions = positions[unique_indices]
     raise ValueError("High symmetry points could not be detected")
 
@@ -97,8 +95,10 @@ def cluster_by_steinhardt(positions, neigh, l_values, q_eps, var_ratio, min_samp
     var = np.std(neigh.distances, axis=-1)
     descriptors = np.concatenate((Q_values, [var * var_ratio]), axis=0)
     labels = db.fit_predict(descriptors.T)
-    var_mean = np.array([np.mean(var[labels==ll]) for ll in np.unique(labels) if ll >= 0])
-    return positions[labels==np.argmin(var_mean)]
+    var_mean = np.array(
+        [np.mean(var[labels==ll]) for ll in np.unique(labels) if ll >= 0]
+    )
+    return positions[labels == np.argmin(var_mean)]
 
 
 class Interstitials:
@@ -183,8 +183,8 @@ class Interstitials:
             var_ratio (float): factor to be multiplied to the variance values in order to give
                 a larger weight to the variances.
             min_samples (int/None): `min_sample` in the point clustering.
-            neigh_argss (dict): arguments to be added to `get_neighbors`
-       """
+            neigh_args (dict): arguments to be added to `get_neighbors`
+        """
         if use_voronoi:
             self.initial_positions = get_voronoi_vertices(structure)
         else:
@@ -197,11 +197,11 @@ class Interstitials:
         self.workflow = [
             {
                 "f": remove_too_close,
-                "args": {"structure": structure, "min_distance": min_distance}
+                "args": {"structure": structure, "min_distance": min_distance},
             },
             {
                 "f": set_to_high_symmetry_points,
-                "args": {"structure": structure, "neigh": self.neigh}
+                "args": {"structure": structure, "neigh": self.neigh},
             },
             {
                 "f": lambda **args: get_cluster_positions(structure, **args),
@@ -214,8 +214,8 @@ class Interstitials:
                     "l_values": l_values,
                     "q_eps": q_eps,
                     "var_ratio": var_ratio,
-                    "min_samples": min_samples
-                }
+                    "min_samples": min_samples,
+                },
             },
         ]
         self._positions = None
