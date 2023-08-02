@@ -10,6 +10,7 @@ from ase.atoms import Atoms
 from scipy.spatial import Voronoi
 from ase.lattice.cubic import BodyCenteredCubic
 import structuretoolkit as stk
+from scipy.spatial import cKDTree
 
 
 try:
@@ -174,6 +175,20 @@ class TestAtoms(unittest.TestCase):
         self.assertAlmostEqual(
             int_octa.get_variances().sum(), 0,
             msg='Distance variance in FCC must be 0'
+        )
+
+    def test_interstitials_details(self):
+        fcc = bulk('Al', cubic=True)
+        inter = stk.analyse.get_interstitials(structure=fcc, num_neighbors=4)
+        x = inter.run_workflow(steps=0)
+        tree = cKDTree(fcc.positions)
+        self.assertGreater(
+            tree.query(x)[0].min(), 1, msg="remove_too_close did not remove closest points"
+        )
+        self.assertGreater(
+            len(x),
+            len(inter.run_workflow(steps=1)),
+            msg="set_to_high_symmetry_points did not reduce overlapping points"
         )
 
     def test_strain(self):
