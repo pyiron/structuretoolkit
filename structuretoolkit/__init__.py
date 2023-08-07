@@ -44,7 +44,6 @@ from structuretoolkit.common import (
     ase_to_pymatgen,
     ase_to_pyscal,
     center_coordinates_in_unit_cell,
-    get_atomic_numbers,
     get_extended_positions,
     get_vertical_length,
     get_wrapped_coordinates,

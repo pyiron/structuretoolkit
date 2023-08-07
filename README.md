@@ -48,6 +48,7 @@ stk.plot3d(structure)
 * `stk.build.high_index_surface()`
 * `stk.build.get_high_index_surface_info()`
 * `stk.build.sqs_structures()`
+* `stk.build.pyxtal()`
 * `stk.build.B2()`
 * `stk.build.C14()`
 * `stk.build.C15()`
@@ -60,4 +61,11 @@ stk.plot3d(structure)
 ### Common 
 * `stk.common.ase_to_pymatgen()`
 * `stk.common.pymatgen_to_ase()`
+* `stk.common.pymatgen_read_from_file()`
 * `stk.common.ase_to_pyscal()`
+* `stk.common.apply_strain()`
+* `stk.common.center_coordinates_in_unit_cell()`
+* `stk.common.get_extended_positions()`
+* `stk.common.get_vertical_length()`
+* `stk.common.get_wrapped_coordinates()`
+* `stk.common.select_index()`

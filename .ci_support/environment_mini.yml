@@ -1,0 +1,10 @@
+channels:
+- conda-forge
+dependencies:
+- ase =3.22.1
+- coveralls
+- coverage
+- codacy-coverage
+- matplotlib-base =3.7.2
+- numpy =1.25.1
+- scipy =1.11.1
