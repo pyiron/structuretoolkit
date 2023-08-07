@@ -207,6 +207,7 @@ def _plot3d_plotly(
     )
     fig.update_layout(scene_camera=angle)
     fig.update_traces(marker=dict(line=dict(width=0.1, color="DarkSlateGrey")))
+    fig.update_scenes(aspectmode='data')
     return fig
 
 
