@@ -10,6 +10,7 @@ import structuretoolkit as stk
 
 try:
     import pyscal
+
     skip_pyscal_test = False
 except ImportError:
     skip_pyscal_test = True
@@ -17,34 +18,55 @@ except ImportError:
 
 try:
     import spglib
+
     skip_spglib_test = False
 except ImportError:
     skip_spglib_test = True
 
-@unittest.skipIf(skip_spglib_test, "spglib is not installed, so the spglib tests are skipped.")
+
+@unittest.skipIf(
+    skip_spglib_test, "spglib is not installed, so the spglib tests are skipped."
+)
 class TestAtoms(unittest.TestCase):
     def test_get_arg_equivalent_sites(self):
         a_0 = 4.0
-        structure = bulk('Al', cubic=True, a=a_0).repeat(2)
-        sites = stk.common.get_wrapped_coordinates(structure=structure, positions=structure.positions + np.array([0, 0, 0.5 * a_0]))
+        structure = bulk("Al", cubic=True, a=a_0).repeat(2)
+        sites = stk.common.get_wrapped_coordinates(
+            structure=structure,
+            positions=structure.positions + np.array([0, 0, 0.5 * a_0]),
+        )
         v_position = structure.positions[0]
         del structure[0]
-        pairs = np.stack((
-            stk.analyse.get_symmetry(structure=structure).get_arg_equivalent_sites(sites),
-            np.unique(np.round(stk.analyse.get_distances_array(structure=structure, p1=v_position, p2=sites), decimals=2), return_inverse=True)[1]
-        ), axis=-1)
+        pairs = np.stack(
+            (
+                stk.analyse.get_symmetry(structure=structure).get_arg_equivalent_sites(
+                    sites
+                ),
+                np.unique(
+                    np.round(
+                        stk.analyse.get_distances_array(
+                            structure=structure, p1=v_position, p2=sites
+                        ),
+                        decimals=2,
+                    ),
+                    return_inverse=True,
+                )[1],
+            ),
+            axis=-1,
+        )
         unique_pairs = np.unique(pairs, axis=0)
         self.assertEqual(len(unique_pairs), len(np.unique(unique_pairs[:, 0])))
         with self.assertRaises(ValueError):
-            stk.analyse.get_symmetry(structure=structure).get_arg_equivalent_sites([0, 0, 0])
+            stk.analyse.get_symmetry(structure=structure).get_arg_equivalent_sites(
+                [0, 0, 0]
+            )
 
     def test_generate_equivalent_points(self):
         a_0 = 4
-        structure = bulk('Al', cubic=True, a=a_0)
+        structure = bulk("Al", cubic=True, a=a_0)
         sym = stk.analyse.get_symmetry(structure)
         self.assertEqual(
-            len(structure),
-            len(sym.generate_equivalent_points([0, 0, 0.5 * a_0]))
+            len(structure), len(sym.generate_equivalent_points([0, 0, 0.5 * a_0]))
         )
         x = np.array([[0, 0, 0.5 * a_0], 3 * [0.25 * a_0]])
         y = np.random.randn(2)
@@ -52,33 +74,54 @@ class TestAtoms(unittest.TestCase):
         y = np.tile(y, len(sym_x))
         sym_x = sym_x.reshape(-1, 3)
         xy = np.round(
-            [stk.analyse.get_neighborhood(structure, sym_x, num_neighbors=1).distances.flatten(), y],
-            decimals=8
+            [
+                stk.analyse.get_neighborhood(
+                    structure, sym_x, num_neighbors=1
+                ).distances.flatten(),
+                y,
+            ],
+            decimals=8,
         )
         self.assertEqual(
             np.unique(xy, axis=1).shape,
             (2, 2),
-            msg="order of generated points does not match the original order"
+            msg="order of generated points does not match the original order",
         )
 
     def test_get_symmetry(self):
         cell = 2.2 * np.identity(3)
-        Al = Atoms("AlAl", positions=[(0, 0, 0), (0.5, 0.5, 0.5)], cell=cell, pbc=True).repeat(2)
-        self.assertEqual(len(set(stk.analyse.get_symmetry(structure=Al)["equivalent_atoms"])), 1)
-        self.assertEqual(len(stk.analyse.get_symmetry(structure=Al)["translations"]), 96)
+        Al = Atoms(
+            "AlAl", positions=[(0, 0, 0), (0.5, 0.5, 0.5)], cell=cell, pbc=True
+        ).repeat(2)
         self.assertEqual(
-            len(stk.analyse.get_symmetry(structure=Al)["translations"]), len(stk.analyse.get_symmetry(structure=Al)["rotations"])
+            len(set(stk.analyse.get_symmetry(structure=Al)["equivalent_atoms"])), 1
+        )
+        self.assertEqual(
+            len(stk.analyse.get_symmetry(structure=Al)["translations"]), 96
+        )
+        self.assertEqual(
+            len(stk.analyse.get_symmetry(structure=Al)["translations"]),
+            len(stk.analyse.get_symmetry(structure=Al)["rotations"]),
         )
         cell = 2.2 * np.identity(3)
-        Al = Atoms("AlAl", scaled_positions=[(0, 0, 0), (0.5, 0.5, 0.5)], cell=cell, pbc=True)
+        Al = Atoms(
+            "AlAl", scaled_positions=[(0, 0, 0), (0.5, 0.5, 0.5)], cell=cell, pbc=True
+        )
         v = np.random.rand(6).reshape(-1, 3)
-        self.assertAlmostEqual(np.linalg.norm(stk.analyse.get_symmetry(structure=Al).symmetrize_vectors(v)), 0)
+        self.assertAlmostEqual(
+            np.linalg.norm(
+                stk.analyse.get_symmetry(structure=Al).symmetrize_vectors(v)
+            ),
+            0,
+        )
         vv = np.random.rand(12).reshape(2, 2, 3)
         for vvv in stk.analyse.get_symmetry(structure=Al).symmetrize_vectors(vv):
             self.assertAlmostEqual(np.linalg.norm(vvv), 0)
         Al.positions[0, 0] += 0.01
         w = stk.analyse.get_symmetry(structure=Al).symmetrize_vectors(v)
-        self.assertAlmostEqual(np.absolute(w[:, 0]).sum(), np.linalg.norm(w, axis=-1).sum())
+        self.assertAlmostEqual(
+            np.absolute(w[:, 0]).sum(), np.linalg.norm(w, axis=-1).sum()
+        )
 
     def test_get_symmetry_dataset(self):
         cell = 2.2 * np.identity(3)
@@ -89,7 +132,14 @@ class TestAtoms(unittest.TestCase):
     def test_get_ir_reciprocal_mesh(self):
         cell = 2.2 * np.identity(3)
         Al_sc = Atoms("AlAl", scaled_positions=[(0, 0, 0), (0.5, 0.5, 0.5)], cell=cell)
-        self.assertEqual(len(stk.analyse.get_symmetry(structure=Al_sc).get_ir_reciprocal_mesh([3, 3, 3])[0]), 27)
+        self.assertEqual(
+            len(
+                stk.analyse.get_symmetry(structure=Al_sc).get_ir_reciprocal_mesh(
+                    [3, 3, 3]
+                )[0]
+            ),
+            27,
+        )
 
     def test_get_primitive_cell(self):
         cell = 2.2 * np.identity(3)
@@ -97,22 +147,47 @@ class TestAtoms(unittest.TestCase):
         structure = basis.repeat([2, 2, 2])
         sym = stk.analyse.get_symmetry(structure=structure)
         self.assertEqual(len(basis), len(sym.get_primitive_cell(standardize=True)))
-        self.assertEqual(stk.analyse.get_symmetry(structure=sym.get_primitive_cell()).spacegroup["Number"], 221)
+        self.assertEqual(
+            stk.analyse.get_symmetry(structure=sym.get_primitive_cell()).spacegroup[
+                "Number"
+            ],
+            221,
+        )
 
     def test_get_equivalent_points(self):
-        basis = Atoms("FeFe", positions=[[0.01, 0, 0], [0.5, 0.5, 0.5]], cell=np.identity(3))
-        arr = stk.analyse.get_symmetry(structure=basis).generate_equivalent_points([0, 0, 0.5])
-        self.assertAlmostEqual(np.linalg.norm(arr - np.array([0.51, 0.5, 0]), axis=-1).min(), 0)
+        basis = Atoms(
+            "FeFe", positions=[[0.01, 0, 0], [0.5, 0.5, 0.5]], cell=np.identity(3)
+        )
+        arr = stk.analyse.get_symmetry(structure=basis).generate_equivalent_points(
+            [0, 0, 0.5]
+        )
+        self.assertAlmostEqual(
+            np.linalg.norm(arr - np.array([0.51, 0.5, 0]), axis=-1).min(), 0
+        )
 
     def test_get_space_group(self):
         cell = 2.2 * np.identity(3)
         Al_sc = Atoms("AlAl", scaled_positions=[(0, 0, 0), (0.5, 0.5, 0.5)], cell=cell)
-        self.assertEqual(stk.analyse.get_symmetry(structure=Al_sc).spacegroup["InternationalTableSymbol"], "Im-3m")
-        self.assertEqual(stk.analyse.get_symmetry(structure=Al_sc).spacegroup["Number"], 229)
+        self.assertEqual(
+            stk.analyse.get_symmetry(structure=Al_sc).spacegroup[
+                "InternationalTableSymbol"
+            ],
+            "Im-3m",
+        )
+        self.assertEqual(
+            stk.analyse.get_symmetry(structure=Al_sc).spacegroup["Number"], 229
+        )
         cell = 4.2 * (0.5 * np.ones((3, 3)) - 0.5 * np.eye(3))
         Al_fcc = Atoms("Al", scaled_positions=[(0, 0, 0)], cell=cell)
-        self.assertEqual(stk.analyse.get_symmetry(structure=Al_fcc).spacegroup["InternationalTableSymbol"], "Fm-3m")
-        self.assertEqual(stk.analyse.get_symmetry(structure=Al_fcc).spacegroup["Number"], 225)
+        self.assertEqual(
+            stk.analyse.get_symmetry(structure=Al_fcc).spacegroup[
+                "InternationalTableSymbol"
+            ],
+            "Fm-3m",
+        )
+        self.assertEqual(
+            stk.analyse.get_symmetry(structure=Al_fcc).spacegroup["Number"], 225
+        )
         a = 3.18
         c = 1.623 * a
         cell = np.eye(3)
@@ -122,7 +197,9 @@ class TestAtoms(unittest.TestCase):
         cell[1, 1] = np.sqrt(3) * a / 2.0
         pos = np.array([[0.0, 0.0, 0.0], [1.0 / 3.0, 2.0 / 3.0, 1.0 / 2.0]])
         Mg_hcp = Atoms("Mg2", scaled_positions=pos, cell=cell)
-        self.assertEqual(stk.analyse.get_symmetry(structure=Mg_hcp).spacegroup["Number"], 194)
+        self.assertEqual(
+            stk.analyse.get_symmetry(structure=Mg_hcp).spacegroup["Number"], 194
+        )
         cell = np.eye(3)
         cell[0, 0] = a
         cell[2, 2] = c
@@ -136,36 +213,48 @@ class TestAtoms(unittest.TestCase):
             ]
         )
         Mg_hcp = Atoms("Mg4", scaled_positions=pos, cell=cell)
-        self.assertEqual(stk.analyse.get_symmetry(structure=Mg_hcp).spacegroup["Number"], 194)
+        self.assertEqual(
+            stk.analyse.get_symmetry(structure=Mg_hcp).spacegroup["Number"], 194
+        )
 
     def test_permutations(self):
-        structure = bulk('Al', cubic=True).repeat(2)
+        structure = bulk("Al", cubic=True).repeat(2)
         x_vacancy = structure.positions[0]
         del structure[0]
         neigh = stk.analyse.get_neighborhood(structure=structure, positions=x_vacancy)
         vec = np.zeros_like(structure.positions)
         vec[neigh.indices[0]] = neigh.vecs[0]
         sym = stk.analyse.get_symmetry(structure=structure)
-        all_vectors = np.einsum('ijk,ink->inj', sym.rotations, vec[sym.permutations])
+        all_vectors = np.einsum("ijk,ink->inj", sym.rotations, vec[sym.permutations])
         for i, v in zip(neigh.indices, neigh.vecs):
             vec = np.zeros_like(structure.positions)
             vec[i] = v
-            self.assertAlmostEqual(np.linalg.norm(all_vectors - vec, axis=(-1, -2)).min(), 0,)
+            self.assertAlmostEqual(
+                np.linalg.norm(all_vectors - vec, axis=(-1, -2)).min(),
+                0,
+            )
 
     def test_arg_equivalent_vectors(self):
-        structure = bulk('Al', cubic=True).repeat(2)
-        self.assertEqual(np.unique(stk.analyse.get_symmetry(structure=structure).arg_equivalent_vectors).squeeze(), 0)
+        structure = bulk("Al", cubic=True).repeat(2)
+        self.assertEqual(
+            np.unique(
+                stk.analyse.get_symmetry(structure=structure).arg_equivalent_vectors
+            ).squeeze(),
+            0,
+        )
         x_v = structure.positions[0]
         del structure[0]
         arg_v = stk.analyse.get_symmetry(structure=structure).arg_equivalent_vectors
-        dx = stk.analyse.get_distances_array(structure=structure, p1=structure.positions, p2=x_v, vectors=True)
+        dx = stk.analyse.get_distances_array(
+            structure=structure, p1=structure.positions, p2=x_v, vectors=True
+        )
         dx_round = np.round(np.absolute(dx), decimals=3)
         self.assertEqual(len(np.unique(dx_round + arg_v)), len(np.unique(arg_v)))
 
     def test_error(self):
         """spglib errors should be wrapped in a SymmetryError."""
 
-        structure = bulk('Al')
+        structure = bulk("Al")
         structure += structure[-1]
         with self.assertRaises(stk.common.SymmetryError):
             stk.analyse.get_symmetry(structure=structure)
