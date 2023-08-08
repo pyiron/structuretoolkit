@@ -174,7 +174,7 @@ class Interstitials:
         var_ratio=5,
         min_samples=None,
         neigh_args={},
-        **args
+        **kwargs
     ):
         """
 
@@ -214,19 +214,19 @@ class Interstitials:
         self.workflow = [
             {
                 "f": remove_too_close,
-                "args": {"structure": structure, "min_distance": min_distance},
+                "kwargs": {"structure": structure, "min_distance": min_distance},
             },
             {
                 "f": set_to_high_symmetry_points,
-                "args": {"structure": structure, "neigh": self.neigh},
+                "kwargs": {"structure": structure, "neigh": self.neigh},
             },
             {
-                "f": lambda **args: get_cluster_positions(structure, **args),
-                "args": {"eps": x_eps},
+                "f": lambda **kwargs: get_cluster_positions(structure, **kwargs),
+                "kwargs": {"eps": x_eps},
             },
             {
                 "f": cluster_by_steinhardt,
-                "args": {
+                "kwargs": {
                     "neigh": self.neigh,
                     "l_values": l_values,
                     "q_eps": q_eps,
@@ -333,7 +333,7 @@ def get_interstitials(
     var_ratio=5,
     min_samples=None,
     neigh_args={},
-    **args
+    **kwargs
 ):
     return Interstitials(
         structure=structure,
@@ -347,7 +347,7 @@ def get_interstitials(
         var_ratio=var_ratio,
         min_samples=min_samples,
         neigh_args=neigh_args,
-        **args
+        **kwargs
     )
 
 
