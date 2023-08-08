@@ -242,7 +242,7 @@ class Interstitials:
         if positions is None:
             positions = self.initial_positions.copy()
         for ii, ww in enumerate(self.workflow):
-            positions = ww["f"](positions=positions, **ww["args"])
+            positions = ww["f"](positions=positions, **ww["kwargs"])
             if ii == steps:
                 return positions
         return positions
