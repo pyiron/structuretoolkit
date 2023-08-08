@@ -130,7 +130,7 @@ class Interstitials:
             given by `min_distance`
         2. Shift interstitial candidates to the nearest symmetric points with respect to the
             neighboring atom sites/vertices.
-        3. Cluster interstitial candidates to avoid point overlapping.
+        3. Cluster interstitial candidate positions to avoid point overlapping.
         4. Cluster interstitial candidates by their Steinhardt parameters (cf. `l_values` for
             the values of the spherical harmonics) and the variance of the distances and
             take the group with the smallest average distance variance
