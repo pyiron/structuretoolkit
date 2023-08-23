@@ -356,10 +356,11 @@ class Symmetry(dict):
         positions = (cell.T @ positions.T).T
         new_structure = self._structure.copy()
         new_structure.cell = cell
+        new_structure.indices[: len(indices)] = indices
         new_structure = new_structure[: len(indices)]
-        new_structure = structuretoolkit.common.helper.set_indices(
-            structure=new_structure, indices=indices
-        )
+        #new_structure = structuretoolkit.common.helper.set_indices(
+        #    structure=new_structure, indices=indices
+        #)
         new_structure.positions = positions
         return new_structure
 
