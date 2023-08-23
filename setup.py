@@ -33,13 +33,13 @@ setup(
         'ase==3.22.1',
         'matplotlib==3.7.2',  # ase already requires matplotlib
         'numpy==1.23.5',  # ase already requires numpy
-        'scipy==1.11.1',  # ase already requires scipy
+        'scipy==1.11.2',  # ase already requires scipy
     ],
     extras_require={
         "grainboundary": ['aimsgb==1.0.3', 'pymatgen==2023.8.10'],
         "pyscal": ['pyscal2==2.10.18'],
         "nglview": ['nglview==3.0.6'],
-        "plotly": ['plotly==5.16.0'],
+        "plotly": ['plotly==5.16.1'],
         "clusters": ['scikit-learn==1.3.0'],
         "symmetry": ['spglib==2.0.2'],
         "surface": ['spglib==2.0.2', 'pymatgen==2023.8.10'],
