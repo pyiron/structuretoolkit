@@ -5,10 +5,20 @@ import unittest
 import numpy as np
 from ase.build import bulk
 from ase.constraints import FixAtoms
-from pymatgen.core import Structure, Lattice
 from structuretoolkit.common import pymatgen_to_ase, ase_to_pymatgen
 
 
+try:
+    from pymatgen.core import Structure, Lattice
+
+    skip_pymatgen_test = False
+except ImportError:
+    skip_pymatgen_test = True
+
+
+@unittest.skipIf(
+    skip_pymatgen_test, "pymatgen is not installed, so the pymatgen tests are skipped."
+)
 class TestPymatgen(unittest.TestCase):
 
     def test_pymatgen_to_pyiron_conversion(self):
