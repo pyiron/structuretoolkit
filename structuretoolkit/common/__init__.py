@@ -13,3 +13,4 @@ from structuretoolkit.common.pymatgen import (
     pymatgen_to_ase,
 )
 from structuretoolkit.common.pyscal import ase_to_pyscal
+from structuretoolkit.common.phonopy import phonopy_to_atoms, atoms_to_phonopy
