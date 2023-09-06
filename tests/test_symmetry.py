@@ -154,6 +154,29 @@ class TestAtoms(unittest.TestCase):
             221,
         )
 
+    def test_get_primitive_cell_hex(self):
+        elements = ['Fe', 'Fe', 'Fe', 'Fe', 'O', 'O', 'O', 'O', 'O', 'O']
+        positions = [
+            [0.0, 0.0, 4.89],
+            [0.0, 0.0, 11.78],
+            [0.0, 0.0, 1.99],
+            [0.0, 0.0, 8.87],
+            [-0.98, 1.45, 8.0],
+            [-1.74, -0.1, 5.74],
+            [-0.77, -1.57, 8.0],
+            [0.98, -1.45, 5.74],
+            [1.74, 0.12, 8.0],
+            [0.77, 1.57, 5.74],
+        ]
+        cell = [[2.519, 1.454, 4.590], [-2.519, 1.454, 4.590], [0.0, -2.909, 4.590]]
+        structure = Atoms(symbols=elements, positions=positions, cell=cell)
+        structure_repeat = structure.repeat([2, 2, 2])
+        structure_prim_base = stk.analyse.get_primitive_cell(structure=structure_repeat)
+        self.assertEqual(
+            structure_prim_base.get_chemical_symbols(),
+            structure.get_chemical_symbols()
+        )
+
     def test_get_equivalent_points(self):
         basis = Atoms(
             "FeFe", positions=[[0.01, 0, 0], [0.5, 0.5, 0.5]], cell=np.identity(3)
