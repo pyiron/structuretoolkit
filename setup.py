@@ -37,7 +37,7 @@ setup(
     ],
     extras_require={
         "grainboundary": ['aimsgb==1.0.3', 'pymatgen==2023.8.10'],
-        "pyscal": ['pyscal2==2.10.18'],
+        "pyscal": ['pyscal2==2.10.20'],
         "nglview": ['nglview==3.0.6'],
         "plotly": ['plotly==5.16.1'],
         "clusters": ['scikit-learn==1.3.0'],
