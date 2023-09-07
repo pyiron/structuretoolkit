@@ -13,9 +13,9 @@ __copyright__ = (
 )
 __version__ = "1.0"
 __maintainer__ = "Liam Huber"
-__email__ = "huber@mpie.de"
+__email__ = "liamhuber@greyhavensolutions.com"
 __status__ = "production"
-__date__ = "Feb 26, 2021"
+__date__ = "Sept 7, 2023"
 
 
 def get_grainboundary_info(axis, max_sigma):
