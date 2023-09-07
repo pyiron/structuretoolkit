@@ -2,6 +2,8 @@
 # Copyright (c) Max-Planck-Institut für Eisenforschung GmbH - Computational Materials Design (CM) Department
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
+from warnings import warn
+
 from structuretoolkit.common.pymatgen import ase_to_pymatgen, pymatgen_to_ase
 
 __author__ = "Ujjal Saikia"
@@ -45,14 +47,17 @@ def grainboundary(
     sigma,
     plane,
     initial_struct,
-    to_primitive=False,
-    delete_layer="0b0t0b0t",
-    add_if_dist=0.0,
     uc_a=1,
     uc_b=1,
+    vacuum=0.0,
+    gap=0.0,
+    delete_layer="0b0t0b0t",
+    tol=0.25,
+    to_primitive=False,
+    add_if_dist=None,
 ):
     """
-    Generate a grain boundary structure based on the aimsgb.GrainBoundary module.
+    Generate a grain boundary structure based on aimsgb.
 
     Args:
         axis : Rotational axis for the GB you want to construct (for example, axis=[1,0,0])
@@ -60,28 +65,39 @@ def grainboundary(
         plane: The grain boundary plane of the GB you want to construct (for example, plane=[2,1,0])
         initial_struct : Initial bulk structure from which you want to construct the GB (a ase
                         structure object).
-        delete_layer : To delete layers of the GB. For example, delete_layer='1b0t1b0t'. The first
+        uc_a (int): Number of unit cell of grain A. (Default is 1.)
+        uc_b (int): Number of unit cell of grain B. (Default is 1.)
+        vacuum (float): Adds space between the grains at _one_ of the two interfaces
+            that must exist due to periodic boundary conditions. (Default is 0.0.)
+        gap (float): Adds space between the grains at _both_ of the two interfaces
+            that must exist due to periodic boundary conditions. When used together with
+            `vacuum`, these spaces add at one of the two interfaces. (Default is 0.0.)
+        delete_layer (str) : To delete layers of the GB. For example, `delete_layer='1b0t1b0t'`. The first
                        4 characters is for first grain and the other 4 is for second grain. b means
                        bottom layer and t means top layer. Integer represents the number of layers
                        to be deleted. The first t and second b from the left hand side represents
-                       the layers at the GB interface. Default value is delete_layer='0b0t0b0t', which
+                       the layers at the GB interface. Default value is `delete_layer='0b0t0b0t'`, which
                        means no deletion of layers.
-        add_if_dist : If you want to add extra interface distance, you can specify add_if_dist.
-                       Default value is add_if_dist=0.0
-        to_primitive : To generate primitive or non-primitive GB structure. Default value is
-                        to_primitive=False
-        uc_a (int): Number of unit cell of grain A. Default to 1.
-        uc_b (int): Number of unit cell of grain B. Default to 1.
+        tol (float): Tolerance factor (in distance units) to determine whether two atoms
+            are in the same plane. (Default is 0.25.)
+        to_primitive : To generate primitive or non-primitive GB structure. (Default
+            value is False.)
+        add_if_dist (float): (Deprecated) Use `gap`.
 
     Returns:
-        :class:`.Atoms`: final grain boundary structure
+        :class:`ase.Atoms`: final grain boundary structure
     """
     from aimsgb import GrainBoundary, Grain
+
+    if add_if_dist is not None:
+        warn("`add_if_dist` is deprecated, please use `gap` instead.")
+        gap = add_if_dist
+
     basis_pymatgen = ase_to_pymatgen(structure=initial_struct)
     grain_init = Grain(
         basis_pymatgen.lattice, basis_pymatgen.species, basis_pymatgen.frac_coords
     )
-    gb_obj = GrainBoundary(
+    gb = GrainBoundary(
         axis=axis,
         sigma=sigma,
         plane=plane,
@@ -91,9 +107,14 @@ def grainboundary(
     )
 
     return pymatgen_to_ase(
-        structure=gb_obj.build_gb(
-            to_primitive=to_primitive,
+        structure=Grain.stack_grains(
+            gb.grain_a,
+            gb.grain_b,
+            vacuum=vacuum,
+            gap=gap,
+            direction=gb.direction,
             delete_layer=delete_layer,
-            add_if_dist=add_if_dist,
+            tol=tol,
+            to_primitive=to_primitive,
         )
     )
