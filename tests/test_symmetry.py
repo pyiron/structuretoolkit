@@ -171,7 +171,8 @@ class TestAtoms(unittest.TestCase):
         cell = [[2.519, 1.454, 4.590], [-2.519, 1.454, 4.590], [0.0, -2.909, 4.590]]
         structure = Atoms(symbols=elements, positions=positions, cell=cell)
         structure_repeat = structure.repeat([2, 2, 2])
-        structure_prim_base = stk.analyse.get_primitive_cell(structure=structure_repeat)
+        sym = stk.analyse.get_symmetry(structure=structure_repeat)
+        structure_prim_base = sym.get_primitive_cell()
         self.assertEqual(
             structure_prim_base.get_chemical_symbols(),
             structure.get_chemical_symbols()
