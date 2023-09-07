@@ -14,9 +14,8 @@ The `structuretoolkit` is currently under development.
 
 ```python
 import structuretoolkit as stk
-from ase.build import bulk
 
-structure = bulk("Al", cubic=True)
+structure = stk.build.ase.bulk("Al", cubic=True)
 stk.analyse.get_adaptive_cna_descriptors(structure)
 stk.plot3d(structure)
 ```
@@ -43,6 +42,7 @@ stk.plot3d(structure)
 * `stk.analyse.get_strain()`
 
 ### Build
+* `stk.build.ase` (Merely a shortcut to the `ase.build` module)
 * `stk.build.get_grainboundary_info()`
 * `stk.build.grainboundary()`
 * `stk.build.high_index_surface()`

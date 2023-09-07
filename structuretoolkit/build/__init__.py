@@ -1,3 +1,4 @@
+from ase import build as ase  # Just a shortcut structuretoolkit.build.ase == ase.build
 from structuretoolkit.build.aimsgb import (
     grainboundary,
     get_grainboundary_info
