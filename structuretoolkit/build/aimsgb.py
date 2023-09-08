@@ -108,8 +108,8 @@ def grainboundary(
 
     return pymatgen_to_ase(
         structure=Grain.stack_grains(
-            gb.grain_a,
-            gb.grain_b,
+            grain_a=gb.grain_a,
+            grain_b=gb.grain_b,
             vacuum=vacuum,
             gap=gap,
             direction=gb.direction,
