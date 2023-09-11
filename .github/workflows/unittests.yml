@@ -52,7 +52,9 @@ jobs:
     - name: Setup environment (unix)
       if: matrix.operating-system != 'windows-latest'
       shell: bash -l {0}
-      run: python .ci_support/condamerge.py --base .ci_support/environment.yml --add .ci_support/environment-lammps.yml > environment.yml
+      run: |
+        mamba install -y yaml
+        python .ci_support/condamerge.py --base .ci_support/environment.yml --add .ci_support/environment-lammps.yml > environment.yml
     - name: Setup Mambaforge
       uses: conda-incubator/setup-miniconda@v2
       with:
