@@ -33,10 +33,10 @@ class TestCu(unittest.TestCase):
         cls.bispec_options = bispec_options
 
     def test_calc_bispectrum_lmp(self):
-        n_coeff = len(stk.analyse.calc_bispectrum_names(
+        n_coeff = len(stk.analyse.get_snap_descriptor_names(
             twojmax=self.bispec_options["twojmax"]
         ))
-        coeff = stk.analyse.calc_bisepctrum_lmp(
+        coeff = stk.analyse.calc_snap_descriptors_per_atom(
             lmp=self.lmp,
             structure=self.structure,
             bispec_options=self.bispec_options,
@@ -45,12 +45,12 @@ class TestCu(unittest.TestCase):
         self.assertTrue(coeff.shape, (len(self.structure), n_coeff))
 
     def test_calc_bispectrum_lmp_quad(self):
-        n_coeff = len(stk.analyse.calc_bispectrum_names(
+        n_coeff = len(stk.analyse.get_snap_descriptor_names(
             twojmax=self.bispec_options["twojmax"]
         ))
         bispec_options = self.bispec_options.copy()
         bispec_options["quadraticflag"] = 1
-        coeff = stk.analyse.calc_bisepctrum_lmp(
+        coeff = stk.analyse.calc_snap_descriptors_per_atom(
             lmp=self.lmp,
             structure=self.structure,
             bispec_options=bispec_options,
@@ -59,10 +59,10 @@ class TestCu(unittest.TestCase):
         self.assertTrue(coeff.shape, (len(self.structure), n_coeff * 31))
 
     def test_calc_a_matrix_snappy(self):
-        n_coeff = len(stk.analyse.calc_bispectrum_names(
+        n_coeff = len(stk.analyse.get_snap_descriptor_names(
             twojmax=self.bispec_options["twojmax"]
         ))
-        mat_a = stk.analyse.calc_a_matrix_snappy(
+        mat_a = stk.analyse.calc_snap_descriptor_derivatives(
             lmp=self.lmp,
             structure=self.structure,
             bispec_options=self.bispec_options,

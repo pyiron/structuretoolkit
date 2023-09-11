@@ -23,9 +23,9 @@ from structuretoolkit.analyse.spatial import (
 )
 from structuretoolkit.analyse.strain import get_strain
 from structuretoolkit.analyse.snap import (
-    calc_bispectrum_names,
-    calc_bisepctrum_lmp,
-    calc_a_matrix_snappy,
+    get_snap_descriptor_names,
+    calc_snap_descriptors_per_atom,
+    calc_snap_descriptor_derivatives,
 )
 
 

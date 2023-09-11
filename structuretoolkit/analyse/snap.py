@@ -130,7 +130,7 @@ def set_potential_lmp(lmp, cutoff=10.0):
     lmp.command("neigh_modify one 10000")
 
 
-def calc_bispectrum_names(twojmax):
+def get_snap_descriptor_names(twojmax):
     lst = []
     for j1 in range(0, twojmax + 1):
         for j2 in range(0, j1 + 1):
@@ -180,8 +180,8 @@ def set_compute_lammps(lmp, bispec_options, numtypes):
     lmp.command(f"{base_b} {radelem} {wj} {kwargs}")
 
 
-def calc_bisepctrum_lmp(lmp, structure, bispec_options, cutoff=10.0):
-    number_coef = len(calc_bispectrum_names(twojmax=bispec_options["twojmax"]))
+def calc_snap_descriptors_per_atom(lmp, structure, bispec_options, cutoff=10.0):
+    number_coef = len(get_snap_descriptor_names(twojmax=bispec_options["twojmax"]))
     reset_lmp(lmp=lmp)
     write_ase_structure(lmp=lmp, structure=structure)
     set_potential_lmp(lmp=lmp, cutoff=cutoff)
@@ -327,8 +327,8 @@ def extract_computes_snappy(lmp, num_atoms, n_coeff, num_types):
     return np.concatenate((np.array([np.eye(a_fit.shape[0])[0]]).T, a_fit), axis=1).copy()
 
 
-def calc_a_matrix_snappy(lmp, structure, bispec_options, cutoff=10.0):
-    number_coef = len(calc_bispectrum_names(twojmax=bispec_options["twojmax"]))
+def calc_snap_descriptor_derivatives(lmp, structure, bispec_options, cutoff=10.0):
+    number_coef = len(get_snap_descriptor_names(twojmax=bispec_options["twojmax"]))
     number_species = len(set(structure.get_chemical_symbols()))
     reset_lmp(lmp=lmp)
     write_ase_structure(lmp=lmp, structure=structure)
