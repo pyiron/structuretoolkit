@@ -29,7 +29,7 @@ class TestPyxtal(TestCase):
         try:
             with self.assertWarnsRegex(
                     UserWarning,
-                    regex="Groups [193, 194] could not be generated with stoichiometry Mg1!",
+                    "Groups [193, 194] could not be generated with stoichiometry Mg1!",
                     msg="No warning is raised even though allow_exceptions=True was passed!"
             ):
                 stk.build.pyxtal([193, 194], ["Mg"], num_ions=[1], allow_exceptions=True)
