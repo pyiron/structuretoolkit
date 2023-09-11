@@ -47,6 +47,7 @@ def grainboundary(
     sigma,
     plane,
     initial_struct,
+    *,
     uc_a=1,
     uc_b=1,
     vacuum=0.0,
