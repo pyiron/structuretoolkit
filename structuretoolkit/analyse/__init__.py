@@ -22,6 +22,11 @@ from structuretoolkit.analyse.spatial import (
     get_voronoi_vertices,
 )
 from structuretoolkit.analyse.strain import get_strain
+from structuretoolkit.analyse.snap import (
+    calc_bispectrum_names,
+    calc_bisepctrum_lmp,
+    calc_a_matrix_snappy,
+)
 
 
 def get_symmetry(
