@@ -2,9 +2,7 @@ from ctypes import c_double, c_int, cast, POINTER
 import numpy as np
 from scipy.constants import physical_constants
 
-eV_div_A3_to_bar = (
-        1e25 / physical_constants["joule-electron volt relationship"][0]
-)
+eV_div_A3_to_bar = 1e25 / physical_constants["joule-electron volt relationship"][0]
 
 
 def convert_mat(mat):
@@ -13,17 +11,35 @@ def convert_mat(mat):
 
 
 def calc_per_atom_quad(linear_per_atom):
-    return np.array([
-        np.concatenate((atom, convert_mat(mat=np.dot(atom.reshape(len(atom), 1), atom.reshape(len(atom), 1).T))))
-        for atom in linear_per_atom
-    ])
+    return np.array(
+        [
+            np.concatenate(
+                (
+                    atom,
+                    convert_mat(
+                        mat=np.dot(
+                            atom.reshape(len(atom), 1), atom.reshape(len(atom), 1).T
+                        )
+                    ),
+                )
+            )
+            for atom in linear_per_atom
+        ]
+    )
 
 
 def calc_sum_quad(linear_sum):
-    return np.concatenate((
-        linear_sum,
-        convert_mat(mat=np.dot(linear_sum.reshape(len(linear_sum), 1), linear_sum.reshape(len(linear_sum), 1).T))
-    ))
+    return np.concatenate(
+        (
+            linear_sum,
+            convert_mat(
+                mat=np.dot(
+                    linear_sum.reshape(len(linear_sum), 1),
+                    linear_sum.reshape(len(linear_sum), 1).T,
+                )
+            ),
+        )
+    )
 
 
 def get_apre(cell):
@@ -39,7 +55,7 @@ def get_apre(cell):
     yhi = np.sin(gamma) * bn
     xzp = np.cos(beta) * cn
     yzp = (bn * cn * np.cos(alpha) - xyp * xzp) / yhi
-    zhi = np.sqrt(cn ** 2 - xzp ** 2 - yzp ** 2)
+    zhi = np.sqrt(cn**2 - xzp**2 - yzp**2)
 
     return np.array(((xhi, 0, 0), (xyp, yhi, 0), (xzp, yzp, zhi)))
 
@@ -88,7 +104,7 @@ def write_ase_structure(lmp, structure):
         x=(len(positions) * c_double)(*positions),
         v=None,
         image=None,
-        shrinkexceed=False
+        shrinkexceed=False,
     )
 
 
@@ -195,7 +211,10 @@ def calc_snap_descriptors_per_atom(lmp, structure, bispec_options, cutoff=10.0):
     except:
         return np.array([])
     else:
-        if "quadraticflag" in bispec_options.keys() and int(bispec_options["quadraticflag"]) == 1:
+        if (
+            "quadraticflag" in bispec_options.keys()
+            and int(bispec_options["quadraticflag"]) == 1
+        ):
             return extract_compute_np(
                 lmp=lmp,
                 name="b",
@@ -203,7 +222,10 @@ def calc_snap_descriptors_per_atom(lmp, structure, bispec_options, cutoff=10.0):
                 result_type=2,
                 # basically we only care about the off diagonal elements and from those we need only half
                 # plus the linear terms:   n + sum_{i: 1->n} i
-                array_shape=(len(structure), int(number_coef * (number_coef * (1 - 1 / 2) + 3 / 2)))
+                array_shape=(
+                    len(structure),
+                    int(number_coef * (number_coef * (1 - 1 / 2) + 3 / 2)),
+                ),
             )
         else:
             return extract_compute_np(
@@ -211,25 +233,30 @@ def calc_snap_descriptors_per_atom(lmp, structure, bispec_options, cutoff=10.0):
                 name="b",
                 compute_type=1,
                 result_type=2,
-                array_shape=(len(structure), number_coef)
+                array_shape=(len(structure), number_coef),
             )
 
 
 def lammps_variables(bispec_options):
-    d = {k: bispec_options[k] for k in
-         ["rcutfac",
-          "rfac0",
-          "rmin0",
-          # "diagonalstyle",
-          # "zblcutinner",
-          # "zblcutouter",
-          "twojmax"]}
+    d = {
+        k: bispec_options[k]
+        for k in [
+            "rcutfac",
+            "rfac0",
+            "rmin0",
+            # "diagonalstyle",
+            # "zblcutinner",
+            # "zblcutouter",
+            "twojmax",
+        ]
+    }
     d.update(
         {
             (k + str(i + 1)): bispec_options[k][i]
             for k in ["wj", "radelem"]  # ["zblz", "wj", "radelem"]
             for i, v in enumerate(bispec_options[k])
-        })
+        }
+    )
     return d
 
 
@@ -250,8 +277,7 @@ def set_computes_snappy(lmp, bispec_options):
 
     kw_options = {
         k: bispec_options[v]
-        for k, v in
-        {
+        for k, v in {
             # "diagonal": "diagonalstyle", For legacy diagonalstyle option
             "rmin0": "rmin0",
             "bzeroflag": "bzeroflag",
@@ -275,7 +301,9 @@ def set_computes_snappy(lmp, bispec_options):
 
 def extract_computes_snappy(lmp, num_atoms, n_coeff, num_types):
     lmp_atom_ids = lmp.numpy.extract_atom_iarray("id", num_atoms).flatten()
-    assert np.all(lmp_atom_ids == 1 + np.arange(num_atoms)), "LAMMPS seems to have lost atoms"
+    assert np.all(
+        lmp_atom_ids == 1 + np.arange(num_atoms)
+    ), "LAMMPS seems to have lost atoms"
 
     # Extract types
     lmp_types = lmp.numpy.extract_atom_iarray(name="type", nelem=num_atoms).flatten()
@@ -296,22 +324,25 @@ def extract_computes_snappy(lmp, num_atoms, n_coeff, num_types):
     b_sum = b_atom.sum(axis=0) / num_atoms
 
     try:
-        assert np.allclose(lmp_bsum, lmp_barr.sum(axis=0), rtol=1e-12, atol=1e-12), \
-            "b_sum doesn't match sum of b"
+        assert np.allclose(
+            lmp_bsum, lmp_barr.sum(axis=0), rtol=1e-12, atol=1e-12
+        ), "b_sum doesn't match sum of b"
     except AssertionError:
         print(lmp_bsum)
         print(lmp_barr.sum(axis=0))
 
     lmp_dbarr = extract_compute_np(lmp, "db", 1, 2, (num_atoms, num_types, 3, n_coeff))
     lmp_dbsum = extract_compute_np(lmp, "db_sum", 0, 1, (num_types, 3, n_coeff))
-    assert np.allclose(lmp_dbsum, lmp_dbarr.sum(axis=0), rtol=1e-12, atol=1e-12), \
-        "db_sum doesn't match sum of db"
+    assert np.allclose(
+        lmp_dbsum, lmp_dbarr.sum(axis=0), rtol=1e-12, atol=1e-12
+    ), "db_sum doesn't match sum of db"
     db_atom = np.transpose(lmp_dbarr, (0, 2, 1, 3))
 
     lmp_vbarr = extract_compute_np(lmp, "vb", 1, 2, (num_atoms, num_types, 6, n_coeff))
     lmp_vbsum = extract_compute_np(lmp, "vb_sum", 0, 1, (num_types, 6, n_coeff))
-    assert np.allclose(lmp_vbsum, lmp_vbarr.sum(axis=0), rtol=1e-12, atol=1e-12), \
-        "vb_sum doesn't match sum of vb"
+    assert np.allclose(
+        lmp_vbsum, lmp_vbarr.sum(axis=0), rtol=1e-12, atol=1e-12
+    ), "vb_sum doesn't match sum of vb"
     vb_sum = np.transpose(lmp_vbsum, (1, 0, 2)) / lmp_volume * eV_div_A3_to_bar
 
     dbatom_shape = db_atom.shape
@@ -319,12 +350,16 @@ def extract_computes_snappy(lmp, num_atoms, n_coeff, num_types):
     a_fit = np.concatenate(
         (
             b_sum,
-            db_atom.reshape(dbatom_shape[0] * dbatom_shape[1], dbatom_shape[2] * dbatom_shape[3]),
-            vb_sum.reshape(vbsum_shape[0] * vbsum_shape[1], vbsum_shape[2])
+            db_atom.reshape(
+                dbatom_shape[0] * dbatom_shape[1], dbatom_shape[2] * dbatom_shape[3]
+            ),
+            vb_sum.reshape(vbsum_shape[0] * vbsum_shape[1], vbsum_shape[2]),
         ),
-        axis=0
+        axis=0,
     )
-    return np.concatenate((np.array([np.eye(a_fit.shape[0])[0]]).T, a_fit), axis=1).copy()
+    return np.concatenate(
+        (np.array([np.eye(a_fit.shape[0])[0]]).T, a_fit), axis=1
+    ).copy()
 
 
 def calc_snap_descriptor_derivatives(lmp, structure, bispec_options, cutoff=10.0):
@@ -343,12 +378,15 @@ def calc_snap_descriptor_derivatives(lmp, structure, bispec_options, cutoff=10.0
     except:
         return np.array([])
     else:
-        if "quadraticflag" in bispec_options.keys() and int(bispec_options["quadraticflag"]) == 1:
+        if (
+            "quadraticflag" in bispec_options.keys()
+            and int(bispec_options["quadraticflag"]) == 1
+        ):
             return extract_computes_snappy(
                 lmp=lmp,
                 num_atoms=len(structure),
                 n_coeff=int(number_coef * (number_coef * (1 - 1 / 2) + 3 / 2)),
-                num_types=number_species
+                num_types=number_species,
             )
         else:
             return extract_computes_snappy(
