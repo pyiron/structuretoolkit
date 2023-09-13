@@ -1,0 +1,4 @@
+channels:
+  - conda-forge
+dependencies:
+ - dscribe =2.1.0
