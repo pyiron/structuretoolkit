@@ -18,6 +18,7 @@ def calculate_soap_descriptor_per_atom(
     verbose=False,
 ):
     from dscribe.descriptors import SOAP
+
     if species is None:
         species = list(set(structure.get_chemical_symbols()))
     periodic_soap = SOAP(
