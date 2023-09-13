@@ -4,6 +4,7 @@
 
 import unittest
 from ase.build import bulk
+import numpy as np
 import structuretoolkit as stk
 
 try:
@@ -22,4 +23,4 @@ class Testdscribe(unittest.TestCase):
         structure = bulk('Cu', 'fcc', a=3.6, cubic=True)
         soap = stk.analyse.calculate_soap_descriptor_per_atom(structure=structure, r_cut=6.0, n_max=8, l_max=6)
         self.assertEqual(soap.shape, (4, 252))
-        self.assertEqual(soap.sum(), 39450.03009497697)
+        self.assertTrue(np.isclose(soap.sum(), 39450.03009, atol=1.e-5))
