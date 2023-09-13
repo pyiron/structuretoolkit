@@ -6,6 +6,7 @@ dependencies:
 - coveralls
 - coverage
 - codacy-coverage
+- dscribe =2.1.0
 - matplotlib-base =3.7.2
 - nglview =3.0.6
 - numpy =1.23.5

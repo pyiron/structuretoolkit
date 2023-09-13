@@ -36,6 +36,7 @@ setup(
         'scipy==1.11.2',  # ase already requires scipy
     ],
     extras_require={
+        "dscribe": ["dscribe==2.1.0"],
         "grainboundary": ['aimsgb==1.0.3', 'pymatgen==2023.9.10'],
         "pyscal": ['pyscal2==2.10.18'],
         "nglview": ['nglview==3.0.6'],
@@ -44,7 +45,7 @@ setup(
         "symmetry": ['spglib==2.0.2'],
         "surface": ['spglib==2.0.2', 'pymatgen==2023.9.10'],
         "phonopy": ['phonopy==2.20.0', 'spglib==2.0.2'],
-        "pyxtal": ['pyxtal==0.6.0']
+        "pyxtal": ['pyxtal==0.6.0'],
     },
     cmdclass=versioneer.get_cmdclass(),
 )
