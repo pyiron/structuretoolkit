@@ -8,7 +8,7 @@ try:
     from pymatgen.core import Structure, Lattice
     from structuretoolkit.analyse.pymatgen import VoronoiSiteFeaturiser
     skip_pymatgen_test = False
-except ImportError, ModuleNotFoundError:
+except (ImportError, ModuleNotFoundError):
     skip_pymatgen_test = True
 
 
