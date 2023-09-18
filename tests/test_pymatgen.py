@@ -196,7 +196,10 @@ class TestPymatgen(unittest.TestCase):
             ),
             "Failed to produce equivalent sel_dyn when both magmom + sel_dyn are present!",
         )
-
+        
+@unittest.skipIf(
+    skip_pymatgen_test, "pymatgen is not installed, so the pymatgen tests are skipped."
+)
 class TestVoronoiSiteFeaturiser(unittest.TestCase):
     def setUp(self):
         self.example_structure = bulk("Fe")
