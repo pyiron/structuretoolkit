@@ -3,13 +3,12 @@ import numpy as np
 from ase.build import bulk
 from ase.constraints import FixAtoms
 from structuretoolkit.common import pymatgen_to_ase, ase_to_pymatgen
-from structuretoolkit.analyse.pymatgen import VoronoiSiteFeaturiser
 
 try:
     from pymatgen.core import Structure, Lattice
-
+    from structuretoolkit.analyse.pymatgen import VoronoiSiteFeaturiser
     skip_pymatgen_test = False
-except ImportError:
+except ImportError, ModuleNotFoundError:
     skip_pymatgen_test = True
 
 
@@ -204,10 +203,23 @@ class TestVoronoiSiteFeaturiser(unittest.TestCase):
     def setUp(self):
         self.example_structure = bulk("Fe")
 
-    def assertAlmostEqualSeries(self, series, expected_series, decimal=4):
-        for index, (actual, expected) in enumerate(zip(series, expected_series)):
-            self.assertAlmostEqual(actual, expected, places=decimal,
-                                   msg=f"Failed at index {index}: {actual} != {expected}")
+    def assertListsAlmostEqual(self, list1, list2, decimal=4):
+        """
+        Check if two lists are approximately equal up to a specified number of decimal places.
+
+        Parameters:
+        list1 (list): The first list for comparison.
+        list2 (list): The second list for comparison.
+        decimal (int): The number of decimal places to consider for comparison.
+
+        Raises:
+        AssertionError: Raised if the lists are not approximately equal.
+        """
+        self.assertEqual(len(list1), len(list2), "Lists have different lengths")
+
+        for i in range(len(list1)):
+            self.assertAlmostEqual(list1[i], list2[i], places=decimal,
+                                msg=f"Lists differ at index {i}: {list1[i]} != {list2[i]}")
 
     def test_VoronoiSiteFeaturiser(self):
         # Calculate the expected output manually
@@ -235,7 +247,4 @@ class TestVoronoiSiteFeaturiser(unittest.TestCase):
 
         # Call the function with the example structure
         df = VoronoiSiteFeaturiser(self.example_structure, 0)
-
-        # Check that the DataFrame matches the expected output with the specified tolerance
-        for column, expected_value in expected_output.items():
-            self.assertAlmostEqualSeries(df[column], expected_value, decimal=4)
+        self.assertListsAlmostEqual(df.values.tolist()[0], list(expected_output.values()), decimal=4)
