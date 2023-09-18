@@ -3,7 +3,7 @@ import numpy as np
 from ase.build import bulk
 from ase.constraints import FixAtoms
 from structuretoolkit.common import pymatgen_to_ase, ase_to_pymatgen
-from structuretoolkit.analyse.pymatgen import VoronoiFeaturiser
+from structuretoolkit.analyse.pymatgen import VoronoiSiteFeaturiser
 
 try:
     from pymatgen.core import Structure, Lattice
