@@ -201,6 +201,11 @@ class TestVoronoiSiteFeaturiser(unittest.TestCase):
     def setUp(self):
         self.example_structure = bulk("Fe")
 
+    def assertAlmostEqualSeries(self, series, expected_series, decimal=4):
+        for index, (actual, expected) in enumerate(zip(series, expected_series)):
+            self.assertAlmostEqual(actual, expected, places=decimal,
+                                   msg=f"Failed at index {index}: {actual} != {expected}")
+
     def test_VoronoiSiteFeaturiser(self):
         # Calculate the expected output manually
         expected_output = {
@@ -228,9 +233,6 @@ class TestVoronoiSiteFeaturiser(unittest.TestCase):
         # Call the function with the example structure
         df = VoronoiSiteFeaturiser(self.example_structure, 0)
 
-        # Define the tolerance for approximate equality (up to 4 decimal places)
-        tolerance = 1e-4
-
         # Check that the DataFrame matches the expected output with the specified tolerance
         for column, expected_value in expected_output.items():
-            self.assertAlmostEqual(df[column], expected_value, delta=tolerance)
+            self.assertAlmostEqualSeries(df[column], expected_value, decimal=4)
