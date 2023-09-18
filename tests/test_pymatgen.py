@@ -196,3 +196,41 @@ class TestPymatgen(unittest.TestCase):
             ),
             "Failed to produce equivalent sel_dyn when both magmom + sel_dyn are present!",
         )
+
+class TestVoronoiSiteFeaturiser(unittest.TestCase):
+    def setUp(self):
+        self.example_structure = bulk("Fe")
+
+    def test_VoronoiSiteFeaturiser(self):
+        # Calculate the expected output manually
+        expected_output = {
+            "VorNN_CoordNo": 14,
+            "VorNN_tot_vol": 11.819951,
+            "VorNN_tot_area": 27.577769,
+            "VorNN_volumes_std": 0.304654,
+            "VorNN_volumes_mean": 0.844282,
+            "VorNN_volumes_min": 0.492498,
+            "VorNN_volumes_max": 1.10812,
+            "VorNN_vertices_std": 0.989743,
+            "VorNN_vertices_mean": 5.142857,
+            "VorNN_vertices_min": 4,
+            "VorNN_vertices_max": 6,
+            "VorNN_areas_std": 0.814261,
+            "VorNN_areas_mean": 1.969841,
+            "VorNN_areas_min": 1.029612,
+            "VorNN_areas_max": 2.675012,
+            "VorNN_distances_std": 0.095141,
+            "VorNN_distances_mean": 1.325141,
+            "VorNN_distances_min": 1.242746,
+            "VorNN_distances_max": 1.435
+        }
+
+        # Call the function with the example structure
+        df = VoronoiSiteFeaturiser(self.example_structure, 0)
+
+        # Define the tolerance for approximate equality (up to 4 decimal places)
+        tolerance = 1e-4
+
+        # Check that the DataFrame matches the expected output with the specified tolerance
+        for column, expected_value in expected_output.items():
+            self.assertAlmostEqual(df[column], expected_value, delta=tolerance)
