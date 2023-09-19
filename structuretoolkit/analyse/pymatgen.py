@@ -4,6 +4,7 @@ from pymatgen.core import Structure, Element
 import numpy as np
 import pandas as pd
 
+
 def get_stats(property_list, property_str):
     """
     Calculate statistical properties of a list of values.
@@ -26,8 +27,9 @@ def get_stats(property_list, property_str):
         f"{property_str}_std": np.std(property_list),
         f"{property_str}_mean": np.mean(property_list),
         f"{property_str}_min": np.min(property_list),
-        f"{property_str}_max": np.max(property_list)
+        f"{property_str}_max": np.max(property_list),
     }
+
 
 def VoronoiSiteFeaturiser(structure, site):
     """
@@ -60,7 +62,7 @@ def VoronoiSiteFeaturiser(structure, site):
     data = {
         "VorNN_CoordNo": coord_no,
         "VorNN_tot_vol": total_volume,
-        "VorNN_tot_area": total_area
+        "VorNN_tot_area": total_area,
     }
 
     data_str_list = ["volumes", "vertices", "areas", "distances"]
