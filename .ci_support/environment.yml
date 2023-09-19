@@ -6,7 +6,7 @@ dependencies:
 - coveralls
 - coverage
 - codacy-coverage
-- matplotlib-base =3.7.2
+- matplotlib-base =3.8.0
 - nglview =3.0.6
 - numpy =1.23.5
 - phonopy =2.20.0
