@@ -73,3 +73,6 @@ from structuretoolkit.build import (
     grainboundary as grainboundary_build,
     sqs_structures as get_sqs_structures,
 )
+
+from . import _version
+__version__ = _version.get_versions()['version']
