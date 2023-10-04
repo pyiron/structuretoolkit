@@ -6,7 +6,7 @@ import numpy as np
 from scipy.sparse import coo_matrix
 from scipy.spatial import ConvexHull, Delaunay, Voronoi
 
-from structuretoolkit.analyse.neighbors import get_neighborhood
+from structuretoolkit.analyse.neighbors import get_neighborhood, get_neighbors
 from structuretoolkit.common.helper import (
     get_average_of_unique_labels,
     get_extended_positions,
@@ -55,22 +55,85 @@ def get_mean_positions(positions, cell, pbc, labels):
     return mean_positions
 
 
+def create_gridpoints(structure, n_gridpoints_per_angstrom=5):
+    cell = get_vertical_length(structure=structure)
+    n_points = (n_gridpoints_per_angstrom * cell).astype(int)
+    positions = np.meshgrid(
+        *[np.linspace(0, 1, n_points[i], endpoint=False) for i in range(3)]
+    )
+    positions = np.stack(positions, axis=-1).reshape(-1, 3)
+    return np.einsum("ji,nj->ni", structure.cell, positions)
+
+
+def remove_too_close(positions, structure, min_distance=1):
+    neigh = get_neighborhood(structure=structure, positions=positions, num_neighbors=1)
+    return positions[neigh.distances.flatten() > min_distance]
+
+
+def set_to_high_symmetry_points(positions, structure, neigh, decimals=4):
+    for _ in range(10):
+        neigh = neigh.get_neighborhood(positions)
+        dx = np.mean(neigh.vecs, axis=-2)
+        if np.allclose(dx, 0):
+            return positions
+        positions += dx
+        positions = get_wrapped_coordinates(structure=structure, positions=positions)
+        unique_indices = np.unique(
+            np.round(positions, decimals=decimals), axis=0, return_index=True
+        )[1]
+        positions = positions[unique_indices]
+    raise ValueError("High symmetry points could not be detected")
+
+
+def cluster_by_steinhardt(positions, neigh, l_values, q_eps, var_ratio, min_samples):
+    """
+    Clusters candidate positions via Steinhardt parameters and the variance in distances to host atoms.
+
+    The cluster that has the lowest variance is returned, i.e. those positions that have the most "regular" coordination polyhedra.
+
+    Args:
+        positions (array): candidate positions
+        neigh (Neighbor): neighborhood information of the candidate positions
+        l_values (list of int): which steinhardt parameters to use for clustering
+        q_eps (float): maximum intercluster distance in steinhardt parameters for DBSCAN clustering
+        var_ratio (float): multiplier to make steinhardt's and distance variance numerically comparable
+        min_samples (int): minimum size of clusters
+
+    Returns:
+         array:  Positions of the most likely interstitial sites
+    """
+    from sklearn.cluster import DBSCAN
+
+    if min_samples is None:
+        min_samples = min(len(neigh.distances), 5)
+    neigh = neigh.get_neighborhood(positions)
+    Q_values = np.array([neigh.get_steinhardt_parameter(ll) for ll in l_values])
+    db = DBSCAN(q_eps, min_samples=min_samples)
+    var = np.std(neigh.distances, axis=-1)
+    descriptors = np.concatenate((Q_values, [var * var_ratio]), axis=0)
+    labels = db.fit_predict(descriptors.T)
+    var_mean = np.array(
+        [np.mean(var[labels == ll]) for ll in np.unique(labels) if ll >= 0]
+    )
+    return positions[labels == np.argmin(var_mean)]
+
+
 class Interstitials:
     """
     Class to search for interstitial sites
 
     This class internally does the following steps:
 
-        1. Initialize grid points (or Voronoi vertices) which are considered as
+        0. Initialize grid points (or Voronoi vertices) which are considered as
             interstitial site candidates.
-        2. Eliminate points within a distance from the nearest neighboring atoms as
+        1. Eliminate points within a distance from the nearest neighboring atoms as
             given by `min_distance`
-        3. Initialize neighbor environment using `get_neighbors`
-        4. Shift interstitial candidates to the nearest symmetric points with respect to the
+        2. Shift interstitial candidates to the nearest symmetric points with respect to the
             neighboring atom sites/vertices.
-        5. Kick out points with large neighbor distance variances; this eliminates "irregular"
-            shaped interstitials
-        6. Cluster interstitial candidates to avoid point overlapping.
+        3. Cluster interstitial candidate positions to avoid point overlapping.
+        4. Cluster interstitial candidates by their Steinhardt parameters (cf. `l_values` for
+            the values of the spherical harmonics) and the variance of the distances and
+            take the group with the smallest average distance variance
 
     The interstitial sites can be obtained via `positions`
 
@@ -83,6 +146,19 @@ class Interstitials:
         - `get_steinhardt_parameters()`
         - `get_volumes()`
         - `get_areas()`
+
+    Troubleshooting:
+
+    Identifying interstitial sites is not a very easy task. The algorithm employed here will
+    probably do a good job, but if it fails, it might be good to look at the following points
+
+    - The intermediate results can be accessed via `run_workflow` by specifying the step number.
+    - The most vulnerable point is the last step, clustering by Steinhardt parameters. Take a
+        look at the step before and after. If the interstitial sites are present in the step
+        before the clustering by Steinhardt parameters, you might want to change the values of
+        `q_eps` and `var_ratio`. It might make a difference to use `l_values` as well.
+    - It might fail to find sites if the box is very small. In that case it might make sense to
+        set `min_samples` very low (you can take 1)
     """
 
     def __init__(
@@ -92,9 +168,13 @@ class Interstitials:
         n_gridpoints_per_angstrom=5,
         min_distance=1,
         use_voronoi=False,
-        variance_buffer=0.01,
-        n_iterations=2,
-        eps=0.1,
+        x_eps=0.1,
+        l_values=np.arange(2, 13),
+        q_eps=0.3,
+        var_ratio=5,
+        min_samples=None,
+        neigh_args={},
+        **kwargs
     ):
         """
 
@@ -111,71 +191,61 @@ class Interstitials:
                 `min_distance` to 0 if no point should be removed.
             use_voronoi (bool): Use Voronoi vertices for the initial interstitial candidate
                 positions instead of grid points.
-            variance_buffer (bool): Maximum permitted variance value (in distance unit) of the
-                neighbor distance values with respect to the minimum value found for each point.
-                It should be close to 0 for perfect crystals and slightly higher values for
-                structures containing defects. Set `variance_buffer` to `numpy.inf` if no selection
-                by variance value should take place.
-            n_iterations (int): Number of iterations for the shifting of the candidate positions
-                to the nearest symmetric positions with respect to `num_neighbors`. In most of the
-                cases, 1 is enough. In some rare cases (notably tetrahedral sites in bcc), it
-                should be at least 2. It is unlikely that it has to be larger than 2. Set
-                `n_iterations` to 0 if no shifting should take place.
-            eps (float): Distance below which two interstitial candidate sites to be considered as
-                one site after the symmetrization of the points. Set `eps` to 0 if clustering should
-                not be done.
+            x_eps (bool): eps value for the clustering of interstitial candidate positions
+            l_values (list): list of values for the Steinhardt parameter values for the
+                classification of the interstitial candidate points
+            q_eps (float): eps value for the clustering of interstitial candidate points based
+                on Steinhardt parameters and distance variances. This might play a crucial role
+                in identifying the correct interstitial sites
+            var_ratio (float): factor to be multiplied to the variance values in order to give
+                a larger weight to the variances.
+            min_samples (int/None): `min_sample` in the point clustering.
+            neigh_args (dict): arguments to be added to `get_neighbors`
         """
-        self._hull = None
-        self._neigh = None
-        self._positions = None
-        self.num_neighbors = num_neighbors
-        self.structure = structure
-        self._initialize(
-            n_gridpoints_per_angstrom=n_gridpoints_per_angstrom,
-            min_distance=min_distance,
-            use_voronoi=use_voronoi,
-            variance_buffer=variance_buffer,
-            n_iterations=n_iterations,
-            eps=eps,
-        )
-
-    def _initialize(
-        self,
-        n_gridpoints_per_angstrom=5,
-        min_distance=1,
-        use_voronoi=False,
-        variance_buffer=0.01,
-        n_iterations=2,
-        eps=0.1,
-    ):
         if use_voronoi:
-            self.positions = self.structure.analyse.get_voronoi_vertices()
+            self.initial_positions = get_voronoi_vertices(structure)
         else:
-            self.positions = self._create_gridpoints(
-                n_gridpoints_per_angstrom=n_gridpoints_per_angstrom
+            self.initial_positions = create_gridpoints(
+                structure=structure, n_gridpoints_per_angstrom=n_gridpoints_per_angstrom
             )
-        self._remove_too_close(min_distance=min_distance)
-        for _ in range(n_iterations):
-            self._set_interstitials_to_high_symmetry_points()
-        self._kick_out_points(variance_buffer=variance_buffer)
-        self._cluster_points(eps=eps)
+        self._neigh = get_neighbors(
+            structure=structure, num_neighbors=num_neighbors, **neigh_args
+        )
+        self.workflow = [
+            {
+                "f": remove_too_close,
+                "kwargs": {"structure": structure, "min_distance": min_distance},
+            },
+            {
+                "f": set_to_high_symmetry_points,
+                "kwargs": {"structure": structure, "neigh": self.neigh},
+            },
+            {
+                "f": lambda **kwargs: get_cluster_positions(structure, **kwargs),
+                "kwargs": {"eps": x_eps},
+            },
+            {
+                "f": cluster_by_steinhardt,
+                "kwargs": {
+                    "neigh": self.neigh,
+                    "l_values": l_values,
+                    "q_eps": q_eps,
+                    "var_ratio": var_ratio,
+                    "min_samples": min_samples,
+                },
+            },
+        ]
+        self._positions = None
+        self.structure = structure
 
-    @property
-    def num_neighbors(self):
-        """
-        Number of atoms (vertices) to consider for each interstitial atom. By definition,
-        tetrahedral sites should have 4 and octahedral sites 6.
-        """
-        return self._num_neighbors
-
-    @num_neighbors.setter
-    def num_neighbors(self, n):
-        self.reset()
-        self._num_neighbors = n
-
-    def reset(self):
-        self._hull = None
-        self._neigh = None
+    def run_workflow(self, positions=None, steps=-1):
+        if positions is None:
+            positions = self.initial_positions.copy()
+        for ii, ww in enumerate(self.workflow):
+            positions = ww["f"](positions=positions, **ww["kwargs"])
+            if ii == steps:
+                return positions
+        return positions
 
     @property
     def neigh(self):
@@ -185,42 +255,14 @@ class Interstitials:
         its nearest neighboring atoms. The functionalities of `neigh` follow those of
         `structuretoolkit.analyse.neighbors`.
         """
-        if self._neigh is None:
-            self._neigh = get_neighborhood(
-                structure=self.structure,
-                positions=self.positions,
-                num_neighbors=self.num_neighbors,
-            )
         return self._neigh
 
     @property
     def positions(self):
-        """
-        Positions of the interstitial candidates (and not those of the atoms).
-
-        IMPORTANT: Do not set positions via numpy setter, i.e.
-
-        BAD:
-        ```
-        >>> Interstitials.neigh.positions[0][0] = x
-        ```
-
-        GOOD:
-        ```
-        >>> positions = Interstitials.neigh.positions
-        >>> positions[0][0] = x
-        >>> Interstitialsneigh.positions = positions
-        ```
-
-        This is because in the first case related properties (most importantly the neighborhood
-        information) is not updated, which might lead to inconsistencies.
-        """
+        if self._positions is None:
+            self._positions = self.run_workflow()
+            self._neigh = self.neigh.get_neighborhood(self._positions)
         return self._positions
-
-    @positions.setter
-    def positions(self, x):
-        self.reset()
-        self._positions = x
 
     @property
     def hull(self):
@@ -228,53 +270,7 @@ class Interstitials:
         Convex hull of each atom. It is mainly used for the volume and area calculation of each
         interstitial candidate. For more info, see `get_volumes` and `get_areas`.
         """
-        if self._hull is None:
-            self._hull = [ConvexHull(v) for v in self.neigh.vecs]
-        return self._hull
-
-    def _create_gridpoints(self, n_gridpoints_per_angstrom=5):
-        cell = get_vertical_length(structure=self.structure)
-        n_points = (n_gridpoints_per_angstrom * cell).astype(int)
-        positions = np.meshgrid(
-            *[np.linspace(0, 1, n_points[i], endpoint=False) for i in range(3)]
-        )
-        positions = np.stack(positions, axis=-1).reshape(-1, 3)
-        return np.einsum("ji,nj->ni", self.structure.cell, positions)
-
-    def _remove_too_close(self, min_distance=1):
-        neigh = get_neighborhood(
-            structure=self.structure, positions=self.positions, num_neighbors=1
-        )
-        self.positions = self.positions[neigh.distances.flatten() > min_distance]
-
-    def _set_interstitials_to_high_symmetry_points(self):
-        self.positions = self.positions + np.mean(self.neigh.vecs, axis=-2)
-        self.positions = get_wrapped_coordinates(
-            structure=self.structure, positions=self.positions
-        )
-
-    def _kick_out_points(self, variance_buffer=0.01):
-        variance = self.get_variances()
-        min_var = variance.min()
-        self.positions = self.positions[variance < min_var + variance_buffer]
-
-    def _cluster_points(self, eps=0.1):
-        from sklearn.cluster import DBSCAN
-
-        if eps == 0:
-            return
-        extended_positions, indices = get_extended_positions(
-            structure=self.structure,
-            width=eps,
-            return_indices=True,
-            positions=self.positions,
-        )
-        labels = DBSCAN(eps=eps, min_samples=1).fit_predict(extended_positions)
-        coo = coo_matrix((labels, (np.arange(len(labels)), indices)))
-        labels = coo.max(axis=0).toarray().flatten()
-        self.positions = get_mean_positions(
-            self.positions, self.structure.cell, self.structure.pbc, labels
-        )
+        return [ConvexHull(v) for v in self.neigh.vecs]
 
     def get_variances(self):
         """
@@ -331,9 +327,13 @@ def get_interstitials(
     n_gridpoints_per_angstrom=5,
     min_distance=1,
     use_voronoi=False,
-    variance_buffer=0.01,
-    n_iterations=2,
-    eps=0.1,
+    x_eps=0.1,
+    l_values=np.arange(2, 13),
+    q_eps=0.3,
+    var_ratio=5,
+    min_samples=None,
+    neigh_args={},
+    **kwargs
 ):
     return Interstitials(
         structure=structure,
@@ -341,9 +341,13 @@ def get_interstitials(
         n_gridpoints_per_angstrom=n_gridpoints_per_angstrom,
         min_distance=min_distance,
         use_voronoi=use_voronoi,
-        variance_buffer=variance_buffer,
-        n_iterations=n_iterations,
-        eps=eps,
+        x_eps=x_eps,
+        l_values=l_values,
+        q_eps=q_eps,
+        var_ratio=var_ratio,
+        min_samples=min_samples,
+        neigh_args=neigh_args,
+        **kwargs
     )
 
 

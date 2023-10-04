@@ -6,5 +6,5 @@ dependencies:
 - coverage
 - codacy-coverage
 - matplotlib-base =3.7.2
-- numpy =1.25.1
-- scipy =1.11.1
+- numpy =1.23.5
+- scipy =1.11.2
