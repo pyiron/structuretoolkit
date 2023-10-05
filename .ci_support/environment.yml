@@ -17,4 +17,4 @@ dependencies:
 - scipy =1.11.3
 - spglib =2.0.2
 - sqsgenerator =0.3
-- emmet-core >=0.69.2  # temporary fix
+- emmet-core =0.69.5  # temporary fix
