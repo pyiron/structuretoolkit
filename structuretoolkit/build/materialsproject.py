@@ -1,5 +1,4 @@
 from typing import Union, List
-from mp_api.client import MPRester
 from ase.atoms import Atoms
 from structuretoolkit.common.pymatgen import pymatgen_to_ase
 
@@ -92,6 +91,8 @@ class MaterialsProjectFactory:
         Returns:
             :class:`~.MPQueryResults`: resulting structures from the query
         """
+        from mp_api.client import MPRester
+        
         rest_kwargs = {
             "use_document_model": False,  # returns results as dictionaries
             "include_user_agent": True,  # send some additional software version info to MP
@@ -141,6 +142,8 @@ class MaterialsProjectFactory:
         Raises:
             ValueError: material id does not exist
         """
+        from mp_api.client import MPRester
+        
         rest_kwargs = {
             "include_user_agent": True,  # send some additional software version info to MP
         }
