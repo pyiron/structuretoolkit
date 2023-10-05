@@ -17,3 +17,4 @@ dependencies:
 - scipy =1.11.3
 - spglib =2.0.2
 - sqsgenerator =0.3
+- pyxtal =0.6.0
