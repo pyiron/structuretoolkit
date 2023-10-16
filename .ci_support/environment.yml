@@ -6,7 +6,7 @@ dependencies:
 - coverage
 - matplotlib-base =3.8.0
 - nglview =3.0.8
-- numpy =1.26.0
+- numpy =1.26.1
 - phonopy =2.20.0
 - plotly =5.17.0
 - pymatgen =2023.10.11
