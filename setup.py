@@ -40,7 +40,7 @@ setup(
         "pyscal": ['pyscal2==2.10.18'],
         "nglview": ['nglview==3.0.8'],
         "plotly": ['plotly==5.17.0'],
-        "clusters": ['scikit-learn==1.3.1'],
+        "clusters": ['scikit-learn==1.3.2'],
         "symmetry": ['spglib==2.1.0'],
         "surface": ['spglib==2.1.0', 'pymatgen==2023.10.11'],
         "phonopy": ['phonopy==2.20.0', 'spglib==2.1.0'],
