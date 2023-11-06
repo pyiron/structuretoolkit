@@ -3,6 +3,6 @@ channels:
 dependencies:
 - ase =3.22.1
 - coverage
-- matplotlib-base =3.7.2
+- matplotlib-base =3.8.1
 - numpy =1.26.0
 - scipy =1.11.3
