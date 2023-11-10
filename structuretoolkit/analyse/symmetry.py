@@ -358,9 +358,19 @@ class Symmetry(dict):
         new_structure.cell = cell
         new_structure.indices[: len(indices)] = indices
         new_structure = new_structure[: len(indices)]
+<<<<<<< HEAD
         #new_structure = structuretoolkit.common.helper.set_indices(
         #    structure=new_structure, indices=indices
         #)
+=======
+        indices_dict = {
+            v: k
+            for k, v in structuretoolkit.common.helper.get_species_indices_dict(
+                structure=self._structure
+            ).items()
+        }
+        new_structure.symbols = [indices_dict[i] for i in indices]
+>>>>>>> main
         new_structure.positions = positions
         return new_structure
 
@@ -380,29 +390,3 @@ class Symmetry(dict):
         if mesh is None:
             raise SymmetryError(spglib.spglib.spglib_error.message)
         return mesh
-
-
-def get_symmetry(
-    structure, use_magmoms=False, use_elements=True, symprec=1e-5, angle_tolerance=-1.0
-):
-    """
-
-    Args:
-        use_magmoms (bool): Whether to consider magnetic moments (cf.
-        get_initial_magnetic_moments())
-        use_elements (bool): If False, chemical elements will be ignored
-        symprec (float): Symmetry search precision
-        angle_tolerance (float): Angle search tolerance
-
-    Returns:
-        symmetry (:class:`structuretoolkit.analyse.symmetry.Symmetry`): Symmetry class
-
-
-    """
-    return Symmetry(
-        structure=structure,
-        use_magmoms=use_magmoms,
-        use_elements=use_elements,
-        symprec=symprec,
-        angle_tolerance=angle_tolerance,
-    )

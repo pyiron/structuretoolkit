@@ -31,20 +31,20 @@ setup(
     packages=find_packages(exclude=["*tests*", "*docs*", "*binder*", "*conda*", "*notebooks*", "*.ci_support*"]),
     install_requires=[
         'ase==3.22.1',
-        'matplotlib==3.7.2',  # ase already requires matplotlib
-        'numpy==1.23.5',  # ase already requires numpy
-        'scipy==1.11.2',  # ase already requires scipy
+        'matplotlib==3.8.1',  # ase already requires matplotlib
+        'numpy==1.26.0',  # ase already requires numpy
+        'scipy==1.11.3',  # ase already requires scipy
     ],
     extras_require={
-        "grainboundary": ['aimsgb==1.0.3', 'pymatgen==2023.8.10'],
+        "grainboundary": ['aimsgb==1.1.0', 'pymatgen==2023.10.11'],
         "pyscal": ['pyscal2==2.10.18'],
-        "nglview": ['nglview==3.0.6'],
-        "plotly": ['plotly==5.16.1'],
-        "clusters": ['scikit-learn==1.3.0'],
-        "symmetry": ['spglib==2.0.2'],
-        "surface": ['spglib==2.0.2', 'pymatgen==2023.8.10'],
-        "phonopy": ['phonopy==2.20.0', 'spglib==2.0.2'],
-        "pyxtal": ['pyxtal==0.5.9']
+        "nglview": ['nglview==3.0.8'],
+        "plotly": ['plotly==5.18.0'],
+        "clusters": ['scikit-learn==1.3.2'],
+        "symmetry": ['spglib==2.1.0'],
+        "surface": ['spglib==2.1.0', 'pymatgen==2023.10.11'],
+        "phonopy": ['phonopy==2.20.0', 'spglib==2.1.0'],
+        "pyxtal": ['pyxtal==0.6.1']
     },
     cmdclass=versioneer.get_cmdclass(),
 )
