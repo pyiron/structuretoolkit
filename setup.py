@@ -36,13 +36,13 @@ setup(
         'scipy==1.11.3',  # ase already requires scipy
     ],
     extras_require={
-        "grainboundary": ['aimsgb==1.1.0', 'pymatgen==2023.10.11'],
+        "grainboundary": ['aimsgb==1.1.0', 'pymatgen==2023.11.12'],
         "pyscal": ['pyscal2==2.10.18'],
         "nglview": ['nglview==3.0.8'],
         "plotly": ['plotly==5.18.0'],
         "clusters": ['scikit-learn==1.3.2'],
         "symmetry": ['spglib==2.1.0'],
-        "surface": ['spglib==2.1.0', 'pymatgen==2023.10.11'],
+        "surface": ['spglib==2.1.0', 'pymatgen==2023.11.12'],
         "phonopy": ['phonopy==2.20.0', 'spglib==2.1.0'],
         "pyxtal": ['pyxtal==0.6.1']
     },
