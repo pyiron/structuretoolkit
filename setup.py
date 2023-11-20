@@ -31,7 +31,7 @@ setup(
     packages=find_packages(exclude=["*tests*", "*docs*", "*binder*", "*conda*", "*notebooks*", "*.ci_support*"]),
     install_requires=[
         'ase==3.22.1',
-        'matplotlib==3.8.1',  # ase already requires matplotlib
+        'matplotlib==3.8.2',  # ase already requires matplotlib
         'numpy==1.26.0',  # ase already requires numpy
         'scipy==1.11.3',  # ase already requires scipy
     ],
