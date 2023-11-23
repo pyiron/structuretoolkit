@@ -1,7 +1,7 @@
 channels:
 - conda-forge
 dependencies:
-- aimsgb =1.0.1
+- aimsgb =1.0.2
 - ase =3.22.1
 - matplotlib-base =3.5.3
 - nglview =2.7.7
@@ -9,7 +9,7 @@ dependencies:
 - phonopy =2.20.0
 - plotly =4.14.3
 - pymatgen =2022.0.12
-- pyscal =2.10.5
+- pyscal =2.10.13
 - scikit-learn =1.2.1
 - scipy =1.11.1
 - spglib =1.16.5
