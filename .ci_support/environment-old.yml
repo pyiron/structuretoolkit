@@ -1,7 +1,7 @@
 channels:
 - conda-forge
 dependencies:
-- aimsgb =0.1.0
+- aimsgb =1.0.0
 - ase =3.22.1
 - matplotlib-base =3.5.3
 - nglview =2.7.7
