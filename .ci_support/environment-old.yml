@@ -6,7 +6,7 @@ dependencies:
 - matplotlib-base =3.5.3
 - nglview =2.7.7
 - numpy =1.23.5
-- phonopy =2.20.0
+- phonopy =2.16.2
 - plotly =4.14.3
 - pymatgen =2022.2.1
 - pyscal =2.10.4
