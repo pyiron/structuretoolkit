@@ -33,7 +33,7 @@ setup(
         'ase==3.22.1',
         'matplotlib==3.8.2',  # ase already requires matplotlib
         'numpy==1.26.0',  # ase already requires numpy
-        'scipy==1.11.3',  # ase already requires scipy
+        'scipy==1.11.4',  # ase already requires scipy
     ],
     extras_require={
         "grainboundary": ['aimsgb==1.1.0', 'pymatgen==2023.11.12'],
