@@ -32,7 +32,7 @@ setup(
     install_requires=[
         'ase==3.22.1',
         'matplotlib==3.8.2',  # ase already requires matplotlib
-        'numpy==1.26.0',  # ase already requires numpy
+        'numpy==1.26.2',  # ase already requires numpy
         'scipy==1.11.4',  # ase already requires scipy
     ],
     extras_require={
