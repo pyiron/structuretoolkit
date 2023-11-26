@@ -307,7 +307,7 @@ def _plot3d(
     # If `select_atoms` was given, visualize only a subset of the `parent_basis`
     if select_atoms is not None:
         select_atoms = np.array(select_atoms, dtype=int)
-        elements = elements[select_atoms]
+        elements = np.array(elements)[select_atoms]
         atomic_numbers = atomic_numbers[select_atoms]
         positions = positions[select_atoms]
         if colors is not None:

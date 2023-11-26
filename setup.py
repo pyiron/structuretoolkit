@@ -31,20 +31,20 @@ setup(
     packages=find_packages(exclude=["*tests*", "*docs*", "*binder*", "*conda*", "*notebooks*", "*.ci_support*"]),
     install_requires=[
         'ase==3.22.1',
-        'matplotlib==3.8.0',  # ase already requires matplotlib
-        'numpy==1.26.1',  # ase already requires numpy
-        'scipy==1.11.3',  # ase already requires scipy
+        'matplotlib==3.8.2',  # ase already requires matplotlib
+        'numpy==1.26.2',  # ase already requires numpy
+        'scipy==1.11.4',  # ase already requires scipy
     ],
     extras_require={
-        "grainboundary": ['aimsgb==1.1.0', 'pymatgen==2023.10.11'],
+        "grainboundary": ['aimsgb==1.1.0', 'pymatgen==2023.11.12'],
         "pyscal": ['pyscal2==2.10.18'],
         "nglview": ['nglview==3.0.8'],
-        "plotly": ['plotly==5.17.0'],
-        "clusters": ['scikit-learn==1.3.1'],
+        "plotly": ['plotly==5.18.0'],
+        "clusters": ['scikit-learn==1.3.2'],
         "symmetry": ['spglib==2.1.0'],
-        "surface": ['spglib==2.1.0', 'pymatgen==2023.10.11'],
+        "surface": ['spglib==2.1.0', 'pymatgen==2023.11.12'],
         "phonopy": ['phonopy==2.20.0', 'spglib==2.1.0'],
-        "pyxtal": ['pyxtal==0.6.0']
+        "pyxtal": ['pyxtal==0.6.1']
     },
     cmdclass=versioneer.get_cmdclass(),
 )
