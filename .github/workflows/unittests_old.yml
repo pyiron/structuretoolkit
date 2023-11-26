@@ -22,13 +22,11 @@ jobs:
         channels: conda-forge
         channel-priority: strict
         activate-environment: my-env
+        environment-file: .ci_support/environment-old.yml
         use-mamba: true
-    - name: Update environment
-      run: mamba env update -n my-env -f .ci_support/environment-old.yml
-    - name: Setup
-      shell: bash -l {0}
-      run: pip install --no-deps .
     - name: Test
       shell: bash -l {0}
       timeout-minutes: 30
-      run: python -m unittest discover tests
+      run: |
+        python -m pip install --no-deps .
+        python -m unittest discover tests

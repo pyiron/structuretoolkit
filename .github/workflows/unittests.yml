@@ -46,8 +46,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Setup environment
-      run: cp .ci_support/environment.yml environment.yml
     - name: Setup Mambaforge
       uses: conda-incubator/setup-miniconda@v2
       with:
@@ -56,17 +54,13 @@ jobs:
         channels: conda-forge
         channel-priority: strict
         activate-environment: my-env
+        environment-file: .ci_support/environment.yml
         use-mamba: true
-    - name: Update environment
-      run: mamba env update -n my-env -f environment.yml
-    - name: Setup
-      shell: bash -l {0}
-      run: |
-        pip install --no-deps .
     - name: Test
       shell: bash -l {0}
       timeout-minutes: 30
       run: |
+        python -m pip install --no-deps .
         coverage run --omit structuretoolkit/_version.py -m unittest discover tests
     - name: Coverage
       if:  matrix.label == 'linux-64-py-3-10'
