@@ -1,3 +1,5 @@
+from . import _version
+
 # Analyse
 from structuretoolkit.analyse import (
     find_mic,
@@ -73,3 +75,5 @@ from structuretoolkit.build import (
     grainboundary as grainboundary_build,
     sqs_structures as get_sqs_structures,
 )
+
+__version__ = _version.get_versions()["version"]
