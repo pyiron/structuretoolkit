@@ -1,5 +1,5 @@
 [build-system]
-requires = ["ase", "matplotlib", "numpy", "setuptools", "scipy"]
+requires = ["ase", "matplotlib", "numpy", "setuptools", "scipy", "versioneer[toml]==0.29"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -56,8 +56,8 @@ phonopy = [
 ]
 pyxtal = ["pyxtal==0.6.1"]
 
-[tool.setuptools]
-packages = ["structuretoolkit"]
+[tool.setuptools.packages.find]
+include = ["structuretoolkit*"]
 
 [tool.setuptools.dynamic]
 version = {attr = "structuretoolkit.__version__"}
