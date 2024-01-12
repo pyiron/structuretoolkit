@@ -154,7 +154,7 @@ def _get_frame(cell):
 
 def _plot3d_plotly(
     structure,
-    show_cell=False,
+    show_cell=True,
     scalar_field=None,
     select_atoms=None,
     particle_size=1.0,
