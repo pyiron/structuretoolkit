@@ -145,12 +145,11 @@ def plot3d(
 
 
 def _get_frame(cell):
-    vertices = np.array([[0, 0, 0], [0, 0, 1], [0, 1, 1], [0, 1, 0], [0, 0, 0]])
-    return [
-        f(vertices + v) @ cell
-        for f in [lambda x: x, lambda x: np.roll(x, 1, axis=-1)]
-        for v in [0, [1, 0, 0]]
-    ]
+    lines_dz = np.stack(np.meshgrid(*3 * [[0, 1]], indexing="ij"), axis=-1)
+    all_lines = np.reshape(
+        [np.roll(lines_dz, i, axis=-1) for i in range(3)], (-1, 2, 3)
+    )
+    return all_lines @ cell
 
 
 def _plot3d_plotly(
