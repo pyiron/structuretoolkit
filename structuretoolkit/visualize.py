@@ -210,7 +210,7 @@ def _plot3d_plotly(
     if show_cell:
         data = fig.data
         for lines in _get_frame(structure.cell):
-            fig = px.line_3d(**{xx: vv for xx, vv in zip(['x', 'y', 'z'], lines.T)})
+            fig = px.line_3d(**{xx: vv for xx, vv in zip(["x", "y", "z"], lines.T)})
             fig.update_traces(line_color="#000000")
             data = fig.data + data
         fig = go.Figure(data=data)
