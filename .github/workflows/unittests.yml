@@ -45,7 +45,7 @@ jobs:
           prefix: /usr/share/miniconda3/envs/my-env
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Setup Mambaforge
       uses: conda-incubator/setup-miniconda@v2
       with:
@@ -54,30 +54,15 @@ jobs:
         channels: conda-forge
         channel-priority: strict
         activate-environment: my-env
+        environment-file: .ci_support/environment.yml
         use-mamba: true
-    - name: Setup environment (windows)
-      if: matrix.operating-system == 'windows-latest'
-      run: cp .ci_support/environment.yml environment.yml
-    - name: Setup environment (unix)
-      if: matrix.operating-system != 'windows-latest'
-      shell: bash -l {0}
-      run: |
-        mamba install -y pyyaml
-        python .ci_support/condamerge.py --base .ci_support/environment.yml --add .ci_support/environment-lammps.yml > environment.yml
-    - name: Update environment
-      run: mamba env update -n my-env -f environment.yml
-    - name: Setup
-      shell: bash -l {0}
-      run: |
-        pip install --no-deps .
     - name: Test
       shell: bash -l {0}
       timeout-minutes: 30
-      run: coverage run --omit structuretoolkit/_version.py -m unittest discover tests
+      run: |
+        pip install versioneer[toml]==0.29
+        pip install . --no-deps --no-build-isolation
+        coverage run --omit structuretoolkit/_version.py -m unittest discover tests
     - name: Coverage
       if:  matrix.label == 'linux-64-py-3-10'
-      continue-on-error: True
-      shell: bash -l {0}
-      run: |
-        coveralls
-        coverage xml
+      uses: coverallsapp/github-action@v2

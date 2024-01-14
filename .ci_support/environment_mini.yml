@@ -2,9 +2,6 @@ channels:
 - conda-forge
 dependencies:
 - ase =3.22.1
-- coveralls
 - coverage
-- codacy-coverage
-- matplotlib-base =3.7.2
-- numpy =1.23.5
-- scipy =1.11.2
+- numpy =1.26.3
+- scipy =1.11.4
