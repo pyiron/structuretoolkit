@@ -36,7 +36,7 @@ class TestCu(unittest.TestCase):
         n_coeff = len(stk.analyse.get_snap_descriptor_names(
             twojmax=self.bispec_options["twojmax"]
         ))
-        coeff = stk.analyse.calc_snap_descriptors_per_atom(
+        coeff = stk.analyse._calc_snap_per_atom(
             lmp=self.lmp,
             structure=self.structure,
             bispec_options=self.bispec_options,
@@ -50,7 +50,7 @@ class TestCu(unittest.TestCase):
         ))
         bispec_options = self.bispec_options.copy()
         bispec_options["quadraticflag"] = 1
-        coeff = stk.analyse.calc_snap_descriptors_per_atom(
+        coeff = stk.analyse._calc_snap_per_atom(
             lmp=self.lmp,
             structure=self.structure,
             bispec_options=bispec_options,
@@ -62,7 +62,7 @@ class TestCu(unittest.TestCase):
         n_coeff = len(stk.analyse.get_snap_descriptor_names(
             twojmax=self.bispec_options["twojmax"]
         ))
-        mat_a = stk.analyse.calc_snap_descriptor_derivatives(
+        mat_a = stk.analyse._calc_snap_derivatives(
             lmp=self.lmp,
             structure=self.structure,
             bispec_options=self.bispec_options,

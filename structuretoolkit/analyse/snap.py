@@ -1,4 +1,5 @@
 from ctypes import c_double, c_int, cast, POINTER
+from lammps import lammps
 import numpy as np
 from scipy.constants import physical_constants
 
@@ -196,7 +197,7 @@ def set_compute_lammps(lmp, bispec_options, numtypes):
     lmp.command(f"{base_b} {radelem} {wj} {kwargs}")
 
 
-def calc_snap_descriptors_per_atom(lmp, structure, bispec_options, cutoff=10.0):
+def _calc_snap_per_atom(lmp, structure, bispec_options, cutoff=10.0):
     number_coef = len(get_snap_descriptor_names(twojmax=bispec_options["twojmax"]))
     reset_lmp(lmp=lmp)
     write_ase_structure(lmp=lmp, structure=structure)
@@ -362,7 +363,7 @@ def extract_computes_snappy(lmp, num_atoms, n_coeff, num_types):
     ).copy()
 
 
-def calc_snap_descriptor_derivatives(lmp, structure, bispec_options, cutoff=10.0):
+def _calc_snap_derivatives(lmp, structure, bispec_options, cutoff=10.0):
     number_coef = len(get_snap_descriptor_names(twojmax=bispec_options["twojmax"]))
     number_species = len(set(structure.get_chemical_symbols()))
     reset_lmp(lmp=lmp)
@@ -395,3 +396,67 @@ def calc_snap_descriptor_derivatives(lmp, structure, bispec_options, cutoff=10.0
                 n_coeff=number_coef,
                 num_types=number_species,
             )
+
+
+def get_default_parameters(atom_types, twojmax=6, element_radius=4.0, rcutfac=1.0, rfac0=0.99363, rmin0=0.0, bzeroflag=0, weights=None, cutoff=10.0):
+    if weights is None:
+        wj = [1.0] * len(atom_types)
+    else:
+        wj = weights
+    if isinstance(element_radius, float):
+        radelem = [element_radius] * len(atom_types)
+    else:
+        radelem = element_radius
+    bispec_options = {
+        "numtypes": len(atom_types),
+        "twojmax": twojmax,
+        "rcutfac": rcutfac,
+        "rfac0": rfac0,
+        "rmin0": rmin0,
+        "bzeroflag": bzeroflag,
+        "radelem": radelem,
+        "type": atom_types,
+        "wj": wj,
+    }
+    lmp = lammps(cmdargs=["-screen", "none", "-log", "none"])
+    return lmp, bispec_options, cutoff
+
+
+def calc_snap_descriptors_per_atom(structure, atom_types, twojmax=6, element_radius=4.0, rcutfac=1.0, rfac0=0.99363, rmin0=0.0, bzeroflag=0, weights=None, cutoff=10.0):
+    lmp, bispec_options, cutoff = get_default_parameters(
+        atom_types=atom_types,
+        twojmax=twojmax,
+        element_radius=element_radius,
+        rcutfac=rcutfac,
+        rfac0=rfac0,
+        rmin0=rmin0,
+        bzeroflag=bzeroflag,
+        weights=weights,
+        cutoff=cutoff,
+    )
+    return _calc_snap_per_atom(
+        lmp=lmp,
+        structure=structure,
+        bispec_options=bispec_options,
+        cutoff=cutoff
+    )
+
+
+def calc_snap_descriptor_derivatives(structure, atom_types, twojmax=6, element_radius=4.0, rcutfac=1.0, rfac0=0.99363, rmin0=0.0, bzeroflag=0, weights=None, cutoff=10.0):
+    lmp, bispec_options, cutoff = get_default_parameters(
+        atom_types=atom_types,
+        twojmax=twojmax,
+        element_radius=element_radius,
+        rcutfac=rcutfac,
+        rfac0=rfac0,
+        rmin0=rmin0,
+        bzeroflag=bzeroflag,
+        weights=weights,
+        cutoff=cutoff,
+    )
+    return _calc_snap_derivatives(
+        lmp=lmp,
+        structure=structure,
+        bispec_options=bispec_options,
+        cutoff=cutoff
+    )
