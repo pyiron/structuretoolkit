@@ -5,7 +5,7 @@ dependencies:
 - ase =3.22.1
 - coverage
 - matplotlib-base =3.8.2
-- nglview =3.0.8
+- nglview =3.1.1
 - numpy =1.26.3
 - phonopy =2.21.0
 - plotly =5.18.0
