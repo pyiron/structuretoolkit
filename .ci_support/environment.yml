@@ -14,6 +14,6 @@ dependencies:
 - pyscal =2.10.18
 - pyxtal =0.6.1
 - scikit-learn =1.4.0
-- scipy =1.11.4
+- scipy =1.12.0
 - spglib =2.2.0
 - sqsgenerator =0.3
