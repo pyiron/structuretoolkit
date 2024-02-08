@@ -6,7 +6,6 @@ from structuretoolkit.analyse.pyscal import get_adaptive_cna_descriptors
 
 
 class Strain:
-
     """
     Calculate local strain of each atom following the Lagrangian strain tensor:
 
