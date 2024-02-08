@@ -88,9 +88,9 @@ def set_to_high_symmetry_points(positions, structure, neigh, decimals=4):
 def cluster_by_steinhardt(positions, neigh, l_values, q_eps, var_ratio, min_samples):
     """
     Clusters candidate positions via Steinhardt parameters and the variance in distances to host atoms.
-    
+
     The cluster that has the lowest variance is returned, i.e. those positions that have the most "regular" coordination polyhedra.
-    
+
     Args:
         positions (array): candidate positions
         neigh (Neighbor): neighborhood information of the candidate positions
@@ -98,7 +98,7 @@ def cluster_by_steinhardt(positions, neigh, l_values, q_eps, var_ratio, min_samp
         q_eps (float): maximum intercluster distance in steinhardt parameters for DBSCAN clustering
         var_ratio (float): multiplier to make steinhardt's and distance variance numerically comparable
         min_samples (int): minimum size of clusters
-    
+
     Returns:
          array:  Positions of the most likely interstitial sites
     """
