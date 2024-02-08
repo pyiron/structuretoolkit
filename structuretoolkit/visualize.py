@@ -144,7 +144,7 @@ def plot3d(
         raise ValueError("plot method not recognized")
 
 
-def _get_frame(cell):
+def _get_box_skeleton(cell):
     lines_dz = np.stack(np.meshgrid(*3 * [[0, 1]], indexing="ij"), axis=-1)
     all_lines = np.reshape(
         [np.roll(lines_dz, i, axis=-1) for i in range(3)], (-1, 2, 3)
@@ -209,7 +209,7 @@ def _plot3d_plotly(
     )
     if show_cell:
         data = fig.data
-        for lines in _get_frame(structure.cell):
+        for lines in _get_box_sleketon(structure.cell):
             fig = px.line_3d(**{xx: vv for xx, vv in zip(["x", "y", "z"], lines.T)})
             fig.update_traces(line_color="#000000")
             data = fig.data + data

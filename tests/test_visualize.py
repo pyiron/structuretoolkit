@@ -4,7 +4,7 @@
 
 import unittest
 import numpy as np
-from structuretoolkit.visualize import _get_flattened_orientation, _get_frame
+from structuretoolkit.visualize import _get_flattened_orientation, _get_box_skeleton
 
 
 class TestAtoms(unittest.TestCase):
@@ -22,7 +22,7 @@ class TestAtoms(unittest.TestCase):
         self.assertAlmostEqual(np.linalg.det(R), 1)
 
     def test_get_frame(self):
-        frame = _get_frame(np.eye(3))
+        frame = _get_box_skeleton(np.eye(3))
         self.assertLessEqual(
             np.unique(frame.reshape(-1, 6), axis=0, return_counts=True)[1].max(),
             1
