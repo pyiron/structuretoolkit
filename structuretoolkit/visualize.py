@@ -147,11 +147,14 @@ def plot3d(
         raise ValueError("plot method not recognized")
 
 
-def _get_frame(cell):
+def _get_box_skeleton(cell):
     lines_dz = np.stack(np.meshgrid(*3 * [[0, 1]], indexing="ij"), axis=-1)
+    # eight corners of a unit cube, paired as four z-axis lines
+
     all_lines = np.reshape(
         [np.roll(lines_dz, i, axis=-1) for i in range(3)], (-1, 2, 3)
     )
+    # All 12 two-point lines on the unit square
     return all_lines @ cell
 
 
@@ -214,7 +217,7 @@ def _plot3d_plotly(
     )
     if show_cell:
         data = fig.data
-        for lines in _get_frame(structure.cell):
+        for lines in _get_box_skeleton(structure.cell):
             fig = px.line_3d(**{xx: vv for xx, vv in zip(["x", "y", "z"], lines.T)})
             fig.update_traces(line_color="#000000")
             data = fig.data + data
