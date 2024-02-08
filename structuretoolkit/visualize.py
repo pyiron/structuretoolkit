@@ -41,6 +41,7 @@ def plot3d(
     view_plane=np.array([0, 0, 1]),
     distance_from_camera=1.0,
     opacity=1.0,
+    height=600
 ):
     """
     Plot3d relies on NGLView or plotly to visualize atomic structures. Here, we construct a string in the "protein database"
@@ -128,6 +129,7 @@ def plot3d(
             view_plane=view_plane,
             distance_from_camera=distance_from_camera,
             opacity=opacity,
+            height=height,
         )
     elif mode == "ase":
         return _plot3d_ase(
@@ -162,6 +164,7 @@ def _plot3d_plotly(
     view_plane=np.array([1, 1, 1]),
     distance_from_camera=1,
     opacity=1,
+    height=600,
 ):
     """
     Make a 3D plot of the atomic structure.
@@ -224,6 +227,7 @@ def _plot3d_plotly(
     fig.update_layout(scene_camera=angle)
     fig.update_traces(marker=dict(line=dict(width=0.1, color="DarkSlateGrey")))
     fig.update_scenes(aspectmode="data")
+    fig.update_layout(autosize=True, height=height)
     return fig
 
 
