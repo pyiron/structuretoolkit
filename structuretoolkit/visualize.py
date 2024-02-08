@@ -120,6 +120,7 @@ def plot3d(
     elif mode == "plotly":
         return _plot3d_plotly(
             structure=structure,
+            show_cell=show_cell,
             camera=camera,
             particle_size=particle_size,
             select_atoms=select_atoms,
@@ -143,8 +144,20 @@ def plot3d(
         raise ValueError("plot method not recognized")
 
 
+def _get_box_skeleton(cell):
+    lines_dz = np.stack(np.meshgrid(*3 * [[0, 1]], indexing="ij"), axis=-1)
+    # eight corners of a unit cube, paired as four z-axis lines
+
+    all_lines = np.reshape(
+        [np.roll(lines_dz, i, axis=-1) for i in range(3)], (-1, 2, 3)
+    )
+    # All 12 two-point lines on the unit square
+    return all_lines @ cell
+
+
 def _plot3d_plotly(
     structure,
+    show_cell=True,
     scalar_field=None,
     select_atoms=None,
     particle_size=1.0,
@@ -177,6 +190,7 @@ def _plot3d_plotly(
     """
     try:
         import plotly.express as px
+        import plotly.graph_objects as go
     except ModuleNotFoundError:
         raise ModuleNotFoundError("plotly not installed - use plot3d instead")
     if select_atoms is None:
@@ -196,6 +210,13 @@ def _plot3d_plotly(
             scale=particle_size / (0.1 * structure.get_volume() ** (1 / 3)),
         ),
     )
+    if show_cell:
+        data = fig.data
+        for lines in _get_box_skeleton(structure.cell):
+            fig = px.line_3d(**{xx: vv for xx, vv in zip(["x", "y", "z"], lines.T)})
+            fig.update_traces(line_color="#000000")
+            data = fig.data + data
+        fig = go.Figure(data=data)
     fig.layout.scene.camera.projection.type = camera
     rot = _get_orientation(view_plane).T
     rot[0, :] *= distance_from_camera * 1.25
@@ -206,6 +227,7 @@ def _plot3d_plotly(
     fig.update_layout(scene_camera=angle)
     fig.update_traces(marker=dict(line=dict(width=0.1, color="DarkSlateGrey")))
     fig.update_scenes(aspectmode="data")
+    fig.update_layout(legend={"itemsizing": "constant"})
     return fig
 
 
