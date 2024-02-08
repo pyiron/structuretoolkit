@@ -83,6 +83,7 @@ def plot3d(
             call. (Default is np.array([0, 0, 1]), which is view normal to the x-y plane.)
         distance_from_camera (float): Distance of the camera from the structure. Higher = farther away.
             (Default is 14, which also seems to be the NGLView default value.)
+        height (int/float): height of the plot area in pixel (only available in plotly)
 
         Possible NGLView color schemes:
           " ", "picking", "random", "uniform", "atomindex", "residueindex",
@@ -183,6 +184,7 @@ def _plot3d_plotly(
         distance_from_camera (float): Distance of the camera from the structure. Higher = farther away.
             (Default is 14, which also seems to be the NGLView default value.)
         opacity (float): opacity
+        height (int/float): height of the plot area in pixel (only available in plotly)
 
     Returns:
         (plotly.express): The NGLView widget itself, which can be operated on further or viewed as-is.
