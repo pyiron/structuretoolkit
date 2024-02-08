@@ -146,9 +146,12 @@ def plot3d(
 
 def _get_box_skeleton(cell):
     lines_dz = np.stack(np.meshgrid(*3 * [[0, 1]], indexing="ij"), axis=-1)
+    # eight corners of a unit cube, paired as four z-axis lines
+    
     all_lines = np.reshape(
         [np.roll(lines_dz, i, axis=-1) for i in range(3)], (-1, 2, 3)
     )
+    # All 12 two-point lines on the unit square
     return all_lines @ cell
 
 
