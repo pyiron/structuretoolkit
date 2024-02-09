@@ -24,7 +24,6 @@ __date__ = "Sep 1, 2017"
 
 
 class Symmetry(dict):
-
     """
 
     Return a class for operations related to box symmetries. Main attributes:
