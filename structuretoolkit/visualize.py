@@ -41,7 +41,7 @@ def plot3d(
     view_plane=np.array([0, 0, 1]),
     distance_from_camera=1.0,
     opacity=1.0,
-    height=None
+    height=None,
 ):
     """
     Plot3d relies on NGLView or plotly to visualize atomic structures. Here, we construct a string in the "protein database"
@@ -99,9 +99,7 @@ def plot3d(
     """
     if mode == "NGLview":
         if height is not None:
-            warnings.warn(
-                "`height` is not implemented in NGLview", SyntaxWarning
-            )
+            warnings.warn("`height` is not implemented in NGLview", SyntaxWarning)
         return _plot3d(
             structure=structure,
             show_cell=show_cell,
@@ -138,9 +136,7 @@ def plot3d(
         )
     elif mode == "ase":
         if height is not None:
-            warnings.warn(
-                "`height` is not implemented in ase", SyntaxWarning
-            )
+            warnings.warn("`height` is not implemented in ase", SyntaxWarning)
         return _plot3d_ase(
             structure=structure,
             show_cell=show_cell,
