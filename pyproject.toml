@@ -38,7 +38,7 @@ Repository = "https://github.com/pyiron/structuretoolkit"
 [project.optional-dependencies]
 grainboundary = [
     "aimsgb==1.1.0",
-    "pymatgen==2024.1.27",
+    "pymatgen==2024.2.8",
 ]
 pyscal = ["pyscal2==2.10.18"]
 nglview = ["nglview==3.1.1"]
@@ -48,7 +48,7 @@ clusters = ["scikit-learn==1.4.0"]
 symmetry = ["spglib==2.3.0"]
 surface = [
     "spglib==2.3.0",
-    "pymatgen==2024.1.27",
+    "pymatgen==2024.2.8",
 ]
 phonopy = [
     "phonopy==2.21.0",
