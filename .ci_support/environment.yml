@@ -7,7 +7,7 @@ dependencies:
 - matplotlib-base =3.8.2
 - nglview =3.1.1
 - notebook
-- numpy =1.26.3
+- numpy =1.26.4
 - phonopy =2.21.0
 - plotly =5.18.0
 - pymatgen =2024.1.27
