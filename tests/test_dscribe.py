@@ -19,8 +19,8 @@ except ImportError:
     skip_dscribe_test, "dscribe is not installed, so the dscribe tests are skipped."
 )
 class Testdscribe(unittest.TestCase):
-    def test_calc_soap_descriptor_per_atom(self):
+    def test_soap_descriptor_per_atom(self):
         structure = bulk('Cu', 'fcc', a=3.6, cubic=True)
-        soap = stk.analyse.calculate_soap_descriptor_per_atom(structure=structure, r_cut=6.0, n_max=8, l_max=6)
+        soap = stk.analyse.soap_descriptor_per_atom(structure=structure, r_cut=6.0, n_max=8, l_max=6)
         self.assertEqual(soap.shape, (4, 252))
         self.assertTrue(np.isclose(soap.sum(), 39450.03009, atol=1.e-5))

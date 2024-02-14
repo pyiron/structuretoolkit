@@ -1,4 +1,4 @@
-def calculate_soap_descriptor_per_atom(
+def soap_descriptor_per_atom(
     structure,
     r_cut=None,
     n_max=None,
