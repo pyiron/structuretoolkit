@@ -174,7 +174,7 @@ class Interstitials:
         var_ratio=5,
         min_samples=None,
         neigh_args={},
-        **kwargs
+        **kwargs,
     ):
         """
 
@@ -333,7 +333,7 @@ def get_interstitials(
     var_ratio=5,
     min_samples=None,
     neigh_args={},
-    **kwargs
+    **kwargs,
 ):
     return Interstitials(
         structure=structure,
@@ -347,7 +347,7 @@ def get_interstitials(
         var_ratio=var_ratio,
         min_samples=min_samples,
         neigh_args=neigh_args,
-        **kwargs
+        **kwargs,
     )
 
 
