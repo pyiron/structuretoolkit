@@ -361,19 +361,21 @@ class Symmetry(dict):
             ).items()
         }
         symbols = [indices_dict[i] for i in indices]
-        arrays = {k: self._structure.arrays[k] for k in self._structure.arrays
-                        if k not in ('numbers', 'positions')}
+        arrays = {
+            k: self._structure.arrays[k]
+            for k in self._structure.arrays
+            if k not in ("numbers", "positions")
+        }
         new_structure = type(self._structure)(
             symbols=symbols,
             scaled_positions=scaled_positions,
             cell=cell,
-            pbc=[True, True, True]
+            pbc=[True, True, True],
         )
         for k, a in arrays.items():
             new_structure.arrays[k] = a
 
         return new_structure
-
 
     def get_ir_reciprocal_mesh(
         self,
