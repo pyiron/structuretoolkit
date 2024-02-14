@@ -3,6 +3,7 @@
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import ast
+from logging import warning
 
 import numpy as np
 import spglib
@@ -344,6 +345,10 @@ class Symmetry(dict):
         >>> symmetry = Symmetry(structure)
         >>> len(symmetry.get_primitive_cell()) == len(basis)
         True
+
+        .. warning::
+            Custom arrays defined in the base structures
+            :attr:`ase.atoms.Atoms.arrays` are not copied to the new structure!
         """
         if not all(self._structure.pbc):
             raise ValueError("Can only symmetrize periodic structures.")
@@ -372,8 +377,9 @@ class Symmetry(dict):
             cell=cell,
             pbc=[True, True, True],
         )
-        for k, a in arrays.items():
-            new_structure.arrays[k] = a
+        keys = set(arrays) - {"numbers", "positions"}
+        if len(keys) > 0:
+            warning(f"Custom arrays {keys} do not carry over to new structure!")
 
         return new_structure
 
