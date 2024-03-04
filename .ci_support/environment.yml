@@ -6,7 +6,7 @@ dependencies:
 - coverage
 - dscribe =2.1.0
 - matplotlib-base =3.8.3
-- nglview =3.1.1
+- nglview =3.1.2
 - notebook
 - numpy =1.26.4
 - phonopy =2.21.2
