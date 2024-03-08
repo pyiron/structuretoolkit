@@ -6,18 +6,23 @@ from scipy.constants import physical_constants
 eV_div_A3_to_bar = 1e25 / physical_constants["joule-electron volt relationship"][0]
 
 
-def convert_mat(mat):
-    mat[np.diag_indices_from(mat)] /= 2
-    return mat[np.triu_indices(len(mat))]
-
-
 def calc_per_atom_quad(linear_per_atom):
+    """
+    Calculate quadratic SNAP descriptors from the linear SNAP descriptors, by multiplying the individual components of
+    the SNAP descriptors.
+
+    Args:
+        linear_per_atom (np.ndarray): Numpy array of the linear per atom SNAP descriptors
+
+    Returns:
+        np.ndarray: Numpy array of the quadratic per atom SNAP descriptors
+    """
     return np.array(
         [
             np.concatenate(
                 (
                     atom,
-                    convert_mat(
+                    _convert_mat(
                         mat=np.dot(
                             atom.reshape(len(atom), 1), atom.reshape(len(atom), 1).T
                         )
@@ -33,7 +38,7 @@ def calc_sum_quad(linear_sum):
     return np.concatenate(
         (
             linear_sum,
-            convert_mat(
+            _convert_mat(
                 mat=np.dot(
                     linear_sum.reshape(len(linear_sum), 1),
                     linear_sum.reshape(len(linear_sum), 1).T,
@@ -43,7 +48,114 @@ def calc_sum_quad(linear_sum):
     )
 
 
+def calc_snap_descriptors_per_atom(
+    structure,
+    atom_types,
+    twojmax=6,
+    element_radius=4.0,
+    rcutfac=1.0,
+    rfac0=0.99363,
+    rmin0=0.0,
+    bzeroflag=0,
+    weights=None,
+    cutoff=10.0,
+):
+    """
+    Calculate per atom SNAP descriptors
+
+    Args:
+        structure (ase.atoms.Atoms): atomistic structure as ASE atoms object
+        atom_types:
+        twojmax (int):
+        element_radius (float):
+        rcutfac (float):
+        rfac0 (float):
+        rmin0 (float):
+        bzeroflag (bool):
+        weights (list/np.ndarry/None):
+        cutoff (float):
+
+    Returns:
+        np.ndarray: Numpy array with the calculated descriptor derivatives
+    """
+    lmp, bispec_options, cutoff = _get_default_parameters(
+        atom_types=atom_types,
+        twojmax=twojmax,
+        element_radius=element_radius,
+        rcutfac=rcutfac,
+        rfac0=rfac0,
+        rmin0=rmin0,
+        bzeroflag=bzeroflag,
+        weights=weights,
+        cutoff=cutoff,
+    )
+    return _calc_snap_per_atom(
+        lmp=lmp,
+        structure=structure,
+        bispec_options=bispec_options,
+        cutoff=cutoff
+    )
+
+
+def calc_snap_descriptor_derivatives(
+    structure,
+    atom_types,
+    twojmax=6,
+    element_radius=4.0,
+    rcutfac=1.0,
+    rfac0=0.99363,
+    rmin0=0.0,
+    bzeroflag=0,
+    weights=None,
+    cutoff=10.0,
+):
+    """
+    Calculate per atom derivatives of the SNAP descriptors.
+
+    Args:
+        structure (ase.atoms.Atoms): atomistic structure as ASE atoms object
+        atom_types:
+        twojmax (int):
+        element_radius (float):
+        rcutfac (float):
+        rfac0 (float):
+        rmin0 (float):
+        bzeroflag (bool):
+        weights (list/np.ndarry/None):
+        cutoff (float):
+
+    Returns:
+        np.ndarray: Numpy array with the calculated descriptor derivatives
+    """
+    lmp, bispec_options, cutoff = _get_default_parameters(
+        atom_types=atom_types,
+        twojmax=twojmax,
+        element_radius=element_radius,
+        rcutfac=rcutfac,
+        rfac0=rfac0,
+        rmin0=rmin0,
+        bzeroflag=bzeroflag,
+        weights=weights,
+        cutoff=cutoff,
+    )
+    return _calc_snap_derivatives(
+        lmp=lmp,
+        structure=structure,
+        bispec_options=bispec_options,
+        cutoff=cutoff
+    )
+
+
 def get_apre(cell):
+    """
+    Convert ASE cell to LAMMPS cell - LAMMPS required the upper triangle to be zero
+
+    Args:
+        cell (np.ndarray): ASE cell as 3x3 matrix
+
+    Returns:
+        np.ndarray: LAMMPS cell as 3x3 matrix
+    """
     a, b, c = cell
     an, bn, cn = [np.linalg.norm(v) for v in cell]
 
@@ -56,12 +168,36 @@ def get_apre(cell):
     yhi = np.sin(gamma) * bn
     xzp = np.cos(beta) * cn
     yzp = (bn * cn * np.cos(alpha) - xyp * xzp) / yhi
-    zhi = np.sqrt(cn**2 - xzp**2 - yzp**2)
+    zhi = np.sqrt(cn ** 2 - xzp ** 2 - yzp ** 2)
 
     return np.array(((xhi, 0, 0), (xyp, yhi, 0), (xzp, yzp, zhi)))
 
 
-def write_ase_structure(lmp, structure):
+def get_snap_descriptor_names(twojmax):
+    """
+    Get names of the SNAP descriptors
+
+    Args:
+        twojmax (int):
+
+    Returns:
+        list: List of SNAP descriptor names
+    """
+    lst = []
+    for j1 in range(0, twojmax + 1):
+        for j2 in range(0, j1 + 1):
+            for j in range(j1 - j2, min(twojmax, j1 + j2) + 1, 2):
+                if j >= j1:
+                    lst.append([j1 / 2.0, j2 / 2.0, j / 2.0])
+    return lst
+
+
+def _convert_mat(mat):
+    mat[np.diag_indices_from(mat)] /= 2
+    return mat[np.triu_indices(len(mat))]
+
+
+def _write_ase_structure(lmp, structure):
     number_species = len(set(structure.get_chemical_symbols()))
 
     apre = get_apre(cell=structure.cell)
@@ -109,7 +245,7 @@ def write_ase_structure(lmp, structure):
     )
 
 
-def extract_compute_np(lmp, name, compute_type, result_type, array_shape):
+def _extract_compute_np(lmp, name, compute_type, result_type, array_shape):
     """
     Convert a lammps compute to a numpy array.
     Assumes the compute returns a floating point numbers.
@@ -130,7 +266,13 @@ def extract_compute_np(lmp, name, compute_type, result_type, array_shape):
     return array_np.copy()
 
 
-def reset_lmp(lmp):
+def _reset_lmp(lmp):
+    """
+    Reset the LAMMPS library instance
+
+    Args:
+        lmp (lammps.Lammps): Lammps library instance
+    """
     lmp.command("clear")
     lmp.command("units metal")
     lmp.command("dimension 3")
@@ -139,7 +281,14 @@ def reset_lmp(lmp):
     lmp.command("atom_modify map array sort 0 2.0")
 
 
-def set_potential_lmp(lmp, cutoff=10.0):
+def _set_potential_lmp(lmp, cutoff=10.0):
+    """
+    Set interatomic potential parameters to LAMMPS library instance
+
+    Args:
+        lmp (lammps.Lammps): Lammps library instance
+        cutoff (float): cutoff radius for the construction of the neighbor list
+    """
     lmp.command("pair_style zero " + str(cutoff))
     lmp.command("pair_coeff * *")
     lmp.command("mass * 1.0e-20")
@@ -147,17 +296,7 @@ def set_potential_lmp(lmp, cutoff=10.0):
     lmp.command("neigh_modify one 10000")
 
 
-def get_snap_descriptor_names(twojmax):
-    lst = []
-    for j1 in range(0, twojmax + 1):
-        for j2 in range(0, j1 + 1):
-            for j in range(j1 - j2, min(twojmax, j1 + j2) + 1, 2):
-                if j >= j1:
-                    lst.append([j1 / 2.0, j2 / 2.0, j / 2.0])
-    return lst
-
-
-def set_compute_lammps(lmp, bispec_options, numtypes):
+def _set_compute_lammps(lmp, bispec_options, numtypes):
     lmp_variable_args = {
         k: bispec_options[k] for k in ["rcutfac", "rfac0", "rmin0", "twojmax"]
     }
@@ -199,10 +338,10 @@ def set_compute_lammps(lmp, bispec_options, numtypes):
 
 def _calc_snap_per_atom(lmp, structure, bispec_options, cutoff=10.0):
     number_coef = len(get_snap_descriptor_names(twojmax=bispec_options["twojmax"]))
-    reset_lmp(lmp=lmp)
-    write_ase_structure(lmp=lmp, structure=structure)
-    set_potential_lmp(lmp=lmp, cutoff=cutoff)
-    set_compute_lammps(
+    _reset_lmp(lmp=lmp)
+    _write_ase_structure(lmp=lmp, structure=structure)
+    _set_potential_lmp(lmp=lmp, cutoff=cutoff)
+    _set_compute_lammps(
         lmp=lmp,
         bispec_options=bispec_options,
         numtypes=len(set(structure.get_chemical_symbols())),
@@ -216,7 +355,7 @@ def _calc_snap_per_atom(lmp, structure, bispec_options, cutoff=10.0):
             "quadraticflag" in bispec_options.keys()
             and int(bispec_options["quadraticflag"]) == 1
         ):
-            return extract_compute_np(
+            return _extract_compute_np(
                 lmp=lmp,
                 name="b",
                 compute_type=1,
@@ -229,7 +368,7 @@ def _calc_snap_per_atom(lmp, structure, bispec_options, cutoff=10.0):
                 ),
             )
         else:
-            return extract_compute_np(
+            return _extract_compute_np(
                 lmp=lmp,
                 name="b",
                 compute_type=1,
@@ -238,7 +377,7 @@ def _calc_snap_per_atom(lmp, structure, bispec_options, cutoff=10.0):
             )
 
 
-def lammps_variables(bispec_options):
+def _lammps_variables(bispec_options):
     d = {
         k: bispec_options[k]
         for k in [
@@ -261,12 +400,26 @@ def lammps_variables(bispec_options):
     return d
 
 
-def set_variables(lmp, **lmp_variable_args):
+def _set_variables(lmp, **lmp_variable_args):
+    """
+    Internal helper function to set LAMMPS variables
+
+    Args:
+        lmp (lammps.Lammps): Lammps library instance
+        **lmp_variable_args (dict): key value pairs of LAMMPS variables to set
+    """
     for k, v in lmp_variable_args.items():
         lmp.command(f"variable {k} equal {v}")
 
 
-def set_computes_snappy(lmp, bispec_options):
+def _set_computes_snap(lmp, bispec_options):
+    """
+    Set LAMMPS computes to calculate SNAP descriptors
+
+    Args:
+        lmp (lammps.Lammps): Lammps library instance
+        bispec_options (dict): bi-spectrum component settings
+    """
     # # Bispectrum coefficient computes
     base_b = "compute b all sna/atom ${rcutfac} ${rfac0} ${twojmax}"
     base_db = "compute db all snad/atom ${rcutfac} ${rfac0} ${twojmax}"
@@ -300,7 +453,7 @@ def set_computes_snappy(lmp, bispec_options):
         lmp.command(f"compute {cname}_sum all reduce sum c_{cname}[*]")
 
 
-def extract_computes_snappy(lmp, num_atoms, n_coeff, num_types):
+def _extract_computes_snap(lmp, num_atoms, n_coeff, num_types):
     lmp_atom_ids = lmp.numpy.extract_atom_iarray("id", num_atoms).flatten()
     assert np.all(
         lmp_atom_ids == 1 + np.arange(num_atoms)
@@ -311,10 +464,10 @@ def extract_computes_snappy(lmp, num_atoms, n_coeff, num_types):
     lmp_volume = lmp.get_thermo("vol")
 
     # Extract Bsum
-    lmp_bsum = extract_compute_np(lmp, "b_sum", 0, 1, (n_coeff))
+    lmp_bsum = _extract_compute_np(lmp, "b_sum", 0, 1, (n_coeff))
 
     # Extract B
-    lmp_barr = extract_compute_np(lmp, "b", 1, 2, (num_atoms, n_coeff))
+    lmp_barr = _extract_compute_np(lmp, "b", 1, 2, (num_atoms, n_coeff))
 
     type_onehot = np.eye(num_types)[lmp_types - 1]  # lammps types are 1-indexed.
     # has shape n_atoms, n_types, num_coeffs.
@@ -332,15 +485,15 @@ def extract_computes_snappy(lmp, num_atoms, n_coeff, num_types):
         print(lmp_bsum)
         print(lmp_barr.sum(axis=0))
 
-    lmp_dbarr = extract_compute_np(lmp, "db", 1, 2, (num_atoms, num_types, 3, n_coeff))
-    lmp_dbsum = extract_compute_np(lmp, "db_sum", 0, 1, (num_types, 3, n_coeff))
+    lmp_dbarr = _extract_compute_np(lmp, "db", 1, 2, (num_atoms, num_types, 3, n_coeff))
+    lmp_dbsum = _extract_compute_np(lmp, "db_sum", 0, 1, (num_types, 3, n_coeff))
     assert np.allclose(
         lmp_dbsum, lmp_dbarr.sum(axis=0), rtol=1e-12, atol=1e-12
     ), "db_sum doesn't match sum of db"
     db_atom = np.transpose(lmp_dbarr, (0, 2, 1, 3))
 
-    lmp_vbarr = extract_compute_np(lmp, "vb", 1, 2, (num_atoms, num_types, 6, n_coeff))
-    lmp_vbsum = extract_compute_np(lmp, "vb_sum", 0, 1, (num_types, 6, n_coeff))
+    lmp_vbarr = _extract_compute_np(lmp, "vb", 1, 2, (num_atoms, num_types, 6, n_coeff))
+    lmp_vbsum = _extract_compute_np(lmp, "vb_sum", 0, 1, (num_types, 6, n_coeff))
     assert np.allclose(
         lmp_vbsum, lmp_vbarr.sum(axis=0), rtol=1e-12, atol=1e-12
     ), "vb_sum doesn't match sum of vb"
@@ -366,11 +519,11 @@ def extract_computes_snappy(lmp, num_atoms, n_coeff, num_types):
 def _calc_snap_derivatives(lmp, structure, bispec_options, cutoff=10.0):
     number_coef = len(get_snap_descriptor_names(twojmax=bispec_options["twojmax"]))
     number_species = len(set(structure.get_chemical_symbols()))
-    reset_lmp(lmp=lmp)
-    write_ase_structure(lmp=lmp, structure=structure)
-    set_potential_lmp(lmp=lmp, cutoff=cutoff)
-    set_variables(lmp, **lammps_variables(bispec_options))
-    set_computes_snappy(
+    _reset_lmp(lmp=lmp)
+    _write_ase_structure(lmp=lmp, structure=structure)
+    _set_potential_lmp(lmp=lmp, cutoff=cutoff)
+    _set_variables(lmp, **_lammps_variables(bispec_options))
+    _set_computes_snap(
         lmp=lmp,
         bispec_options=bispec_options,
     )
@@ -383,14 +536,14 @@ def _calc_snap_derivatives(lmp, structure, bispec_options, cutoff=10.0):
             "quadraticflag" in bispec_options.keys()
             and int(bispec_options["quadraticflag"]) == 1
         ):
-            return extract_computes_snappy(
+            return _extract_computes_snap(
                 lmp=lmp,
                 num_atoms=len(structure),
                 n_coeff=int(number_coef * (number_coef * (1 - 1 / 2) + 3 / 2)),
                 num_types=number_species,
             )
         else:
-            return extract_computes_snappy(
+            return _extract_computes_snap(
                 lmp=lmp,
                 num_atoms=len(structure),
                 n_coeff=number_coef,
@@ -398,7 +551,17 @@ def _calc_snap_derivatives(lmp, structure, bispec_options, cutoff=10.0):
             )
 
 
-def get_default_parameters(atom_types, twojmax=6, element_radius=4.0, rcutfac=1.0, rfac0=0.99363, rmin0=0.0, bzeroflag=0, weights=None, cutoff=10.0):
+def _get_default_parameters(
+    atom_types,
+    twojmax=6,
+    element_radius=4.0,
+    rcutfac=1.0,
+    rfac0=0.99363,
+    rmin0=0.0,
+    bzeroflag=0,
+    weights=None,
+    cutoff=10.0
+):
     if weights is None:
         wj = [1.0] * len(atom_types)
     else:
@@ -420,43 +583,3 @@ def get_default_parameters(atom_types, twojmax=6, element_radius=4.0, rcutfac=1.
     }
     lmp = lammps(cmdargs=["-screen", "none", "-log", "none"])
     return lmp, bispec_options, cutoff
-
-
-def calc_snap_descriptors_per_atom(structure, atom_types, twojmax=6, element_radius=4.0, rcutfac=1.0, rfac0=0.99363, rmin0=0.0, bzeroflag=0, weights=None, cutoff=10.0):
-    lmp, bispec_options, cutoff = get_default_parameters(
-        atom_types=atom_types,
-        twojmax=twojmax,
-        element_radius=element_radius,
-        rcutfac=rcutfac,
-        rfac0=rfac0,
-        rmin0=rmin0,
-        bzeroflag=bzeroflag,
-        weights=weights,
-        cutoff=cutoff,
-    )
-    return _calc_snap_per_atom(
-        lmp=lmp,
-        structure=structure,
-        bispec_options=bispec_options,
-        cutoff=cutoff
-    )
-
-
-def calc_snap_descriptor_derivatives(structure, atom_types, twojmax=6, element_radius=4.0, rcutfac=1.0, rfac0=0.99363, rmin0=0.0, bzeroflag=0, weights=None, cutoff=10.0):
-    lmp, bispec_options, cutoff = get_default_parameters(
-        atom_types=atom_types,
-        twojmax=twojmax,
-        element_radius=element_radius,
-        rcutfac=rcutfac,
-        rfac0=rfac0,
-        rmin0=rmin0,
-        bzeroflag=bzeroflag,
-        weights=weights,
-        cutoff=cutoff,
-    )
-    return _calc_snap_derivatives(
-        lmp=lmp,
-        structure=structure,
-        bispec_options=bispec_options,
-        cutoff=cutoff
-    )
