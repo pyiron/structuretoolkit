@@ -1,7 +1,13 @@
 from ase.build.bulk import bulk
 import numpy as np
 import structuretoolkit as stk
-from structuretoolkit.analyse.snap import _calc_snap_per_atom, _calc_snap_derivatives, calc_per_atom_quad, calc_sum_quad, _get_lammps_compatible_cell
+from structuretoolkit.analyse.snap import (
+    calc_per_atom_quad,
+    calc_sum_quad,
+    _calc_snap_per_atom,
+    _calc_snap_derivatives,
+    _get_lammps_compatible_cell
+)
 import unittest
 
 
