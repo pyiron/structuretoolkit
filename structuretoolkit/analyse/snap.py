@@ -71,7 +71,7 @@ def calc_snap_descriptors_per_atom(
     cutoff=10.0,
 ):
     """
-    Calculate per atom SNAP descriptors
+    Calculate per atom SNAP descriptors using LAMMPS https://docs.lammps.org/compute_sna_atom.html
 
     Args:
         structure (ase.atoms.Atoms): atomistic structure as ASE atoms object
@@ -120,7 +120,7 @@ def calc_snap_descriptor_derivatives(
     cutoff=10.0,
 ):
     """
-    Calculate per atom derivatives of the SNAP descriptors.
+    Calculate per atom derivatives of the SNAP descriptors using LAMMPS https://docs.lammps.org/compute_sna_atom.html
 
     Args:
         structure (ase.atoms.Atoms): atomistic structure as ASE atoms object
@@ -312,6 +312,19 @@ def _set_potential_lmp(lmp, cutoff=10.0):
 
 
 def _set_compute_lammps(lmp, bispec_options, numtypes):
+    compute_parameter = [
+        "rmin0",
+        "bzeroflag",
+        "quadraticflag",
+        "switchflag",
+        "chem",
+        "bnormflag",
+        "wselfallflag",
+        "bikflag",
+        "switchinnerflag",
+        "sinner",
+        "dinner",
+    ]
     lmp_variable_args = {
         k: bispec_options[k] for k in ["rcutfac", "rfac0", "rmin0", "twojmax"]
     }
@@ -330,21 +343,7 @@ def _set_compute_lammps(lmp, bispec_options, numtypes):
     radelem = " ".join([f"${{radelem{i}}}" for i in range(1, numtypes + 1)])
     wj = " ".join([f"${{wj{i}}}" for i in range(1, numtypes + 1)])
     kw_options = {
-        k: bispec_options[v]
-        for k, v in {
-            "rmin0": "rmin0",
-            "bzeroflag": "bzeroflag",
-            "quadraticflag": "quadraticflag",
-            "switchflag": "switchflag",
-            "chem": "chemflag",
-            "bnormflag": "bnormflag",
-            "wselfallflag": "wselfallflag",
-            "bikflag": "bikflag",
-            "switchinnerflag": "switchinnerflag",
-            "sinner": "sinner",
-            "dinner": "dinner",
-        }.items()
-        if v in bispec_options
+        k: bispec_options[k] for k in compute_parameter if k in bispec_options
     }
     kw_substrings = [f"{k} {v}" for k, v in kw_options.items()]
     kwargs = " ".join(kw_substrings)
