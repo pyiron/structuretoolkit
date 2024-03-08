@@ -1,6 +1,6 @@
 from ase.build.bulk import bulk
 import structuretoolkit as stk
-from structuretoolkit.analyse.snap import _calc_snap_per_atom, _calc_snap_derivatives
+from structuretoolkit.analyse.snap import _calc_snap_per_atom, _calc_snap_derivatives, calc_per_atom_quad, calc_sum_quad
 import unittest
 
 
@@ -25,7 +25,8 @@ class TestSNAP(unittest.TestCase):
         cls.rcutfac = 1.0
         cls.rfac0 = 0.99363
         cls.rmin0 = 0.0
-        cls.bzeroflag = 0
+        cls.bzeroflag = False
+        cls.quadraticflag = False
         cls.radelem = [4.0]
         cls.type = ['Cu']
         cls.wj = [1.0]
@@ -81,28 +82,30 @@ class TestSNAP(unittest.TestCase):
             rfac0=self.rfac0,
             rmin0=self.rmin0,
             bzeroflag=self.bzeroflag,
+            quadraticflag=self.quadraticflag,
             weights=self.wj,
             cutoff=10.0,
         )
-        self.assertTrue(coeff.shape, (len(self.structure), n_coeff))
+        self.assertEqual(coeff.shape, (len(self.structure), n_coeff))
 
     def test_calc_bispectrum_lmp_quad(self):
         n_coeff = len(stk.analyse.get_snap_descriptor_names(
             twojmax=self.twojmax
         ))
         coeff = stk.analyse.calc_snap_descriptors_per_atom(
-                structure=self.structure,
-                atom_types=self.type,
-                twojmax=self.twojmax,
-                element_radius=self.radelem,
-                rcutfac=self.rcutfac,
-                rfac0=self.rfac0,
-                rmin0=self.rmin0,
-                bzeroflag=self.bzeroflag,
-                weights=self.wj,
-                cutoff=10.0,
-            )
-        self.assertTrue(coeff.shape, (len(self.structure), n_coeff * 31))
+            structure=self.structure,
+            atom_types=self.type,
+            twojmax=self.twojmax,
+            element_radius=self.radelem,
+            rcutfac=self.rcutfac,
+            rfac0=self.rfac0,
+            rmin0=self.rmin0,
+            bzeroflag=self.bzeroflag,
+            quadraticflag=True,
+            weights=self.wj,
+            cutoff=10.0,
+        )
+        self.assertEqual(coeff.shape, (len(self.structure), ((n_coeff + 1) * n_coeff) / 2 + 30))
 
     def test_calc_a_matrix_snappy(self):
         n_coeff = len(stk.analyse.get_snap_descriptor_names(
@@ -117,10 +120,11 @@ class TestSNAP(unittest.TestCase):
             rfac0=self.rfac0,
             rmin0=self.rmin0,
             bzeroflag=self.bzeroflag,
+            quadraticflag=self.quadraticflag,
             weights=self.wj,
             cutoff=10.0,
         )
-        self.assertTrue(mat_a.shape, (len(self.structure) * 3 + 7, n_coeff))
+        self.assertEqual(mat_a.shape, (len(self.structure) * 3 + 7, n_coeff + 1))
 
 
 @unittest.skipIf(
@@ -154,21 +158,29 @@ class TestSNAPInternal(unittest.TestCase):
             bispec_options=self.bispec_options,
             cutoff=10.0
         )
-        self.assertTrue(coeff.shape, (len(self.structure), n_coeff))
+        self.assertEqual(coeff.shape, (len(self.structure), n_coeff))
 
     def test_calc_bispectrum_lmp_quad(self):
         n_coeff = len(stk.analyse.get_snap_descriptor_names(
             twojmax=self.bispec_options["twojmax"]
         ))
+        coeff_lin = _calc_snap_per_atom(
+            lmp=self.lmp,
+            structure=self.structure,
+            bispec_options=self.bispec_options,
+            cutoff=10.0
+        )
         bispec_options = self.bispec_options.copy()
         bispec_options["quadraticflag"] = 1
-        coeff = _calc_snap_per_atom(
+        coeff_quad = _calc_snap_per_atom(
             lmp=self.lmp,
             structure=self.structure,
             bispec_options=bispec_options,
             cutoff=10.0
         )
-        self.assertTrue(coeff.shape, (len(self.structure), n_coeff * 31))
+        self.assertEqual(coeff_quad.shape, (len(self.structure), ((n_coeff+1) * n_coeff)/2 + 30))
+        coeff_quad_py = calc_per_atom_quad(coeff_lin)
+        self.assertEqual(coeff_quad.shape, coeff_quad_py.shape)
 
     def test_calc_a_matrix_snappy(self):
         n_coeff = len(stk.analyse.get_snap_descriptor_names(
@@ -180,4 +192,4 @@ class TestSNAPInternal(unittest.TestCase):
             bispec_options=self.bispec_options,
             cutoff=10.0
         )
-        self.assertTrue(mat_a.shape, (len(self.structure) * 3 + 7, n_coeff))
+        self.assertEqual(mat_a.shape, (len(self.structure) * 3 + 7, n_coeff + 1))

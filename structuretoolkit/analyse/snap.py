@@ -55,7 +55,8 @@ def calc_snap_descriptors_per_atom(
     rcutfac=1.0,
     rfac0=0.99363,
     rmin0=0.0,
-    bzeroflag=0,
+    bzeroflag=False,
+    quadraticflag=False,
     weights=None,
     cutoff=10.0,
 ):
@@ -71,6 +72,7 @@ def calc_snap_descriptors_per_atom(
         rfac0 (float):
         rmin0 (float):
         bzeroflag (bool):
+        quadraticflag (bool):
         weights (list/np.ndarry/None):
         cutoff (float):
 
@@ -85,6 +87,7 @@ def calc_snap_descriptors_per_atom(
         rfac0=rfac0,
         rmin0=rmin0,
         bzeroflag=bzeroflag,
+        quadraticflag=quadraticflag,
         weights=weights,
         cutoff=cutoff,
     )
@@ -102,6 +105,7 @@ def calc_snap_descriptor_derivatives(
     rfac0=0.99363,
     rmin0=0.0,
     bzeroflag=0,
+    quadraticflag=0,
     weights=None,
     cutoff=10.0,
 ):
@@ -131,6 +135,7 @@ def calc_snap_descriptor_derivatives(
         rfac0=rfac0,
         rmin0=rmin0,
         bzeroflag=bzeroflag,
+        quadraticflag=quadraticflag,
         weights=weights,
         cutoff=cutoff,
     )
@@ -544,6 +549,7 @@ def _get_default_parameters(
     bzeroflag=0,
     weights=None,
     cutoff=10.0,
+    quadraticflag=0,
 ):
     from lammps import lammps
 
@@ -561,10 +567,17 @@ def _get_default_parameters(
         "rcutfac": rcutfac,
         "rfac0": rfac0,
         "rmin0": rmin0,
-        "bzeroflag": bzeroflag,
         "radelem": radelem,
         "type": atom_types,
         "wj": wj,
     }
+    if bzeroflag:
+        bispec_options["bzeroflag"] = 1
+    else:
+        bispec_options["bzeroflag"] = 0
+    if quadraticflag:
+        bispec_options["quadraticflag"] = 1
+    else:
+        bispec_options["quadraticflag"] = 0
     lmp = lammps(cmdargs=["-screen", "none", "-log", "none"])
     return lmp, bispec_options, cutoff
