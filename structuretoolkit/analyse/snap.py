@@ -35,15 +35,15 @@ def calc_per_atom_quad(linear_per_atom):
 
 def calc_sum_quad(linear_sum):
     """
-   Calculate quadratic SNAP descriptors from the linear SNAP descriptors, by multiplying the individual components of
-   the SNAP descriptors.
+    Calculate quadratic SNAP descriptors from the linear SNAP descriptors, by multiplying the individual components of
+    the SNAP descriptors.
 
-   Args:
-       linear_sum (np.ndarray): Numpy array of the linear SNAP descriptors
+    Args:
+        linear_sum (np.ndarray): Numpy array of the linear SNAP descriptors
 
-   Returns:
-       np.ndarray: Numpy array of the quadratic SNAP descriptors
-   """
+    Returns:
+        np.ndarray: Numpy array of the quadratic SNAP descriptors
+    """
     return np.concatenate(
         (
             linear_sum,
@@ -282,12 +282,15 @@ def _reset_lmp(lmp):
     Args:
         lmp (lammps.Lammps): Lammps library instance
     """
-    lmp.command("clear")
-    lmp.command("units metal")
-    lmp.command("dimension 3")
-    lmp.command("boundary p p p")
-    lmp.command("atom_style charge")
-    lmp.command("atom_modify map array sort 0 2.0")
+    for c in [
+        "clear",
+        "units metal",
+        "dimension 3",
+        "boundary p p p",
+        "atom_style charge",
+        "atom_modify map array sort 0 2.0",
+    ]:
+        lmp.command(c)
 
 
 def _set_potential_lmp(lmp, cutoff=10.0):
@@ -298,11 +301,14 @@ def _set_potential_lmp(lmp, cutoff=10.0):
         lmp (lammps.Lammps): Lammps library instance
         cutoff (float): cutoff radius for the construction of the neighbor list
     """
-    lmp.command("pair_style zero " + str(cutoff))
-    lmp.command("pair_coeff * *")
-    lmp.command("mass * 1.0e-20")
-    lmp.command("neighbor 1.0e-20 nsq")
-    lmp.command("neigh_modify one 10000")
+    for c in [
+        "pair_style zero " + str(cutoff),
+        "pair_coeff * *",
+        "mass * 1.0e-20",
+        "neighbor 1.0e-20 nsq",
+        "neigh_modify one 10000",
+    ]:
+        lmp.command(c)
 
 
 def _set_compute_lammps(lmp, bispec_options, numtypes):
