@@ -233,7 +233,9 @@ def _write_ase_structure(lmp, structure):
     )
     lmp.command("create_box " + str(number_species) + " 1")
 
-    el_dict = {el: i for i, el in enumerate(set(structure.get_chemical_symbols()))}
+    el_dict = {
+        el: i for i, el in enumerate(sorted(set(structure.get_chemical_symbols())))
+    }
 
     rotation_mat = np.dot(np.linalg.inv(structure.cell), lammps_cell)
 
