@@ -1,5 +1,4 @@
 from ctypes import c_double, c_int, cast, POINTER
-from lammps import lammps
 import numpy as np
 from scipy.constants import physical_constants
 
@@ -546,6 +545,8 @@ def _get_default_parameters(
     weights=None,
     cutoff=10.0,
 ):
+    from lammps import lammps
+
     if weights is None:
         wj = [1.0] * len(atom_types)
     else:
