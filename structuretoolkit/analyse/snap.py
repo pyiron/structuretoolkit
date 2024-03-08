@@ -438,9 +438,7 @@ def _set_computes_snap(lmp, bispec_options):
     kwargs = " ".join(kw_substrings)
 
     for op, base in zip(("b", "db", "vb"), (base_b, base_db, base_vb)):
-        # print("Setting up compute",op)
         command = f"{base} {radelem} {wj} {kwargs}"
-        # print(command)
         lmp.command(command)
 
     for cname in ["b", "db", "vb"]:
@@ -470,14 +468,6 @@ def _extract_computes_snap(lmp, num_atoms, n_coeff, num_types):
 
     b_atom = type_onehot[:, :, np.newaxis] * lmp_barr[:, np.newaxis, :]
     b_sum = b_atom.sum(axis=0) / num_atoms
-
-    try:
-        assert np.allclose(
-            lmp_bsum, lmp_barr.sum(axis=0), rtol=1e-12, atol=1e-12
-        ), "b_sum doesn't match sum of b"
-    except AssertionError:
-        print(lmp_bsum)
-        print(lmp_barr.sum(axis=0))
 
     lmp_dbarr = _extract_compute_np(lmp, "db", 1, 2, (num_atoms, num_types, 3, n_coeff))
     lmp_dbsum = _extract_compute_np(lmp, "db_sum", 0, 1, (num_types, 3, n_coeff))
