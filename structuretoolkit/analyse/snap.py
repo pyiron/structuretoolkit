@@ -90,10 +90,7 @@ def calc_snap_descriptors_per_atom(
         cutoff=cutoff,
     )
     return _calc_snap_per_atom(
-        lmp=lmp,
-        structure=structure,
-        bispec_options=bispec_options,
-        cutoff=cutoff
+        lmp=lmp, structure=structure, bispec_options=bispec_options, cutoff=cutoff
     )
 
 
@@ -139,10 +136,7 @@ def calc_snap_descriptor_derivatives(
         cutoff=cutoff,
     )
     return _calc_snap_derivatives(
-        lmp=lmp,
-        structure=structure,
-        bispec_options=bispec_options,
-        cutoff=cutoff
+        lmp=lmp, structure=structure, bispec_options=bispec_options, cutoff=cutoff
     )
 
 
@@ -168,7 +162,7 @@ def get_apre(cell):
     yhi = np.sin(gamma) * bn
     xzp = np.cos(beta) * cn
     yzp = (bn * cn * np.cos(alpha) - xyp * xzp) / yhi
-    zhi = np.sqrt(cn ** 2 - xzp ** 2 - yzp ** 2)
+    zhi = np.sqrt(cn**2 - xzp**2 - yzp**2)
 
     return np.array(((xhi, 0, 0), (xyp, yhi, 0), (xzp, yzp, zhi)))
 
@@ -560,7 +554,7 @@ def _get_default_parameters(
     rmin0=0.0,
     bzeroflag=0,
     weights=None,
-    cutoff=10.0
+    cutoff=10.0,
 ):
     if weights is None:
         wj = [1.0] * len(atom_types)
