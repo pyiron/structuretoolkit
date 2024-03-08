@@ -7,8 +7,8 @@ eV_div_A3_to_bar = 1e25 / physical_constants["joule-electron volt relationship"]
 
 def calc_per_atom_quad(linear_per_atom):
     """
-    Calculate quadratic SNAP descriptors from the linear SNAP descriptors, by multiplying the individual components of
-    the SNAP descriptors.
+    Calculate quadratic par-atom SNAP descriptors from the linear SNAP descriptors, by multiplying the individual
+    components of the SNAP descriptors.
 
     Args:
         linear_per_atom (np.ndarray): Numpy array of the linear per atom SNAP descriptors
@@ -34,6 +34,16 @@ def calc_per_atom_quad(linear_per_atom):
 
 
 def calc_sum_quad(linear_sum):
+    """
+   Calculate quadratic SNAP descriptors from the linear SNAP descriptors, by multiplying the individual components of
+   the SNAP descriptors.
+
+   Args:
+       linear_sum (np.ndarray): Numpy array of the linear SNAP descriptors
+
+   Returns:
+       np.ndarray: Numpy array of the quadratic SNAP descriptors
+   """
     return np.concatenate(
         (
             linear_sum,
@@ -65,16 +75,16 @@ def calc_snap_descriptors_per_atom(
 
     Args:
         structure (ase.atoms.Atoms): atomistic structure as ASE atoms object
-        atom_types:
-        twojmax (int):
-        element_radius (list):
-        rcutfac (float):
-        rfac0 (float):
-        rmin0 (float):
-        bzeroflag (bool):
-        quadraticflag (bool):
-        weights (list/np.ndarry/None):
-        cutoff (float):
+        atom_types (list): list of element types
+        twojmax (int): band limit for bispectrum components (non-negative integer)
+        element_radius (list): list of radii for the individual elements
+        rcutfac (float): scale factor applied to all cutoff radii (positive real)
+        rfac0 (float): parameter in distance to angle conversion (0 < rcutfac < 1)
+        rmin0 (float): parameter in distance to angle conversion (distance units)
+        bzeroflag (bool): subtract B0
+        quadraticflag (bool): generate quadratic terms
+        weights (list/np.ndarry/None): list of neighbor weights, one for each type
+        cutoff (float): cutoff radius for the construction of the neighbor list
 
     Returns:
         np.ndarray: Numpy array with the calculated descriptor derivatives
@@ -104,8 +114,8 @@ def calc_snap_descriptor_derivatives(
     rcutfac=1.0,
     rfac0=0.99363,
     rmin0=0.0,
-    bzeroflag=0,
-    quadraticflag=0,
+    bzeroflag=False,
+    quadraticflag=False,
     weights=None,
     cutoff=10.0,
 ):
@@ -114,15 +124,16 @@ def calc_snap_descriptor_derivatives(
 
     Args:
         structure (ase.atoms.Atoms): atomistic structure as ASE atoms object
-        atom_types:
-        twojmax (int):
-        element_radius (list):
-        rcutfac (float):
-        rfac0 (float):
-        rmin0 (float):
-        bzeroflag (bool):
-        weights (list/np.ndarry/None):
-        cutoff (float):
+        atom_types (list): list of element types
+        twojmax (int): band limit for bispectrum components (non-negative integer)
+        element_radius (list): list of radii for the individual elements
+        rcutfac (float): scale factor applied to all cutoff radii (positive real)
+        rfac0 (float): parameter in distance to angle conversion (0 < rcutfac < 1)
+        rmin0 (float): parameter in distance to angle conversion (distance units)
+        bzeroflag (bool): subtract B0
+        quadraticflag (bool): generate quadratic terms
+        weights (list/np.ndarry/None): list of neighbor weights, one for each type
+        cutoff (float): cutoff radius for the construction of the neighbor list
 
     Returns:
         np.ndarray: Numpy array with the calculated descriptor derivatives
@@ -146,7 +157,7 @@ def calc_snap_descriptor_derivatives(
 
 def get_apre(cell):
     """
-    Convert ASE cell to LAMMPS cell - LAMMPS required the upper triangle to be zero
+    Convert ASE cell to LAMMPS cell - LAMMPS requires the upper triangle to be zero
 
     Args:
         cell (np.ndarray): ASE cell as 3x3 matrix
@@ -176,7 +187,7 @@ def get_snap_descriptor_names(twojmax):
     Get names of the SNAP descriptors
 
     Args:
-        twojmax (int):
+        twojmax (int): band limit for bispectrum components (non-negative integer)
 
     Returns:
         list: List of SNAP descriptor names

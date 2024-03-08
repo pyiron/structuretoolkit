@@ -1,6 +1,7 @@
 from ase.build.bulk import bulk
+import numpy as np
 import structuretoolkit as stk
-from structuretoolkit.analyse.snap import _calc_snap_per_atom, _calc_snap_derivatives, calc_per_atom_quad, calc_sum_quad
+from structuretoolkit.analyse.snap import _calc_snap_per_atom, _calc_snap_derivatives, calc_per_atom_quad, calc_sum_quad, get_apre
 import unittest
 
 
@@ -179,8 +180,10 @@ class TestSNAPInternal(unittest.TestCase):
             cutoff=10.0
         )
         self.assertEqual(coeff_quad.shape, (len(self.structure), ((n_coeff+1) * n_coeff)/2 + 30))
-        coeff_quad_py = calc_per_atom_quad(coeff_lin)
-        self.assertEqual(coeff_quad.shape, coeff_quad_py.shape)
+        coeff_quad_per_atom = calc_per_atom_quad(coeff_lin)
+        coeff_quad_sum = calc_sum_quad(np.sum(coeff_lin, axis=0))
+        self.assertEqual(coeff_quad.shape, coeff_quad_per_atom.shape)
+        self.assertEqual(np.sum(coeff_quad, axis=0).shape, coeff_quad_sum.shape)
 
     def test_calc_a_matrix_snappy(self):
         n_coeff = len(stk.analyse.get_snap_descriptor_names(
@@ -193,3 +196,11 @@ class TestSNAPInternal(unittest.TestCase):
             cutoff=10.0
         )
         self.assertEqual(mat_a.shape, (len(self.structure) * 3 + 7, n_coeff + 1))
+
+    def test_get_apre(self):
+        cell = bulk("Cu").cell
+        lmp_cell = get_apre(cell=cell)
+        self.assertEqual(lmp_cell[0, 1], 0.0)
+        self.assertEqual(lmp_cell[0, 2], 0.0)
+        self.assertEqual(lmp_cell[1, 2], 0.0)
+        self.assertEqual(cell.shape, lmp_cell.shape)
