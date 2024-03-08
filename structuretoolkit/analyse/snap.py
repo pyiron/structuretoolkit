@@ -67,7 +67,7 @@ def calc_snap_descriptors_per_atom(
         structure (ase.atoms.Atoms): atomistic structure as ASE atoms object
         atom_types:
         twojmax (int):
-        element_radius (float):
+        element_radius (list):
         rcutfac (float):
         rfac0 (float):
         rmin0 (float):
@@ -113,7 +113,7 @@ def calc_snap_descriptor_derivatives(
         structure (ase.atoms.Atoms): atomistic structure as ASE atoms object
         atom_types:
         twojmax (int):
-        element_radius (float):
+        element_radius (list):
         rcutfac (float):
         rfac0 (float):
         rmin0 (float):
