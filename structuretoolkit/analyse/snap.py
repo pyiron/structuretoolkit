@@ -155,7 +155,26 @@ def calc_snap_descriptor_derivatives(
     )
 
 
-def get_apre(cell):
+def get_snap_descriptor_names(twojmax):
+    """
+    Get names of the SNAP descriptors
+
+    Args:
+        twojmax (int): band limit for bispectrum components (non-negative integer)
+
+    Returns:
+        list: List of SNAP descriptor names
+    """
+    lst = []
+    for j1 in range(0, twojmax + 1):
+        for j2 in range(0, j1 + 1):
+            for j in range(j1 - j2, min(twojmax, j1 + j2) + 1, 2):
+                if j >= j1:
+                    lst.append([j1 / 2.0, j2 / 2.0, j / 2.0])
+    return lst
+
+
+def _get_lammps_compatible_cell(cell):
     """
     Convert ASE cell to LAMMPS cell - LAMMPS requires the upper triangle to be zero
 
@@ -182,25 +201,6 @@ def get_apre(cell):
     return np.array(((xhi, 0, 0), (xyp, yhi, 0), (xzp, yzp, zhi)))
 
 
-def get_snap_descriptor_names(twojmax):
-    """
-    Get names of the SNAP descriptors
-
-    Args:
-        twojmax (int): band limit for bispectrum components (non-negative integer)
-
-    Returns:
-        list: List of SNAP descriptor names
-    """
-    lst = []
-    for j1 in range(0, twojmax + 1):
-        for j2 in range(0, j1 + 1):
-            for j in range(j1 - j2, min(twojmax, j1 + j2) + 1, 2):
-                if j >= j1:
-                    lst.append([j1 / 2.0, j2 / 2.0, j / 2.0])
-    return lst
-
-
 def _convert_mat(mat):
     mat[np.diag_indices_from(mat)] /= 2
     return mat[np.triu_indices(len(mat))]
@@ -209,7 +209,7 @@ def _convert_mat(mat):
 def _write_ase_structure(lmp, structure):
     number_species = len(set(structure.get_chemical_symbols()))
 
-    apre = get_apre(cell=structure.cell)
+    apre = _get_lammps_compatible_cell(cell=structure.cell)
     (
         (xhi, xy, xz),
         (_, yhi, yz),

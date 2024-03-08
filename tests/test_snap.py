@@ -1,7 +1,7 @@
 from ase.build.bulk import bulk
 import numpy as np
 import structuretoolkit as stk
-from structuretoolkit.analyse.snap import _calc_snap_per_atom, _calc_snap_derivatives, calc_per_atom_quad, calc_sum_quad, get_apre
+from structuretoolkit.analyse.snap import _calc_snap_per_atom, _calc_snap_derivatives, calc_per_atom_quad, calc_sum_quad, _get_lammps_compatible_cell
 import unittest
 
 
@@ -197,9 +197,9 @@ class TestSNAPInternal(unittest.TestCase):
         )
         self.assertEqual(mat_a.shape, (len(self.structure) * 3 + 7, n_coeff + 1))
 
-    def test_get_apre(self):
+    def test_get_lammps_compatible_cell(self):
         cell = bulk("Cu").cell
-        lmp_cell = get_apre(cell=cell)
+        lmp_cell = _get_lammps_compatible_cell(cell=cell)
         self.assertEqual(lmp_cell[0, 1], 0.0)
         self.assertEqual(lmp_cell[0, 2], 0.0)
         self.assertEqual(lmp_cell[1, 2], 0.0)
