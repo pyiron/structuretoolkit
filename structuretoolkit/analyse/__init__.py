@@ -1,6 +1,7 @@
 import numpy as np
 
 from structuretoolkit.analyse.distance import find_mic, get_distances_array
+from structuretoolkit.analyse.dscribe import soap_descriptor_per_atom
 from structuretoolkit.analyse.neighbors import get_neighborhood, get_neighbors
 from structuretoolkit.analyse.phonopy import get_equivalent_atoms
 from structuretoolkit.analyse.pyscal import (

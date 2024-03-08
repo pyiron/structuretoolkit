@@ -25,8 +25,8 @@ classifiers = [
 ]
 dependencies = [
     "ase==3.22.1",
-    "numpy==1.26.3",
-    "scipy==1.11.4",
+    "numpy==1.26.4",
+    "scipy==1.12.0",
 ]
 dynamic = ["version"]
 
@@ -36,25 +36,26 @@ Documentation = "https://github.com/pyiron/structuretoolkit"
 Repository = "https://github.com/pyiron/structuretoolkit"
 
 [project.optional-dependencies]
+dscribe = ["dscribe==2.1.0"]
 grainboundary = [
     "aimsgb==1.1.0",
-    "pymatgen==2023.12.18",
+    "pymatgen==2024.3.1",
 ]
 pyscal = ["pyscal2==2.10.18"]
-nglview = ["nglview==3.0.8"]
-matplotlib = ["matplotlib==3.8.2"]
-plotly = ["plotly==5.18.0"]
-clusters = ["scikit-learn==1.3.2"]
-symmetry = ["spglib==2.2.0"]
+nglview = ["nglview==3.1.2"]
+matplotlib = ["matplotlib==3.8.3"]
+plotly = ["plotly==5.19.0"]
+clusters = ["scikit-learn==1.4.1.post1"]
+symmetry = ["spglib==2.3.1"]
 surface = [
-    "spglib==2.2.0",
-    "pymatgen==2023.12.18",
+    "spglib==2.3.1",
+    "pymatgen==2024.3.1",
 ]
 phonopy = [
-    "phonopy==2.21.0",
-    "spglib==2.2.0",
+    "phonopy==2.21.2",
+    "spglib==2.3.1",
 ]
-pyxtal = ["pyxtal==0.6.1"]
+pyxtal = ["pyxtal==0.6.2"]
 
 [tool.setuptools.packages.find]
 include = ["structuretoolkit*"]
