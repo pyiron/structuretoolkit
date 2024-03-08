@@ -35,15 +35,15 @@ def calc_per_atom_quad(linear_per_atom):
 
 def calc_sum_quad(linear_sum):
     """
-   Calculate quadratic SNAP descriptors from the linear SNAP descriptors, by multiplying the individual components of
-   the SNAP descriptors.
+    Calculate quadratic SNAP descriptors from the linear SNAP descriptors, by multiplying the individual components of
+    the SNAP descriptors.
 
-   Args:
-       linear_sum (np.ndarray): Numpy array of the linear SNAP descriptors
+    Args:
+        linear_sum (np.ndarray): Numpy array of the linear SNAP descriptors
 
-   Returns:
-       np.ndarray: Numpy array of the quadratic SNAP descriptors
-   """
+    Returns:
+        np.ndarray: Numpy array of the quadratic SNAP descriptors
+    """
     return np.concatenate(
         (
             linear_sum,
