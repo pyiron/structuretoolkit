@@ -209,12 +209,12 @@ def _convert_mat(mat):
 def _write_ase_structure(lmp, structure):
     number_species = len(set(structure.get_chemical_symbols()))
 
-    apre = _get_lammps_compatible_cell(cell=structure.cell)
+    lammps_cell = _get_lammps_compatible_cell(cell=structure.cell)
     (
         (xhi, xy, xz),
         (_, yhi, yz),
         (_, _, zhi),
-    ) = apre.T
+    ) = lammps_cell.T
     lmp.command(
         "region 1 prism"
         + " 0.0 "
@@ -235,12 +235,12 @@ def _write_ase_structure(lmp, structure):
 
     el_dict = {el: i for i, el in enumerate(set(structure.get_chemical_symbols()))}
 
-    R = np.dot(np.linalg.inv(structure.cell), apre)
+    rotation_mat = np.dot(np.linalg.inv(structure.cell), lammps_cell)
 
     positions = structure.positions.flatten()
-    if np.matrix.trace(R) != 3:
+    if np.matrix.trace(rotation_mat) != 3:
         positions = np.array(positions).reshape(-1, 3)
-        positions = np.matmul(positions, R)
+        positions = np.matmul(positions, rotation_mat)
     positions = positions.flatten()
     elem_all = np.array([el_dict[el] + 1 for el in structure.get_chemical_symbols()])
     lmp.create_atoms(
@@ -261,16 +261,16 @@ def _extract_compute_np(lmp, name, compute_type, result_type, array_shape):
     Note that the result is a view into the original memory.
     If the result type is 0 (scalar) then conversion to numpy is skipped and a python float is returned.
     """
-    ptr = lmp.extract_compute(
+    pointer = lmp.extract_compute(
         name, compute_type, result_type
     )  # 1,2: Style (1) is per-atom compute, returns array type (2).
     if result_type == 0:
-        return ptr  # No casting needed, lammps.py already works
+        return pointer  # No casting needed, lammps.py already works
     if result_type == 2:
-        ptr = ptr.contents
+        pointer = pointer.contents
     total_size = int(np.prod(array_shape))
-    buffer_ptr = cast(ptr, POINTER(c_double * total_size))
-    array_np = np.frombuffer(buffer_ptr.contents, dtype=float)
+    buffer_pointer = cast(pointer, POINTER(c_double * total_size))
+    array_np = np.frombuffer(buffer_pointer.contents, dtype=float)
     array_np.shape = array_shape
     return array_np.copy()
 
