@@ -264,7 +264,9 @@ def _set_ase_structure(lmp, structure: Atoms):
     )
 
 
-def _extract_compute_np(lmp, name: str, compute_type: int, result_type: int, array_shape: tuple) -> np.ndarray:
+def _extract_compute_np(
+    lmp, name: str, compute_type: int, result_type: int, array_shape: tuple
+) -> np.ndarray:
     """
     Convert a lammps compute to a numpy array.
     Assumes the compute returns a floating point numbers.
@@ -378,7 +380,9 @@ def _set_compute_lammps(lmp, bispec_options: dict, numtypes: int):
     lmp.command(f"{base_b} {radelem} {wj} {kwargs}")
 
 
-def _calc_snap_per_atom(lmp, structure: Atoms, bispec_options: dict, cutoff: float = 10.0) -> np.ndarray:
+def _calc_snap_per_atom(
+    lmp, structure: Atoms, bispec_options: dict, cutoff: float = 10.0
+) -> np.ndarray:
     """
     Internal function to calculate the per-atom SNAP descriptors
 
@@ -515,7 +519,9 @@ def _set_computes_snap(lmp, bispec_options: dict):
         lmp.command(f"compute {cname}_sum all reduce sum c_{cname}[*]")
 
 
-def _extract_computes_snap(lmp, num_atoms: int, n_coeff: int, num_types: int) -> np.ndarray:
+def _extract_computes_snap(
+    lmp, num_atoms: int, n_coeff: int, num_types: int
+) -> np.ndarray:
     """
     Internal function to extract the compute from the LAMMPS instance
 
@@ -582,7 +588,9 @@ def _extract_computes_snap(lmp, num_atoms: int, n_coeff: int, num_types: int) ->
     ).copy()
 
 
-def _calc_snap_derivatives(lmp, structure: Atoms, bispec_options: dict, cutoff=10.0) -> np.ndarray:
+def _calc_snap_derivatives(
+    lmp, structure: Atoms, bispec_options: dict, cutoff=10.0
+) -> np.ndarray:
     """
     Internal function to calculate per-atom derivatives of the SNAP descriptors
 
