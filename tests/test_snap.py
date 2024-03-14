@@ -219,7 +219,7 @@ class TestSNAP(unittest.TestCase):
         n_coeff = len(stk.analyse.get_snap_descriptor_names(
             twojmax=self.twojmax
         ))
-        coeff = stk.analyse.calc_snap_descriptors_per_atom(
+        coeff = stk.analyse.get_snap_descriptors_per_atom(
             structure=self.structure,
             atom_types=self.type,
             twojmax=self.twojmax,
@@ -242,7 +242,7 @@ class TestSNAP(unittest.TestCase):
         n_coeff = len(stk.analyse.get_snap_descriptor_names(
             twojmax=self.twojmax
         ))
-        coeff = stk.analyse.calc_snap_descriptors_per_atom(
+        coeff = stk.analyse.get_snap_descriptors_per_atom(
             structure=self.structure,
             atom_types=self.type,
             twojmax=self.twojmax,
@@ -265,7 +265,7 @@ class TestSNAP(unittest.TestCase):
         n_coeff = len(stk.analyse.get_snap_descriptor_names(
             twojmax=self.twojmax
         ))
-        mat_a = stk.analyse.calc_snap_descriptor_derivatives(
+        mat_a = stk.analyse.get_snap_descriptor_derivatives(
             structure=self.structure,
             atom_types=self.type,
             twojmax=self.twojmax,

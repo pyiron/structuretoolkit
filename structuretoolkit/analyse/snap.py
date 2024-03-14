@@ -57,7 +57,7 @@ def calc_sum_quad(linear_sum):
     )
 
 
-def calc_snap_descriptors_per_atom(
+def get_snap_descriptors_per_atom(
     structure,
     atom_types,
     twojmax=6,
@@ -106,7 +106,7 @@ def calc_snap_descriptors_per_atom(
     )
 
 
-def calc_snap_descriptor_derivatives(
+def get_snap_descriptor_derivatives(
     structure,
     atom_types,
     twojmax=6,

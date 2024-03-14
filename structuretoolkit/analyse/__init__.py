@@ -25,8 +25,8 @@ from structuretoolkit.analyse.spatial import (
 from structuretoolkit.analyse.strain import get_strain
 from structuretoolkit.analyse.snap import (
     get_snap_descriptor_names,
-    calc_snap_descriptors_per_atom,
-    calc_snap_descriptor_derivatives,
+    get_snap_descriptors_per_atom,
+    get_snap_descriptor_derivatives,
 )
 
 
