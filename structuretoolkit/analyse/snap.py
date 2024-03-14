@@ -1,3 +1,5 @@
+from ase.atoms import Atoms
+from typing import Optional, Union
 from ctypes import c_double, c_int, cast, POINTER
 import numpy as np
 from scipy.constants import physical_constants
@@ -5,7 +7,7 @@ from scipy.constants import physical_constants
 eV_div_A3_to_bar = 1e25 / physical_constants["joule-electron volt relationship"][0]
 
 
-def calc_per_atom_quad(linear_per_atom):
+def get_per_atom_quad(linear_per_atom: np.ndarray) -> np.ndarray:
     """
     Calculate quadratic par-atom SNAP descriptors from the linear SNAP descriptors, by multiplying the individual
     components of the SNAP descriptors.
@@ -33,7 +35,7 @@ def calc_per_atom_quad(linear_per_atom):
     )
 
 
-def calc_sum_quad(linear_sum):
+def get_sum_quad(linear_sum: np.ndarray) -> np.ndarray:
     """
     Calculate quadratic SNAP descriptors from the linear SNAP descriptors, by multiplying the individual components of
     the SNAP descriptors.
@@ -58,26 +60,26 @@ def calc_sum_quad(linear_sum):
 
 
 def get_snap_descriptors_per_atom(
-    structure,
-    atom_types,
-    twojmax=6,
-    element_radius=4.0,
-    rcutfac=1.0,
-    rfac0=0.99363,
-    rmin0=0.0,
-    bzeroflag=False,
-    quadraticflag=False,
-    weights=None,
-    cutoff=10.0,
-):
+    structure: Atoms,
+    atom_types: list[str],
+    twojmax: int = 6,
+    element_radius: list[int] = [4.0],
+    rcutfac: float = 1.0,
+    rfac0: float = 0.99363,
+    rmin0: float = 0.0,
+    bzeroflag: bool = False,
+    quadraticflag: bool = False,
+    weights: Optional[Union[list, np.ndarray]] = None,
+    cutoff: float = 10.0,
+) -> np.ndarray:
     """
     Calculate per atom SNAP descriptors using LAMMPS https://docs.lammps.org/compute_sna_atom.html
 
     Args:
         structure (ase.atoms.Atoms): atomistic structure as ASE atoms object
-        atom_types (list): list of element types
+        atom_types (list[str]): list of element types
         twojmax (int): band limit for bispectrum components (non-negative integer)
-        element_radius (list): list of radii for the individual elements
+        element_radius (list[int]): list of radii for the individual elements
         rcutfac (float): scale factor applied to all cutoff radii (positive real)
         rfac0 (float): parameter in distance to angle conversion (0 < rcutfac < 1)
         rmin0 (float): parameter in distance to angle conversion (distance units)
@@ -107,26 +109,26 @@ def get_snap_descriptors_per_atom(
 
 
 def get_snap_descriptor_derivatives(
-    structure,
-    atom_types,
-    twojmax=6,
-    element_radius=4.0,
-    rcutfac=1.0,
-    rfac0=0.99363,
-    rmin0=0.0,
-    bzeroflag=False,
-    quadraticflag=False,
-    weights=None,
-    cutoff=10.0,
+    structure: Atoms,
+    atom_types: list[str],
+    twojmax: int = 6,
+    element_radius: list[int] = [4.0],
+    rcutfac: float = 1.0,
+    rfac0: float = 0.99363,
+    rmin0: float = 0.0,
+    bzeroflag: bool = False,
+    quadraticflag: bool = False,
+    weights: Optional[Union[list, np.ndarray]] = None,
+    cutoff: float = 10.0,
 ):
     """
     Calculate per atom derivatives of the SNAP descriptors using LAMMPS https://docs.lammps.org/compute_sna_atom.html
 
     Args:
         structure (ase.atoms.Atoms): atomistic structure as ASE atoms object
-        atom_types (list): list of element types
+        atom_types (list[str]): list of element types
         twojmax (int): band limit for bispectrum components (non-negative integer)
-        element_radius (list): list of radii for the individual elements
+        element_radius (list[int]): list of radii for the individual elements
         rcutfac (float): scale factor applied to all cutoff radii (positive real)
         rfac0 (float): parameter in distance to angle conversion (0 < rcutfac < 1)
         rmin0 (float): parameter in distance to angle conversion (distance units)
@@ -155,7 +157,7 @@ def get_snap_descriptor_derivatives(
     )
 
 
-def get_snap_descriptor_names(twojmax):
+def get_snap_descriptor_names(twojmax: int) -> np.ndarray:
     """
     Get names of the SNAP descriptors
 
@@ -173,7 +175,7 @@ def get_snap_descriptor_names(twojmax):
     return lst
 
 
-def _get_lammps_compatible_cell(cell):
+def _get_lammps_compatible_cell(cell: np.ndarray) -> np.ndarray:
     """
     Convert ASE cell to LAMMPS cell - LAMMPS requires the upper triangle to be zero
 
@@ -200,12 +202,19 @@ def _get_lammps_compatible_cell(cell):
     return np.array(((xhi, 0, 0), (xyp, yhi, 0), (xzp, yzp, zhi)))
 
 
-def _convert_mat(mat):
+def _convert_mat(mat: np.ndarray) -> np.ndarray:
     mat[np.diag_indices_from(mat)] /= 2
     return mat[np.triu_indices(len(mat))]
 
 
-def _write_ase_structure(lmp, structure):
+def _set_ase_structure(lmp, structure: Atoms):
+    """
+    Use ASE structure object to initialize the structure in the LAMMPS calculator
+
+    Args:
+        lmp (lammps.Lammps): LAMMPS library instance
+        structure (ase.atoms.Atoms): ASE structure object
+    """
     number_species = len(set(structure.get_chemical_symbols()))
 
     lammps_cell = _get_lammps_compatible_cell(cell=structure.cell)
@@ -255,12 +264,22 @@ def _write_ase_structure(lmp, structure):
     )
 
 
-def _extract_compute_np(lmp, name, compute_type, result_type, array_shape):
+def _extract_compute_np(lmp, name: str, compute_type: int, result_type: int, array_shape: tuple) -> np.ndarray:
     """
     Convert a lammps compute to a numpy array.
     Assumes the compute returns a floating point numbers.
     Note that the result is a view into the original memory.
     If the result type is 0 (scalar) then conversion to numpy is skipped and a python float is returned.
+
+    Args:
+        lmp (lammps.Lammps): LAMMPS library instance
+        name (str): LAMMPS internal compute ID
+        compute_type (int): style of the data retrieve (global, atom, or local)
+        result_type (int): type or size of the returned data (scalar, vector, or array)
+        array_shape (tuple[int]): shape of the array as tuple of integers
+
+    Returns:
+        np.ndarray: output of the LAMMPS compute
     """
     pointer = lmp.extract_compute(
         name, compute_type, result_type
@@ -294,7 +313,7 @@ def _reset_lmp(lmp):
         lmp.command(c)
 
 
-def _set_potential_lmp(lmp, cutoff=10.0):
+def _set_potential_lmp(lmp, cutoff: float = 10.0):
     """
     Set interatomic potential parameters to LAMMPS library instance
 
@@ -312,7 +331,15 @@ def _set_potential_lmp(lmp, cutoff=10.0):
         lmp.command(c)
 
 
-def _set_compute_lammps(lmp, bispec_options, numtypes):
+def _set_compute_lammps(lmp, bispec_options: dict, numtypes: int):
+    """
+    Internal function to set the LAMMPS compute
+
+    Args:
+        lmp (lammps.Lammps): Lammps library instance
+        bispec_options (dict): dictionary of the parameters to compute the bi-spectral components
+        numtypes (int): number of atomic types
+    """
     compute_parameter = [
         "rmin0",
         "bzeroflag",
@@ -351,10 +378,22 @@ def _set_compute_lammps(lmp, bispec_options, numtypes):
     lmp.command(f"{base_b} {radelem} {wj} {kwargs}")
 
 
-def _calc_snap_per_atom(lmp, structure, bispec_options, cutoff=10.0):
+def _calc_snap_per_atom(lmp, structure: Atoms, bispec_options: dict, cutoff: float = 10.0) -> np.ndarray:
+    """
+    Internal function to calculate the per-atom SNAP descriptors
+
+    Args:
+        lmp (lammps.Lammps): Lammps library instance
+        structure (ase.atoms.Atoms):
+        bispec_options (dict): dictionary of the parameters to compute the bi-spectral components
+        cutoff (float): cutoff radius for the construction of the neighbor list
+
+    Returns:
+        np.ndarray: Output of the LAMMPS compute command
+    """
     number_coef = len(get_snap_descriptor_names(twojmax=bispec_options["twojmax"]))
     _reset_lmp(lmp=lmp)
-    _write_ase_structure(lmp=lmp, structure=structure)
+    _set_ase_structure(lmp=lmp, structure=structure)
     _set_potential_lmp(lmp=lmp, cutoff=cutoff)
     _set_compute_lammps(
         lmp=lmp,
@@ -392,7 +431,17 @@ def _calc_snap_per_atom(lmp, structure, bispec_options, cutoff=10.0):
             )
 
 
-def _lammps_variables(bispec_options):
+def _lammps_variables(bispec_options: dict):
+    """
+    Identify which of the parameters to compute the bi-spectral components can be set as LAMMPS variables rather than
+    as inputs to the LAMMPS compute command.
+
+    Args:
+        bispec_options (dict): dictionary of the parameters to compute the bi-spectral components
+
+    Returns:
+        dict: dictionary of LAMMPS variables and their values to be set
+    """
     d = {
         k: bispec_options[k]
         for k in [
@@ -427,13 +476,13 @@ def _set_variables(lmp, **lmp_variable_args):
         lmp.command(f"variable {k} equal {v}")
 
 
-def _set_computes_snap(lmp, bispec_options):
+def _set_computes_snap(lmp, bispec_options: dict):
     """
     Set LAMMPS computes to calculate SNAP descriptors
 
     Args:
         lmp (lammps.Lammps): Lammps library instance
-        bispec_options (dict): bi-spectrum component settings
+        bispec_options (dict): dictionary of the parameters to compute the bi-spectral components
     """
     # # Bispectrum coefficient computes
     base_b = "compute b all sna/atom ${rcutfac} ${rfac0} ${twojmax}"
@@ -466,7 +515,19 @@ def _set_computes_snap(lmp, bispec_options):
         lmp.command(f"compute {cname}_sum all reduce sum c_{cname}[*]")
 
 
-def _extract_computes_snap(lmp, num_atoms, n_coeff, num_types):
+def _extract_computes_snap(lmp, num_atoms: int, n_coeff: int, num_types: int) -> np.ndarray:
+    """
+    Internal function to extract the compute from the LAMMPS instance
+
+    Args:
+        lmp (lammps.Lammps): Lammps library instance
+        num_atoms (int): Number of atoms
+        n_coeff (int): Number of SNAP coefficients to compure
+        num_types (int): Number of chemical types
+
+    Returns:
+        np.ndarray: Output of the LAMMPS compute command
+    """
     lmp_atom_ids = lmp.numpy.extract_atom_iarray("id", num_atoms).flatten()
     assert np.all(
         lmp_atom_ids == 1 + np.arange(num_atoms)
@@ -521,11 +582,23 @@ def _extract_computes_snap(lmp, num_atoms, n_coeff, num_types):
     ).copy()
 
 
-def _calc_snap_derivatives(lmp, structure, bispec_options, cutoff=10.0):
+def _calc_snap_derivatives(lmp, structure: Atoms, bispec_options: dict, cutoff=10.0) -> np.ndarray:
+    """
+    Internal function to calculate per-atom derivatives of the SNAP descriptors
+
+    Args:
+        lmp (lammps.Lammps): Lammps library instance
+        structure (ase.atoms.Atoms): atomistic structure as ASE atoms object
+        bispec_options (dict): dictionary of the parameters to compute the bi-spectral components
+        cutoff (float): cutoff radius for the construction of the neighbor list
+
+    Returns:
+        np.ndarray: Output of the LAMMPS compute command
+    """
     number_coef = len(get_snap_descriptor_names(twojmax=bispec_options["twojmax"]))
     number_species = len(set(structure.get_chemical_symbols()))
     _reset_lmp(lmp=lmp)
-    _write_ase_structure(lmp=lmp, structure=structure)
+    _set_ase_structure(lmp=lmp, structure=structure)
     _set_potential_lmp(lmp=lmp, cutoff=cutoff)
     _set_variables(lmp, **_lammps_variables(bispec_options))
     _set_computes_snap(
@@ -559,17 +632,35 @@ def _calc_snap_derivatives(lmp, structure, bispec_options, cutoff=10.0):
 
 
 def _get_default_parameters(
-    atom_types,
-    twojmax=6,
+    atom_types: list[str],
+    twojmax: int = 6,
     element_radius=4.0,
-    rcutfac=1.0,
-    rfac0=0.99363,
-    rmin0=0.0,
-    bzeroflag=0,
-    weights=None,
-    cutoff=10.0,
-    quadraticflag=0,
+    rcutfac: float = 1.0,
+    rfac0: float = 0.99363,
+    rmin0: float = 0.0,
+    bzeroflag: bool = False,
+    quadraticflag: bool = False,
+    weights: Optional[Union[list, np.ndarray]] = None,
+    cutoff: float = 10.0,
 ):
+    """
+    Convert input parameters to the internal dictonary format
+
+    Args:
+        atom_types (list[str]): list of element types
+        twojmax (int): band limit for bispectrum components (non-negative integer)
+        element_radius (list[int]): list of radii for the individual elements
+        rcutfac (float): scale factor applied to all cutoff radii (positive real)
+        rfac0 (float): parameter in distance to angle conversion (0 < rcutfac < 1)
+        rmin0 (float): parameter in distance to angle conversion (distance units)
+        bzeroflag (bool): subtract B0
+        quadraticflag (bool): generate quadratic terms
+        weights (list/np.ndarry/None): list of neighbor weights, one for each type
+        cutoff (float): cutoff radius for the construction of the neighbor list
+
+    Returns:
+        (lammps.Lammps, dict, flaot): LAMMPS instance, dictionary of bi-spectral component parameters, cut-off radius
+    """
     from lammps import lammps
 
     if weights is None:

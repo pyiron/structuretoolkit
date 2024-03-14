@@ -2,8 +2,8 @@ from ase.build.bulk import bulk
 import numpy as np
 import structuretoolkit as stk
 from structuretoolkit.analyse.snap import (
-    calc_per_atom_quad,
-    calc_sum_quad,
+    get_per_atom_quad,
+    get_sum_quad,
     _calc_snap_per_atom,
     _calc_snap_derivatives,
     _get_lammps_compatible_cell
@@ -337,8 +337,8 @@ class TestSNAPInternal(unittest.TestCase):
             cutoff=10.0
         )
         self.assertEqual(coeff_quad.shape, (len(self.structure), ((n_coeff+1) * n_coeff)/2 + 30))
-        coeff_quad_per_atom = calc_per_atom_quad(coeff_lin)
-        coeff_quad_sum = calc_sum_quad(np.sum(coeff_lin, axis=0))
+        coeff_quad_per_atom = get_per_atom_quad(coeff_lin)
+        coeff_quad_sum = get_sum_quad(np.sum(coeff_lin, axis=0))
         self.assertEqual(coeff_quad.shape, coeff_quad_per_atom.shape)
         self.assertEqual(np.sum(coeff_quad, axis=0).shape, coeff_quad_sum.shape)
         self.assertTrue(np.isclose(
