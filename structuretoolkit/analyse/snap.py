@@ -536,6 +536,8 @@ def _calc_snap_derivatives(lmp, structure, bispec_options, cutoff=10.0):
     try:
         lmp.command("run 0")
     except:
+        # When LAMMPS crashes return an empty array - this can be the case when atoms are overlapping.
+        # To iterate over large structure databases, the code does not raise an exception here.
         return np.array([])
     else:
         if (
