@@ -168,9 +168,8 @@ def get_snap_descriptor_names(twojmax):
     lst = []
     for j1 in range(0, twojmax + 1):
         for j2 in range(0, j1 + 1):
-            for j in range(j1 - j2, min(twojmax, j1 + j2) + 1, 2):
-                if j >= j1:
-                    lst.append([j1 / 2.0, j2 / 2.0, j / 2.0])
+            for j in range(j1 + j2 % 2, min(twojmax, j1 + j2) + 1, 2):
+                lst.append([j1 / 2.0, j2 / 2.0, j / 2.0])
     return lst
 
 
