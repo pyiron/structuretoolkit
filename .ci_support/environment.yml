@@ -1,7 +1,7 @@
 channels:
 - conda-forge
 dependencies:
-- aimsgb =1.1.0
+- aimsgb =1.1.1
 - ase =3.22.1
 - coverage
 - dscribe =2.1.0
