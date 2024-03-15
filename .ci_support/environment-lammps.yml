@@ -1,0 +1,4 @@
+channels:
+- conda-forge
+dependencies:
+- lammps =2023.11.21

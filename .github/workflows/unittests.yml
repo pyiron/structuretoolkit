@@ -46,6 +46,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - name: Merge conda environment
+      if:  matrix.operating-system != 'windows-latest'
+      run: tail --lines=+4 .ci_support/environment-lammps.yml >> .ci_support/environment.yml
     - name: Setup Mambaforge
       uses: conda-incubator/setup-miniconda@v2
       with:

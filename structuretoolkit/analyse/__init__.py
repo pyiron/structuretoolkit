@@ -23,6 +23,11 @@ from structuretoolkit.analyse.spatial import (
     get_voronoi_vertices,
 )
 from structuretoolkit.analyse.strain import get_strain
+from structuretoolkit.analyse.snap import (
+    get_snap_descriptor_names,
+    get_snap_descriptors_per_atom,
+    get_snap_descriptor_derivatives,
+)
 
 
 def get_symmetry(
