@@ -98,7 +98,7 @@ def set_to_high_symmetry_points(
 def cluster_by_steinhardt(
     positions: np.ndarray,
     neigh,
-    l_values: List[int],
+    l_values: list[int],
     q_eps: float,
     var_ratio: float,
     min_samples: int,
