@@ -6,7 +6,7 @@ from ase.atoms import Atoms
 import numpy as np
 from scipy.sparse import coo_matrix
 from scipy.spatial import ConvexHull, Delaunay, Voronoi
-from typing import List, Optional
+from typing import Optional
 
 from structuretoolkit.analyse.neighbors import get_neighborhood, get_neighbors
 from structuretoolkit.common.helper import (
