@@ -378,7 +378,7 @@ get_interstitials.__doc__ = (
 def get_layers(
     structure: Atoms,
     distance_threshold: float = 0.01,
-    id_list: list = None,
+    id_list: Optional[list[int]] = None,
     wrap_atoms: bool = True,
     planes: np.ndarray = None,
     cluster_method: str = None,
