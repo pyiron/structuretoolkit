@@ -11,7 +11,7 @@ def soap_descriptor_per_atom(
     sigma: Optional[float] = 1.0,
     rbf: str = "gto",
     weighting: Optional[np.ndarray] = None,
-    average: str ="off",
+    average: str = "off",
     compression: dict = {"mode": "off", "species_weighting": None},
     species: Optional[list] = None,
     periodic: bool = True,

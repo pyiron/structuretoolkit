@@ -1,5 +1,6 @@
 from ase.atoms import Atoms
 
+
 def phonopy_to_atoms(ph_atoms) -> Atoms:
     """
     Convert Phonopy Atoms to ASE-like Atoms

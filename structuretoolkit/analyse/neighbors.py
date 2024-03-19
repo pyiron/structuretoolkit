@@ -130,7 +130,12 @@ class Tree:
         new_neigh._positions = self._positions.copy()
         return new_neigh
 
-    def _reshape(self, value: np.ndarray, key: Optional[str] = None, ref_vector: Optional[np.ndarray] = None):
+    def _reshape(
+        self,
+        value: np.ndarray,
+        key: Optional[str] = None,
+        ref_vector: Optional[np.ndarray] = None,
+    ):
         if value is None:
             raise ValueError("Neighbors not initialized yet")
         if key is None:
@@ -227,7 +232,9 @@ class Tree:
             return np.arange(len(self._ref_structure.positions))
         return self._wrapped_indices
 
-    def _get_wrapped_positions(self, positions: np.ndarray, distance_buffer: float = 1.0e-12):
+    def _get_wrapped_positions(
+        self, positions: np.ndarray, distance_buffer: float = 1.0e-12
+    ):
         if not self.wrap_positions:
             return np.asarray(positions)
         x = np.array(positions).copy()
@@ -319,7 +326,10 @@ class Tree:
         return vectors
 
     def _estimate_num_neighbors(
-        self, num_neighbors: Optional[int] = None, cutoff_radius: float = np.inf, width_buffer: float = 1.2
+        self,
+        num_neighbors: Optional[int] = None,
+        cutoff_radius: float = np.inf,
+        width_buffer: float = 1.2,
     ):
         """
 
@@ -356,7 +366,10 @@ class Tree:
         return num_neighbors
 
     def _estimate_width(
-        self, num_neighbors: Optional[int] = None, cutoff_radius: float = np.inf, width_buffer: float = 1.2
+        self,
+        num_neighbors: Optional[int] = None,
+        cutoff_radius: float = np.inf,
+        width_buffer: float = 1.2,
     ):
         """
 
@@ -456,7 +469,13 @@ class Tree:
                 return True
         return False
 
-    def get_spherical_harmonics(self, l: np.ndarray, m: np.ndarray, cutoff_radius: float = np.inf, rotation: Optional[np.ndarray] = None) -> np.ndarray:
+    def get_spherical_harmonics(
+        self,
+        l: np.ndarray,
+        m: np.ndarray,
+        cutoff_radius: float = np.inf,
+        rotation: Optional[np.ndarray] = None,
+    ) -> np.ndarray:
         """
         Args:
             l (int/numpy.array): Degree of the harmonic (int); must have ``l >= 0``.
@@ -497,7 +516,9 @@ class Tree:
             within_cutoff, axis=-1
         )
 
-    def get_steinhardt_parameter(self, l: np.ndarray, cutoff_radius: float = np.inf) -> np.ndarray:
+    def get_steinhardt_parameter(
+        self, l: np.ndarray, cutoff_radius: float = np.inf
+    ) -> np.ndarray:
         """
         Args:
             l (int/numpy.array): Order of Steinhardt parameter
@@ -790,7 +811,10 @@ class Neighbors(Tree):
         return self._reshape(shells, key=mode)
 
     def get_shell_matrix(
-        self, chemical_pair: Optional[list] = None, cluster_by_distances: bool = False, cluster_by_vecs: bool = False
+        self,
+        chemical_pair: Optional[list] = None,
+        cluster_by_distances: bool = False,
+        cluster_by_vecs: bool = False,
     ):
         """
         Shell matrices for pairwise interaction. Note: The matrices are always symmetric, meaning if you
@@ -851,7 +875,9 @@ class Neighbors(Tree):
                 )
         return shell_matrix
 
-    def find_neighbors_by_vector(self, vector: np.ndarray, return_deviation: bool = False) -> np.ndarray:
+    def find_neighbors_by_vector(
+        self, vector: np.ndarray, return_deviation: bool = False
+    ) -> np.ndarray:
         """
         Args:
             vector (list/np.ndarray): vector by which positions are translated (and neighbors are searched)
@@ -1052,7 +1078,12 @@ class Neighbors(Tree):
                     self.__probe_cluster(c_count, nbrs, id_list)
 
     # TODO: combine with corresponding routine in plot3d
-    def get_bonds(self, radius: float = np.inf, max_shells: Optional[int] = None, prec: float = 0.1):
+    def get_bonds(
+        self,
+        radius: float = np.inf,
+        max_shells: Optional[int] = None,
+        prec: float = 0.1,
+    ):
         """
 
         Args:
@@ -1110,7 +1141,7 @@ def get_volume_of_n_sphere_in_p_norm(n: int = 3, p: int = 2) -> float:
 
 def get_neighbors(
     structure: Atoms,
-    num_neighbors: int =12,
+    num_neighbors: int = 12,
     tolerance: int = 2,
     id_list: Optional[list] = None,
     cutoff_radius: float = np.inf,

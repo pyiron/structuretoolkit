@@ -26,7 +26,11 @@ class Strain:
     """
 
     def __init__(
-        self, structure: Atoms, ref_structure: Atoms, num_neighbors: Optional[int] = None, only_bulk_type: bool = False
+        self,
+        structure: Atoms,
+        ref_structure: Atoms,
+        num_neighbors: Optional[int] = None,
+        only_bulk_type: bool = False,
     ):
         """
 
@@ -71,7 +75,9 @@ class Strain:
             self.structure.analyse.pyscal_cna_adaptive(mode="str") != self.crystal_phase
         )
 
-    def _get_perpendicular_unit_vectors(self, vec: np.ndarray, vec_axis: Optional[np.ndarray] = None) -> np.ndarray:
+    def _get_perpendicular_unit_vectors(
+        self, vec: np.ndarray, vec_axis: Optional[np.ndarray] = None
+    ) -> np.ndarray:
         if vec_axis is not None:
             vec_axis = self._get_safe_unit_vectors(vec_axis)
             vec = np.array(
@@ -80,7 +86,9 @@ class Strain:
         return self._get_safe_unit_vectors(vec)
 
     @staticmethod
-    def _get_safe_unit_vectors(vectors: np.ndarray, minimum_value: float = 1.0e-8) -> np.ndarray:
+    def _get_safe_unit_vectors(
+        vectors: np.ndarray, minimum_value: float = 1.0e-8
+    ) -> np.ndarray:
         v = np.linalg.norm(vectors, axis=-1)
         v += (v < minimum_value) * minimum_value
         return np.einsum("...i,...->...i", vectors, 1 / v)
@@ -94,7 +102,12 @@ class Strain:
             prod[np.absolute(prod) > 1] = np.sign(prod)[np.absolute(prod) > 1]
         return np.arccos(prod)
 
-    def _get_rotation_from_vectors(self, vec_before: np.ndarray, vec_after: np.ndarray, vec_axis: Optional[np.ndarray] = None) -> np.ndarray:
+    def _get_rotation_from_vectors(
+        self,
+        vec_before: np.ndarray,
+        vec_after: np.ndarray,
+        vec_axis: Optional[np.ndarray] = None,
+    ) -> np.ndarray:
         v = self._get_perpendicular_unit_vectors(vec_before, vec_axis)
         w = self._get_perpendicular_unit_vectors(vec_after, vec_axis)
         if vec_axis is None:
@@ -132,7 +145,9 @@ class Strain:
         return self._rotations
 
     @staticmethod
-    def _get_best_match_indices(coords: np.ndarray, ref_coord: np.ndarray) -> np.ndarray:
+    def _get_best_match_indices(
+        coords: np.ndarray, ref_coord: np.ndarray
+    ) -> np.ndarray:
         distances = np.linalg.norm(
             coords[:, :, None, :] - ref_coord[None, None, :, :], axis=-1
         )
@@ -195,7 +210,7 @@ class Strain:
 def get_strain(
     structure: Atoms,
     ref_structure: Atoms,
-    num_neighbors: Optional[int] =None,
+    num_neighbors: Optional[int] = None,
     only_bulk_type: bool = False,
     return_object: bool = False,
 ):

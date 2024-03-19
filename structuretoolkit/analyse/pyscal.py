@@ -64,7 +64,9 @@ def get_steinhardt_parameters(
         return sysq
 
 
-def get_centro_symmetry_descriptors(structure: Atoms, num_neighbors: int = 12) -> np.ndarray:
+def get_centro_symmetry_descriptors(
+    structure: Atoms, num_neighbors: int = 12
+) -> np.ndarray:
     """
     Analyse centrosymmetry parameter
 
@@ -183,7 +185,9 @@ def get_diamond_structure_descriptors(
         )
 
 
-def get_adaptive_cna_descriptors(structure: Atoms, mode: str = "total", ovito_compatibility: bool = False) -> np.ndarray:
+def get_adaptive_cna_descriptors(
+    structure: Atoms, mode: str = "total", ovito_compatibility: bool = False
+) -> np.ndarray:
     """
     Use common neighbor analysis
 
@@ -253,7 +257,7 @@ def get_voronoi_volumes(structure: Atoms) -> np.ndarray:
 
 def find_solids(
     structure: Atoms,
-    neighbor_method: str ="cutoff",
+    neighbor_method: str = "cutoff",
     cutoff: float = 0.0,
     bonds: float = 0.5,
     threshold: float = 0.5,

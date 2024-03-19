@@ -230,7 +230,9 @@ class Symmetry(dict):
             np.einsum("ijk->jki", v_reshaped)[self.permutations],
         ).reshape(np.shape(vectors)) / len(self["rotations"])
 
-    def _get_spglib_cell(self, use_elements: Optional[bool] = None, use_magmoms: Optional[bool] = None) -> tuple:
+    def _get_spglib_cell(
+        self, use_elements: Optional[bool] = None, use_magmoms: Optional[bool] = None
+    ) -> tuple:
         lattice = np.array(self._structure.get_cell(), dtype="double", order="C")
         positions = np.array(
             self._structure.get_scaled_positions(wrap=False), dtype="double", order="C"
@@ -326,7 +328,10 @@ class Symmetry(dict):
         }
 
     def get_primitive_cell(
-        self, standardize: bool = False, use_elements: Optional[bool] = None, use_magmoms: Optional[bool] = None
+        self,
+        standardize: bool = False,
+        use_elements: Optional[bool] = None,
+        use_magmoms: Optional[bool] = None,
     ) -> Atoms:
         """
         Get primitive cell of a given structure.

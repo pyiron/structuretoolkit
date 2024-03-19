@@ -3,7 +3,13 @@ from ase.atoms import Atoms
 import numpy as np
 
 
-def get_distances_array(structure: Atoms, p1: Optional[np.ndarray] = None, p2: Optional[np.ndarray] = None, mic: bool = True, vectors: bool = False):
+def get_distances_array(
+    structure: Atoms,
+    p1: Optional[np.ndarray] = None,
+    p2: Optional[np.ndarray] = None,
+    mic: bool = True,
+    vectors: bool = False,
+):
     """
     Return distance matrix of every position in p1 with every position in
     p2. If p2 is not set, it is assumed that distances between all

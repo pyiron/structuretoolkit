@@ -32,7 +32,7 @@ def plot3d(
     select_atoms: Optional[np.ndarray] = None,
     background: str = "white",
     color_scheme: Optional[str] = None,
-    colors: Optional[np.ndarray] =None,
+    colors: Optional[np.ndarray] = None,
     scalar_field: Optional[np.ndarray] = None,
     scalar_start: Optional[float] = None,
     scalar_end: Optional[float] = None,
@@ -512,7 +512,14 @@ def _plot3d_ase(
     return view
 
 
-def _ngl_write_cell(a1: float, a2: float, a3: float, f1: float = 90.0, f2: float = 90.0, f3: float = 90.0):
+def _ngl_write_cell(
+    a1: float,
+    a2: float,
+    a3: float,
+    f1: float = 90.0,
+    f2: float = 90.0,
+    f3: float = 90.0,
+):
     """
     Writes a PDB-formatted line to represent the simulation cell.
 
@@ -568,7 +575,9 @@ def _ngl_write_atom(
     )
 
 
-def _ngl_write_structure(elements: np.ndarray, positions: np.ndarray, cell: np.ndarray) -> str:
+def _ngl_write_structure(
+    elements: np.ndarray, positions: np.ndarray, cell: np.ndarray
+) -> str:
     """
     Turns structure information into a NGLView-readable protein-database-formatted string.
 
@@ -604,7 +613,9 @@ def _ngl_write_structure(elements: np.ndarray, positions: np.ndarray, cell: np.n
     return pdb_str
 
 
-def _atomic_number_to_radius(atomic_number: int, shift: float =0.2, slope: float = 0.1, scale: float = 1.0) -> float:
+def _atomic_number_to_radius(
+    atomic_number: int, shift: float = 0.2, slope: float = 0.1, scale: float = 1.0
+) -> float:
     """
     Give the atomic radius for plotting, which scales like the root of the atomic number.
 
@@ -621,7 +632,11 @@ def _atomic_number_to_radius(atomic_number: int, shift: float =0.2, slope: float
 
 
 def _add_colorscheme_spacefill(
-    view, elements: np.ndarray, atomic_numbers: np.ndarray, particle_size: float, scheme: str = "element"
+    view,
+    elements: np.ndarray,
+    atomic_numbers: np.ndarray,
+    particle_size: float,
+    scheme: str = "element",
 ):
     """
     Set NGLView spacefill parameters according to a color-scheme.
@@ -651,7 +666,9 @@ def _add_colorscheme_spacefill(
     return view
 
 
-def _add_custom_color_spacefill(view, atomic_numbers: np.ndarray, particle_size: float, colors: np.ndarray):
+def _add_custom_color_spacefill(
+    view, atomic_numbers: np.ndarray, particle_size: float, colors: np.ndarray
+):
     """
     Set NGLView spacefill parameters according to per-atom colors.
 
@@ -674,7 +691,12 @@ def _add_custom_color_spacefill(view, atomic_numbers: np.ndarray, particle_size:
     return view
 
 
-def _scalars_to_hex_colors(scalar_field: np.ndarray, start: Optional[float] = None, end: Optional[float] = None, cmap=None):
+def _scalars_to_hex_colors(
+    scalar_field: np.ndarray,
+    start: Optional[float] = None,
+    end: Optional[float] = None,
+    cmap=None,
+):
     """
     Convert scalar values to hex codes using a colormap.
 
@@ -753,7 +775,9 @@ def _get_orientation(view_plane: np.ndarray) -> np.ndarray:
     ).T
 
 
-def _get_flattened_orientation(view_plane: np.ndarray, distance_from_camera: float) -> list:
+def _get_flattened_orientation(
+    view_plane: np.ndarray, distance_from_camera: float
+) -> list:
     """
     A helper method to plot3d, which generates a rotation matrix from the input `view_plane`, and returns a
     flattened list of len = 16. This flattened list becomes the input argument to `view.contol.orient`.

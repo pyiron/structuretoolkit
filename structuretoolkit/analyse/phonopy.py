@@ -17,7 +17,9 @@ __status__ = "development"
 __date__ = "Sep 1, 2018"
 
 
-def get_equivalent_atoms(structure: Atoms, symprec: float = 1e-5, angle_tolerance: float = -1.0):
+def get_equivalent_atoms(
+    structure: Atoms, symprec: float = 1e-5, angle_tolerance: float = -1.0
+):
     """
     Args: (read phonopy.structure.spglib for more details)
         symprec:

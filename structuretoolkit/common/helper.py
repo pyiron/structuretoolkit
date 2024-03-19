@@ -6,7 +6,11 @@ from typing import Optional
 
 
 def get_extended_positions(
-    structure: Atoms, width: float, return_indices: bool =False, norm_order: int = 2, positions: Optional[np.ndarray] = None
+    structure: Atoms,
+    width: float,
+    return_indices: bool = False,
+    norm_order: int = 2,
+    positions: Optional[np.ndarray] = None,
 ):
     """
     Get all atoms in the boundary around the supercell which have a distance
@@ -79,7 +83,9 @@ def get_vertical_length(structure: Atoms, norm_order: int = 2):
     )
 
 
-def get_wrapped_coordinates(structure: Atoms, positions: np.ndarray, epsilon: float=1.0e-8) -> np.ndarray:
+def get_wrapped_coordinates(
+    structure: Atoms, positions: np.ndarray, epsilon: float = 1.0e-8
+) -> np.ndarray:
     """
     Return coordinates in wrapped in the periodic cell
 
@@ -153,7 +159,9 @@ def get_average_of_unique_labels(labels: np.ndarray, values: np.ndarray) -> floa
     return mean_values
 
 
-def center_coordinates_in_unit_cell(structure: Atoms, origin: float = 0.0, eps: float = 1e-4) -> Atoms:
+def center_coordinates_in_unit_cell(
+    structure: Atoms, origin: float = 0.0, eps: float = 1e-4
+) -> Atoms:
     """
     Wrap atomic coordinates within the supercell.
 
@@ -174,7 +182,9 @@ def center_coordinates_in_unit_cell(structure: Atoms, origin: float = 0.0, eps: 
     return structure
 
 
-def apply_strain(structure: Atoms, epsilon: float, return_box: bool = False, mode: str = "linear"):
+def apply_strain(
+    structure: Atoms, epsilon: float, return_box: bool = False, mode: str = "linear"
+):
     """
     Apply a given strain on the structure. It applies the matrix `F` in the manner:
 

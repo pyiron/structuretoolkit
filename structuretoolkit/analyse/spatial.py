@@ -28,7 +28,9 @@ __status__ = "production"
 __date__ = "Sep 1, 2017"
 
 
-def get_mean_positions(positions: np.ndarray, cell: np.ndarray, pbc: np.ndarray, labels: np.ndarray) -> np.ndarray:
+def get_mean_positions(
+    positions: np.ndarray, cell: np.ndarray, pbc: np.ndarray, labels: np.ndarray
+) -> np.ndarray:
     """
     This function calculates the average position(-s) across periodic boundary conditions according
     to the labels
@@ -57,7 +59,9 @@ def get_mean_positions(positions: np.ndarray, cell: np.ndarray, pbc: np.ndarray,
     return mean_positions
 
 
-def create_gridpoints(structure: Atoms, n_gridpoints_per_angstrom: int = 5) -> np.ndarray:
+def create_gridpoints(
+    structure: Atoms, n_gridpoints_per_angstrom: int = 5
+) -> np.ndarray:
     cell = get_vertical_length(structure=structure)
     n_points = (n_gridpoints_per_angstrom * cell).astype(int)
     positions = np.meshgrid(
@@ -67,12 +71,16 @@ def create_gridpoints(structure: Atoms, n_gridpoints_per_angstrom: int = 5) -> n
     return np.einsum("ji,nj->ni", structure.cell, positions)
 
 
-def remove_too_close(positions: np.ndarray, structure: Atoms, min_distance: float = 1) -> np.ndarray:
+def remove_too_close(
+    positions: np.ndarray, structure: Atoms, min_distance: float = 1
+) -> np.ndarray:
     neigh = get_neighborhood(structure=structure, positions=positions, num_neighbors=1)
     return positions[neigh.distances.flatten() > min_distance]
 
 
-def set_to_high_symmetry_points(positions: np.ndarray, structure: Atoms, neigh, decimals: int = 4) -> np.ndarray:
+def set_to_high_symmetry_points(
+    positions: np.ndarray, structure: Atoms, neigh, decimals: int = 4
+) -> np.ndarray:
     for _ in range(10):
         neigh = neigh.get_neighborhood(positions)
         dx = np.mean(neigh.vecs, axis=-2)
@@ -87,7 +95,14 @@ def set_to_high_symmetry_points(positions: np.ndarray, structure: Atoms, neigh, 
     raise ValueError("High symmetry points could not be detected")
 
 
-def cluster_by_steinhardt(positions: np.ndarray, neigh, l_values: List[int], q_eps: float, var_ratio: float, min_samples: int) -> np.ndarray:
+def cluster_by_steinhardt(
+    positions: np.ndarray,
+    neigh,
+    l_values: List[int],
+    q_eps: float,
+    var_ratio: float,
+    min_samples: int,
+) -> np.ndarray:
     """
     Clusters candidate positions via Steinhardt parameters and the variance in distances to host atoms.
 
@@ -240,7 +255,9 @@ class Interstitials:
         self._positions = None
         self.structure = structure
 
-    def run_workflow(self, positions: Optional[np.ndarray] = None, steps: int = -1) -> np.ndarray:
+    def run_workflow(
+        self, positions: Optional[np.ndarray] = None, steps: int = -1
+    ) -> np.ndarray:
         if positions is None:
             positions = self.initial_positions.copy()
         for ii, ww in enumerate(self.workflow):
@@ -470,7 +487,10 @@ def get_layers(
 
 
 def get_voronoi_vertices(
-    structure: Atoms, epsilon: float = 2.5e-4, distance_threshold: float = 0, width_buffer: float = 10.0
+    structure: Atoms,
+    epsilon: float = 2.5e-4,
+    distance_threshold: float = 0,
+    width_buffer: float = 10.0,
 ) -> np.ndarray:
     """
     Get voronoi vertices of the box.
@@ -578,7 +598,11 @@ def get_delaunay_neighbors(structure: Atoms, width_buffer: float = 10.0) -> np.n
 
 
 def get_cluster_positions(
-    structure: Atoms, positions: Optional[np.ndarray] = None, eps: float = 1.0, buffer_width: Optional[float] =None, return_labels: bool = False
+    structure: Atoms,
+    positions: Optional[np.ndarray] = None,
+    eps: float = 1.0,
+    buffer_width: Optional[float] = None,
+    return_labels: bool = False,
 ) -> np.ndarray:
     """
     Cluster positions according to the distances. Clustering algorithm uses DBSCAN:
