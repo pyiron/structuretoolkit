@@ -2,9 +2,11 @@
 # Copyright (c) Max-Planck-Institut für Eisenforschung GmbH - Computational Materials Design (CM) Department
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
+from ase.atoms import Atoms
 import numpy as np
 from scipy.sparse import coo_matrix
 from scipy.spatial import ConvexHull, Delaunay, Voronoi
+from typing import List, Optional
 
 from structuretoolkit.analyse.neighbors import get_neighborhood, get_neighbors
 from structuretoolkit.common.helper import (
@@ -26,7 +28,7 @@ __status__ = "production"
 __date__ = "Sep 1, 2017"
 
 
-def get_mean_positions(positions, cell, pbc, labels):
+def get_mean_positions(positions: np.ndarray, cell: np.ndarray, pbc: np.ndarray, labels: np.ndarray) -> np.ndarray:
     """
     This function calculates the average position(-s) across periodic boundary conditions according
     to the labels
@@ -55,7 +57,7 @@ def get_mean_positions(positions, cell, pbc, labels):
     return mean_positions
 
 
-def create_gridpoints(structure, n_gridpoints_per_angstrom=5):
+def create_gridpoints(structure: Atoms, n_gridpoints_per_angstrom: int = 5) -> np.ndarray:
     cell = get_vertical_length(structure=structure)
     n_points = (n_gridpoints_per_angstrom * cell).astype(int)
     positions = np.meshgrid(
@@ -65,12 +67,12 @@ def create_gridpoints(structure, n_gridpoints_per_angstrom=5):
     return np.einsum("ji,nj->ni", structure.cell, positions)
 
 
-def remove_too_close(positions, structure, min_distance=1):
+def remove_too_close(positions: np.ndarray, structure: Atoms, min_distance: float = 1) -> np.ndarray:
     neigh = get_neighborhood(structure=structure, positions=positions, num_neighbors=1)
     return positions[neigh.distances.flatten() > min_distance]
 
 
-def set_to_high_symmetry_points(positions, structure, neigh, decimals=4):
+def set_to_high_symmetry_points(positions: np.ndarray, structure: Atoms, neigh, decimals: int = 4) -> np.ndarray:
     for _ in range(10):
         neigh = neigh.get_neighborhood(positions)
         dx = np.mean(neigh.vecs, axis=-2)
@@ -85,7 +87,7 @@ def set_to_high_symmetry_points(positions, structure, neigh, decimals=4):
     raise ValueError("High symmetry points could not be detected")
 
 
-def cluster_by_steinhardt(positions, neigh, l_values, q_eps, var_ratio, min_samples):
+def cluster_by_steinhardt(positions: np.ndarray, neigh, l_values: List[int], q_eps: float, var_ratio: float, min_samples: int) -> np.ndarray:
     """
     Clusters candidate positions via Steinhardt parameters and the variance in distances to host atoms.
 
@@ -163,17 +165,17 @@ class Interstitials:
 
     def __init__(
         self,
-        structure,
-        num_neighbors,
-        n_gridpoints_per_angstrom=5,
-        min_distance=1,
-        use_voronoi=False,
-        x_eps=0.1,
-        l_values=np.arange(2, 13),
-        q_eps=0.3,
-        var_ratio=5,
-        min_samples=None,
-        neigh_args={},
+        structure: Atoms,
+        num_neighbors: int,
+        n_gridpoints_per_angstrom: int = 5,
+        min_distance: float = 1,
+        use_voronoi: bool = False,
+        x_eps: float = 0.1,
+        l_values: np.ndarray = np.arange(2, 13),
+        q_eps: float = 0.3,
+        var_ratio: float = 5.0,
+        min_samples: Optional[int] = None,
+        neigh_args: dict = {},
         **kwargs,
     ):
         """
@@ -238,7 +240,7 @@ class Interstitials:
         self._positions = None
         self.structure = structure
 
-    def run_workflow(self, positions=None, steps=-1):
+    def run_workflow(self, positions: Optional[np.ndarray] = None, steps: int = -1) -> np.ndarray:
         if positions is None:
             positions = self.initial_positions.copy()
         for ii, ww in enumerate(self.workflow):
@@ -258,21 +260,21 @@ class Interstitials:
         return self._neigh
 
     @property
-    def positions(self):
+    def positions(self) -> np.ndarray:
         if self._positions is None:
             self._positions = self.run_workflow()
             self._neigh = self.neigh.get_neighborhood(self._positions)
         return self._positions
 
     @property
-    def hull(self):
+    def hull(self) -> list:
         """
         Convex hull of each atom. It is mainly used for the volume and area calculation of each
         interstitial candidate. For more info, see `get_volumes` and `get_areas`.
         """
         return [ConvexHull(v) for v in self.neigh.vecs]
 
-    def get_variances(self):
+    def get_variances(self) -> np.ndarray:
         """
         Get variance of neighboring distances. Since interstitial sites are mostly in symmetric
         sites, the variance values tend to be small. In the case of fcc, both tetrahedral and
@@ -283,7 +285,7 @@ class Interstitials:
         """
         return np.std(self.neigh.distances, axis=-1)
 
-    def get_distances(self, function_to_apply=np.min):
+    def get_distances(self, function_to_apply=np.min) -> np.ndarray:
         """
         Get per-position return values of a given function for the neighbors.
 
@@ -296,7 +298,7 @@ class Interstitials:
         """
         return function_to_apply(self.neigh.distances, axis=-1)
 
-    def get_steinhardt_parameters(self, l):
+    def get_steinhardt_parameters(self, l: int) -> np.ndarray:
         """
         Args:
             l (int/numpy.array): Order of Steinhardt parameter
@@ -306,14 +308,14 @@ class Interstitials:
         """
         return self.neigh.get_steinhardt_parameter(l=l)
 
-    def get_volumes(self):
+    def get_volumes(self) -> np.ndarray:
         """
         Returns:
             (numpy.array (n,)): Convex hull volume of each site.
         """
         return np.array([h.volume for h in self.hull])
 
-    def get_areas(self):
+    def get_areas(self) -> np.ndarray:
         """
         Returns:
             (numpy.array (n,)): Convex hull area of each site.
@@ -322,17 +324,17 @@ class Interstitials:
 
 
 def get_interstitials(
-    structure,
-    num_neighbors,
-    n_gridpoints_per_angstrom=5,
-    min_distance=1,
-    use_voronoi=False,
-    x_eps=0.1,
-    l_values=np.arange(2, 13),
-    q_eps=0.3,
-    var_ratio=5,
-    min_samples=None,
-    neigh_args={},
+    structure: Atoms,
+    num_neighbors: int,
+    n_gridpoints_per_angstrom: int = 5,
+    min_distance: float = 1,
+    use_voronoi: bool = False,
+    x_eps: float = 0.1,
+    l_values: np.ndarray = np.arange(2, 13),
+    q_eps: float = 0.3,
+    var_ratio: float = 5.0,
+    min_samples: Optional[int] = None,
+    neigh_args: dict = {},
     **kwargs,
 ):
     return Interstitials(
@@ -357,13 +359,13 @@ get_interstitials.__doc__ = (
 
 
 def get_layers(
-    structure,
-    distance_threshold=0.01,
-    id_list=None,
-    wrap_atoms=True,
-    planes=None,
-    cluster_method=None,
-):
+    structure: Atoms,
+    distance_threshold: float = 0.01,
+    id_list: list = None,
+    wrap_atoms: bool = True,
+    planes: np.ndarray = None,
+    cluster_method: str = None,
+) -> np.ndarray:
     """
     Get an array of layer numbers.
 
@@ -468,8 +470,8 @@ def get_layers(
 
 
 def get_voronoi_vertices(
-    structure, epsilon=2.5e-4, distance_threshold=0, width_buffer=10
-):
+    structure: Atoms, epsilon: float = 2.5e-4, distance_threshold: float = 0, width_buffer: float = 10.0
+) -> np.ndarray:
     """
     Get voronoi vertices of the box.
 
@@ -517,8 +519,8 @@ def get_voronoi_vertices(
 
 
 def _get_neighbors(
-    structure,
-    position_interpreter,
+    structure: Atoms,
+    position_interpreter: callable,
     data_field: str,
     width_buffer: float = 10,
 ) -> np.ndarray:
@@ -537,7 +539,7 @@ def _get_neighbors(
     ]
 
 
-def get_voronoi_neighbors(structure, width_buffer: float = 10) -> np.ndarray:
+def get_voronoi_neighbors(structure: Atoms, width_buffer: float = 10) -> np.ndarray:
     """
     Get pairs of atom indices sharing the same Voronoi vertices/areas.
 
@@ -555,7 +557,7 @@ def get_voronoi_neighbors(structure, width_buffer: float = 10) -> np.ndarray:
     )
 
 
-def get_delaunay_neighbors(structure, width_buffer: float = 10.0) -> np.ndarray:
+def get_delaunay_neighbors(structure: Atoms, width_buffer: float = 10.0) -> np.ndarray:
     """
     Get indices of atoms sharing the same Delaunay tetrahedrons (commonly known as Delaunay
     triangles), i.e. indices of neighboring atoms, which form a tetrahedron, in which no other
@@ -576,8 +578,8 @@ def get_delaunay_neighbors(structure, width_buffer: float = 10.0) -> np.ndarray:
 
 
 def get_cluster_positions(
-    structure, positions=None, eps=1, buffer_width=None, return_labels=False
-):
+    structure: Atoms, positions: Optional[np.ndarray] = None, eps: float = 1.0, buffer_width: Optional[float] =None, return_labels: bool = False
+) -> np.ndarray:
     """
     Cluster positions according to the distances. Clustering algorithm uses DBSCAN:
 

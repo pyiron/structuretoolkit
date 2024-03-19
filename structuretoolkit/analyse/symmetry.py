@@ -4,9 +4,11 @@
 
 import ast
 
+from ase.atoms import Atoms
 import numpy as np
 import spglib
 from scipy.spatial import cKDTree
+from typing import Optional
 
 import structuretoolkit.common.helper
 from structuretoolkit.common.error import SymmetryError
@@ -37,12 +39,12 @@ class Symmetry(dict):
 
     def __init__(
         self,
-        structure,
-        use_magmoms=False,
-        use_elements=True,
-        symprec=1e-5,
-        angle_tolerance=-1.0,
-        epsilon=1.0e-8,
+        structure: Atoms,
+        use_magmoms: bool = False,
+        use_elements: bool = True,
+        symprec: float = 1e-5,
+        angle_tolerance: float = -1.0,
+        epsilon: float = 1.0e-8,
     ):
         """
         Args:
@@ -67,11 +69,11 @@ class Symmetry(dict):
             self[k] = v
 
     @property
-    def arg_equivalent_atoms(self):
+    def arg_equivalent_atoms(self) -> np.ndarray:
         return self["equivalent_atoms"]
 
     @property
-    def arg_equivalent_vectors(self):
+    def arg_equivalent_vectors(self) -> np.ndarray:
         """
         Get 3d vector components which are equivalent under symmetry operation. For example, if
         the `i`-direction (`i = x, y, z`) of the `n`-th atom is equivalent to the `j`-direction
@@ -88,7 +90,7 @@ class Symmetry(dict):
         return enum.reshape(-1, 3)
 
     @property
-    def rotations(self):
+    def rotations(self) -> np.ndarray:
         """
         All rotational matrices. Two points x and y are equivalent with respect to the box
         box symmetry, if there is a rotational matrix R and a translational vector t which
@@ -99,7 +101,7 @@ class Symmetry(dict):
         return self["rotations"]
 
     @property
-    def translations(self):
+    def translations(self) -> np.ndarray:
         """
         All translational vectors. Two points x and y are equivalent with respect to the box
         box symmetry, if there is a rotational matrix R and a translational vector t which
@@ -111,10 +113,10 @@ class Symmetry(dict):
 
     def generate_equivalent_points(
         self,
-        points,
-        return_unique=True,
-        decimals=5,
-    ):
+        points: np.ndarray,
+        return_unique: bool = True,
+        decimals: int = 5,
+    ) -> np.ndarray:
         """
 
         Args:
@@ -149,9 +151,9 @@ class Symmetry(dict):
 
     def get_arg_equivalent_sites(
         self,
-        points,
-        decimals=5,
-    ):
+        points: np.ndarray,
+        decimals: int = 5,
+    ) -> np.ndarray:
         """
         Group points according to the box symmetries
 
@@ -176,7 +178,7 @@ class Symmetry(dict):
         return np.unique(indices, return_inverse=True)[1]
 
     @property
-    def permutations(self):
+    def permutations(self) -> np.ndarray:
         """
         Permutations for the corresponding symmetry operations.
 
@@ -210,8 +212,8 @@ class Symmetry(dict):
 
     def symmetrize_vectors(
         self,
-        vectors,
-    ):
+        vectors: np.ndarray,
+    ) -> np.ndarray:
         """
         Symmetrization of natom x 3 vectors according to box symmetries
 
@@ -228,7 +230,7 @@ class Symmetry(dict):
             np.einsum("ijk->jki", v_reshaped)[self.permutations],
         ).reshape(np.shape(vectors)) / len(self["rotations"])
 
-    def _get_spglib_cell(self, use_elements=None, use_magmoms=None):
+    def _get_spglib_cell(self, use_elements: Optional[bool] = None, use_magmoms: Optional[bool] = None) -> tuple:
         lattice = np.array(self._structure.get_cell(), dtype="double", order="C")
         positions = np.array(
             self._structure.get_scaled_positions(wrap=False), dtype="double", order="C"
@@ -260,7 +262,7 @@ class Symmetry(dict):
             )
         return lattice, positions, numbers
 
-    def _get_symmetry(self, symprec=1e-5, angle_tolerance=-1.0):
+    def _get_symmetry(self, symprec: float = 1e-5, angle_tolerance: float = -1.0):
         """
 
         Args:
@@ -297,7 +299,7 @@ class Symmetry(dict):
         return info
 
     @property
-    def spacegroup(self):
+    def spacegroup(self) -> dict:
         """
 
         Args:
@@ -324,8 +326,8 @@ class Symmetry(dict):
         }
 
     def get_primitive_cell(
-        self, standardize=False, use_elements=None, use_magmoms=None
-    ):
+        self, standardize: bool = False, use_elements: Optional[bool] = None, use_magmoms: Optional[bool] = None
+    ) -> Atoms:
         """
         Get primitive cell of a given structure.
 
@@ -368,10 +370,10 @@ class Symmetry(dict):
 
     def get_ir_reciprocal_mesh(
         self,
-        mesh,
-        is_shift=np.zeros(3, dtype="intc"),
-        is_time_reversal=True,
-    ):
+        mesh: np.ndarray,
+        is_shift: np.ndarray = np.zeros(3, dtype="intc"),
+        is_time_reversal: bool = True,
+    ) -> np.ndarray:
         mesh = spglib.get_ir_reciprocal_mesh(
             mesh=mesh,
             cell=self._get_spglib_cell(),

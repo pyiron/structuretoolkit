@@ -2,6 +2,7 @@
 # Copyright (c) Max-Planck-Institut für Eisenforschung GmbH - Computational Materials Design (CM) Department
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
+from ase.atoms import Atoms
 import numpy as np
 
 __author__ = "Osamu Waseda"
@@ -16,7 +17,7 @@ __status__ = "development"
 __date__ = "Sep 1, 2018"
 
 
-def get_equivalent_atoms(structure, symprec=1e-5, angle_tolerance=-1.0):
+def get_equivalent_atoms(structure: Atoms, symprec: float = 1e-5, angle_tolerance: float = -1.0):
     """
     Args: (read phonopy.structure.spglib for more details)
         symprec:

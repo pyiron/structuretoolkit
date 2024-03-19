@@ -1,4 +1,6 @@
-def phonopy_to_atoms(ph_atoms):
+from ase.atoms import Atoms
+
+def phonopy_to_atoms(ph_atoms) -> Atoms:
     """
     Convert Phonopy Atoms to ASE-like Atoms
     Args:
@@ -7,8 +9,6 @@ def phonopy_to_atoms(ph_atoms):
     Returns: ASE-like Atoms object
 
     """
-    from ase.atoms import Atoms
-
     return Atoms(
         symbols=list(ph_atoms.get_chemical_symbols()),
         positions=list(ph_atoms.get_positions()),
@@ -17,7 +17,7 @@ def phonopy_to_atoms(ph_atoms):
     )
 
 
-def atoms_to_phonopy(atom):
+def atoms_to_phonopy(atom: Atoms):
     """
     Convert ASE-like Atoms to Phonopy Atoms
     Args:
