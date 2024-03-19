@@ -1,22 +1,27 @@
+import numpy as np
+from ase.atoms import Atoms
+from typing import Optional
+
+
 def soap_descriptor_per_atom(
-    structure,
-    r_cut=None,
-    n_max=None,
-    l_max=None,
-    sigma=1.0,
-    rbf="gto",
-    weighting=None,
-    average="off",
-    compression={"mode": "off", "species_weighting": None},
-    species=None,
-    periodic=True,
-    sparse=False,
-    dtype="float64",
-    centers=None,
-    n_jobs=1,
-    only_physical_cores=False,
-    verbose=False,
-):
+    structure: Atoms,
+    r_cut: Optional[float] = None,
+    n_max: Optional[int] = None,
+    l_max: Optional[int] = None,
+    sigma: Optional[float] = 1.0,
+    rbf: str = "gto",
+    weighting: Optional[np.ndarray] = None,
+    average: str = "off",
+    compression: dict = {"mode": "off", "species_weighting": None},
+    species: Optional[list] = None,
+    periodic: bool = True,
+    sparse: bool = False,
+    dtype: str = "float64",
+    centers: Optional[np.ndarray] = None,
+    n_jobs: int = 1,
+    only_physical_cores: bool = False,
+    verbose: bool = False,
+) -> np.ndarray:
     from dscribe.descriptors import SOAP
 
     if species is None:

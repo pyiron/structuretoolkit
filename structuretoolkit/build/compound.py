@@ -1,10 +1,12 @@
 import numpy as np
+from typing import Optional
+from ase.atoms import Atoms
 from ase.build import bulk
 from ase.spacegroup import crystal
 from structuretoolkit.analyse.neighbors import get_neighbors
 
 
-def B2(element_a, element_b, a=None):
+def B2(element_a: str, element_b: str, a: Optional[float] = None):
     """
     Builds a cubic $AB$ B2 structure of interpenetrating simple cubic lattices.
 
@@ -26,7 +28,7 @@ def B2(element_a, element_b, a=None):
     )
 
 
-def C14(element_a, element_b, a=None, c_over_a=1.626, x1=0.1697, z1=0.5629):
+def C14(element_a: str, element_b: str , a: Optional[float] = None, c_over_a: float = 1.626, x1: float = 0.1697, z1: float = 0.5629) -> Atoms:
     """
     Builds a hexagonal $A B_2$ C14 Laves phase cell.
 
@@ -72,7 +74,7 @@ def C14(element_a, element_b, a=None, c_over_a=1.626, x1=0.1697, z1=0.5629):
     return s
 
 
-def C15(element_a, element_b, a=None):
+def C15(element_a: str, element_b: str, a: Optional[float] = None) -> Atoms:
     """
     Builds a cubic $A B_2$ C15 Laves phase cell.
 
@@ -112,15 +114,15 @@ def C15(element_a, element_b, a=None):
 
 
 def C36(
-    element_a,
-    element_b,
-    a=None,
-    c_over_a=3.252,
-    x1=0.16429,
-    z1=0.09400,
-    z2=0.65583,
-    z3=0.12514,
-):
+    element_a: str,
+    element_b: str,
+    a: Optional[float] = None,
+    c_over_a: float = 3.252,
+    x1: float = 0.16429,
+    z1: float = 0.09400,
+    z2: float = 0.65583,
+    z3: float = 0.12514,
+) -> Atoms:
     """
     Create hexagonal $A B_2$ C36 Laves phase.
 
@@ -175,7 +177,7 @@ def C36(
     return s
 
 
-def D03(element_a, element_b, a=None):
+def D03(element_a: str, element_b: str, a: Optional[float] = None) -> Atoms:
     """
     Builds a cubic $A B_3$ D03 cubic cell.
 
@@ -198,7 +200,7 @@ def D03(element_a, element_b, a=None):
     )
 
 
-def _bcc_lattice_constant_from_nn_distance(element):
+def _bcc_lattice_constant_from_nn_distance(element: Atoms):
     """
     Build a BCC lattice constant by making the BCC have the same nearest neighbour distance as the regular cell.
 

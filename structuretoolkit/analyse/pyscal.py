@@ -2,6 +2,7 @@
 # Copyright (c) Max-Planck-Institut für Eisenforschung GmbH - Computational Materials Design (CM) Department
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
+from typing import Optional
 import numpy as np
 from ase.atoms import Atoms
 
@@ -20,12 +21,12 @@ __date__ = "Nov 6, 2019"
 
 
 def get_steinhardt_parameters(
-    structure,
-    neighbor_method="cutoff",
-    cutoff=0,
-    n_clusters=2,
-    q=None,
-    averaged=False,
+    structure: Atoms,
+    neighbor_method: str = "cutoff",
+    cutoff: float = 0.0,
+    n_clusters: int = 2,
+    q: Optional[tuple] = None,
+    averaged: bool = False,
 ):
     """
     Calculate Steinhardts parameters
@@ -63,7 +64,9 @@ def get_steinhardt_parameters(
         return sysq
 
 
-def get_centro_symmetry_descriptors(structure, num_neighbors=12):
+def get_centro_symmetry_descriptors(
+    structure: Atoms, num_neighbors: int = 12
+) -> np.ndarray:
     """
     Analyse centrosymmetry parameter
 
@@ -79,8 +82,8 @@ def get_centro_symmetry_descriptors(structure, num_neighbors=12):
 
 
 def get_diamond_structure_descriptors(
-    structure, mode="total", ovito_compatibility=False
-):
+    structure: Atoms, mode: str = "total", ovito_compatibility: bool = False
+) -> np.ndarray:
     """
     Analyse diamond structure
 
@@ -182,7 +185,9 @@ def get_diamond_structure_descriptors(
         )
 
 
-def get_adaptive_cna_descriptors(structure, mode="total", ovito_compatibility=False):
+def get_adaptive_cna_descriptors(
+    structure: Atoms, mode: str = "total", ovito_compatibility: bool = False
+) -> np.ndarray:
     """
     Use common neighbor analysis
 
@@ -237,7 +242,7 @@ def get_adaptive_cna_descriptors(structure, mode="total", ovito_compatibility=Fa
             )
 
 
-def get_voronoi_volumes(structure):
+def get_voronoi_volumes(structure: Atoms) -> np.ndarray:
     """
     Calculate the Voronoi volume of atoms
 
@@ -251,16 +256,16 @@ def get_voronoi_volumes(structure):
 
 
 def find_solids(
-    structure,
-    neighbor_method="cutoff",
-    cutoff=0,
-    bonds=0.5,
-    threshold=0.5,
-    avgthreshold=0.6,
-    cluster=False,
-    q=6,
-    right=True,
-    return_sys=False,
+    structure: Atoms,
+    neighbor_method: str = "cutoff",
+    cutoff: float = 0.0,
+    bonds: float = 0.5,
+    threshold: float = 0.5,
+    avgthreshold: float = 0.6,
+    cluster: bool = False,
+    q: int = 6,
+    right: bool = True,
+    return_sys: bool = False,
 ):
     """
     Get the number of solids or the corresponding pyscal system.
