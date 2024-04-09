@@ -43,7 +43,7 @@ grainboundary = [
 ]
 pyscal = ["pyscal2==2.10.18"]
 nglview = ["nglview==3.1.2"]
-matplotlib = ["matplotlib==3.8.3"]
+matplotlib = ["matplotlib==3.8.4"]
 plotly = ["plotly==5.19.0"]
 clusters = ["scikit-learn==1.4.1.post1"]
 symmetry = ["spglib==2.3.1"]
