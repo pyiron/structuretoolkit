@@ -1,10 +1,16 @@
 import numpy as np
+from ase.atoms import Atoms
 from ase.data import atomic_numbers
 from scipy.sparse import coo_matrix
+from typing import Optional
 
 
 def get_extended_positions(
-    structure, width, return_indices=False, norm_order=2, positions=None
+    structure: Atoms,
+    width: float,
+    return_indices: bool = False,
+    norm_order: int = 2,
+    positions: Optional[np.ndarray] = None,
 ):
     """
     Get all atoms in the boundary around the supercell which have a distance
@@ -15,7 +21,7 @@ def get_extended_positions(
             atoms across periodic boundaries are chosen.
         return_indices (bool): Whether or not return the original indices of the appended
             atoms.
-        norm_order (float): Order of Lp-norm.
+        norm_order (int): Order of Lp-norm.
         positions (numpy.ndarray): Positions for which the extended positions are returned.
             If None, the atom positions of the structure are used.
 
@@ -54,7 +60,7 @@ def get_extended_positions(
     return v_repeated
 
 
-def get_vertical_length(structure, norm_order=2):
+def get_vertical_length(structure: Atoms, norm_order: int = 2):
     """
     Return the length of the cell in each direction projected on the vector vertical to the
     plane.
@@ -77,7 +83,9 @@ def get_vertical_length(structure, norm_order=2):
     )
 
 
-def get_wrapped_coordinates(structure, positions, epsilon=1.0e-8):
+def get_wrapped_coordinates(
+    structure: Atoms, positions: np.ndarray, epsilon: float = 1.0e-8
+) -> np.ndarray:
     """
     Return coordinates in wrapped in the periodic cell
 
@@ -101,12 +109,12 @@ def get_wrapped_coordinates(structure, positions, epsilon=1.0e-8):
     return new_positions.reshape(np.asarray(positions).shape)
 
 
-def get_species_indices_dict(structure):
+def get_species_indices_dict(structure: Atoms) -> dict:
     # As of Python version 3.7, dictionaries are ordered.
     return {el: i for i, el in enumerate(structure.symbols.indices().keys())}
 
 
-def get_structure_indices(structure):
+def get_structure_indices(structure: Atoms) -> np.ndarray:
     element_indices_dict = get_species_indices_dict(structure=structure)
     elements = np.array(structure.get_chemical_symbols())
     indices = elements.copy()
@@ -115,11 +123,11 @@ def get_structure_indices(structure):
     return indices.astype(int)
 
 
-def select_index(structure, element):
+def select_index(structure: Atoms, element: str) -> np.ndarray:
     return structure.symbols.indices()[element]
 
 
-def set_indices(structure, indices):
+def set_indices(structure: Atoms, indices: np.ndarray) -> Atoms:
     indices_dict = {
         v: k for k, v in get_species_indices_dict(structure=structure).items()
     }
@@ -127,7 +135,7 @@ def set_indices(structure, indices):
     return structure
 
 
-def get_average_of_unique_labels(labels, values):
+def get_average_of_unique_labels(labels: np.ndarray, values: np.ndarray) -> float:
     """
 
     This function returns the average values of those elements, which share the same labels
@@ -151,7 +159,9 @@ def get_average_of_unique_labels(labels, values):
     return mean_values
 
 
-def center_coordinates_in_unit_cell(structure, origin=0, eps=1e-4):
+def center_coordinates_in_unit_cell(
+    structure: Atoms, origin: float = 0.0, eps: float = 1e-4
+) -> Atoms:
     """
     Wrap atomic coordinates within the supercell.
 
@@ -172,7 +182,9 @@ def center_coordinates_in_unit_cell(structure, origin=0, eps=1e-4):
     return structure
 
 
-def apply_strain(structure, epsilon, return_box=False, mode="linear"):
+def apply_strain(
+    structure: Atoms, epsilon: float, return_box: bool = False, mode: str = "linear"
+):
     """
     Apply a given strain on the structure. It applies the matrix `F` in the manner:
 

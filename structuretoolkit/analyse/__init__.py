@@ -1,6 +1,7 @@
 import numpy as np
 
 from structuretoolkit.analyse.distance import find_mic, get_distances_array
+from structuretoolkit.analyse.dscribe import soap_descriptor_per_atom
 from structuretoolkit.analyse.neighbors import get_neighborhood, get_neighbors
 from structuretoolkit.analyse.phonopy import get_equivalent_atoms
 from structuretoolkit.analyse.pyscal import (
@@ -22,6 +23,11 @@ from structuretoolkit.analyse.spatial import (
     get_voronoi_vertices,
 )
 from structuretoolkit.analyse.strain import get_strain
+from structuretoolkit.analyse.snap import (
+    get_snap_descriptor_names,
+    get_snap_descriptors_per_atom,
+    get_snap_descriptor_derivatives,
+)
 
 
 def get_symmetry(

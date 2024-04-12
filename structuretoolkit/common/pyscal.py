@@ -1,4 +1,7 @@
-def ase_to_pyscal(structure):
+from ase.atoms import Atoms
+
+
+def ase_to_pyscal(structure: Atoms):
     """
     Converts atoms to ase atoms and than to a pyscal system.
     Also adds the pyscal publication.

@@ -2,8 +2,11 @@
 # Copyright (c) Max-Planck-Institut für Eisenforschung GmbH - Computational Materials Design (CM) Department
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
+from typing import Optional
 from warnings import warn
 
+from ase.atoms import Atoms
+import numpy as np
 from structuretoolkit.common.pymatgen import ase_to_pymatgen, pymatgen_to_ase
 
 __author__ = "Ujjal Saikia"
@@ -18,7 +21,7 @@ __status__ = "production"
 __date__ = "Sept 7, 2023"
 
 
-def get_grainboundary_info(axis, max_sigma):
+def get_grainboundary_info(axis: np.ndarray, max_sigma: int):
     """
     Provides a list of possible GB structures for a given rotational axis and upto the given maximum sigma value.
 
@@ -43,19 +46,19 @@ def get_grainboundary_info(axis, max_sigma):
 
 
 def grainboundary(
-    axis,
-    sigma,
-    plane,
-    initial_struct,
+    axis: np.ndarray,
+    sigma: int,
+    plane: np.ndarray,
+    initial_struct: Atoms,
     *,
-    uc_a=1,
-    uc_b=1,
-    vacuum=0.0,
-    gap=0.0,
-    delete_layer="0b0t0b0t",
-    tol=0.25,
-    to_primitive=False,
-    add_if_dist=None,
+    uc_a: int = 1,
+    uc_b: int = 1,
+    vacuum: float = 0.0,
+    gap: float = 0.0,
+    delete_layer: str = "0b0t0b0t",
+    tol: float = 0.25,
+    to_primitive: bool = False,
+    add_if_dist: Optional[float] = None,
 ):
     """
     Generate a grain boundary structure based on aimsgb.

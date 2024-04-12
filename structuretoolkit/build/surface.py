@@ -1,20 +1,22 @@
+from typing import Optional
 import numpy as np
+from ase.atoms import Atoms
 from ase.build import bulk, surface
 from structuretoolkit.analyse import get_symmetry
 from structuretoolkit.common.pymatgen import ase_to_pymatgen, pymatgen_to_ase
 
 
 def get_high_index_surface_info(
-        element,
-        crystal_structure,
-        lattice_constant,
-        terrace_orientation=None,
-        step_orientation=None,
-        kink_orientation=None,
-        step_down_vector=None,
-        length_step=3,
-        length_terrace=3,
-        length_kink=1,
+    element: str,
+    crystal_structure: str,
+    lattice_constant: float,
+    terrace_orientation: Optional[list] = None,
+    step_orientation: Optional[list] = None,
+    kink_orientation: Optional[list] = None,
+    step_down_vector: Optional[list] = None,
+    length_step: int = 3,
+    length_terrace: int = 3,
+    length_kink: int = 1,
 ):
     """
     Gives the miller indices of high index surface required to create a stepped and kink surface, based
@@ -103,19 +105,19 @@ def get_high_index_surface_info(
 
 
 def high_index_surface(
-        element,
-        crystal_structure,
-        lattice_constant,
-        terrace_orientation=None,
-        step_orientation=None,
-        kink_orientation=None,
-        step_down_vector=None,
-        length_step=3,
-        length_terrace=3,
-        length_kink=1,
-        layers=60,
-        vacuum=10,
-):
+    element: str,
+    crystal_structure: str,
+    lattice_constant: float,
+    terrace_orientation: Optional[list] = None,
+    step_orientation: Optional[list] = None,
+    kink_orientation: Optional[list] = None,
+    step_down_vector: Optional[list] = None,
+    length_step: int = 3,
+    length_terrace: int = 3,
+    length_kink: int = 1,
+    layers: int = 60,
+    vacuum: int = 10,
+) -> Atoms:
     """
     Gives a slab positioned at the bottom with the high index surface computed by high_index_surface_info().
     Args:

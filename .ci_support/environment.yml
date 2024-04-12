@@ -1,19 +1,20 @@
 channels:
 - conda-forge
 dependencies:
-- aimsgb =1.1.0
+- aimsgb =1.1.1
 - ase =3.22.1
 - coverage
-- matplotlib-base =3.8.2
-- nglview =3.1.1
+- dscribe =2.1.0
+- matplotlib-base =3.8.4
+- nglview =3.1.2
 - notebook
-- numpy =1.26.3
-- phonopy =2.21.0
-- plotly =5.18.0
-- pymatgen =2024.1.27
+- numpy =1.26.4
+- phonopy =2.22.1
+- plotly =5.19.0
+- pymatgen =2024.3.1
 - pyscal =2.10.18
 - pyxtal =0.6.2
-- scikit-learn =1.4.0
-- scipy =1.12.0
-- spglib =2.3.0
+- scikit-learn =1.4.2
+- scipy =1.13.0
+- spglib =2.4.0
 - sqsgenerator =0.3
