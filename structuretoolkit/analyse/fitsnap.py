@@ -3,6 +3,7 @@ from typing import Optional, Union
 import random
 import numpy as np
 from fitsnap3lib.fitsnap import FitSnap
+from structuretoolkit.analyse.snap import _get_lammps_compatible_cell
 
 
 def get_ace_descriptor_derivatives(
@@ -190,32 +191,6 @@ def _ase_scraper(data) -> list:
         raise Exception("Argument must be list or dictionary for ASE scraper.")
 
 
-def _get_apre(cell):
-    """
-    Calculate transformed ASE cell for LAMMPS calculations. Thank you Jan Janssen!
-
-    Args:
-        cell: ASE atoms cell.
-
-    Returns transformed cell as np.array which is suitable for LAMMPS.
-    """
-    a, b, c = cell
-    an, bn, cn = [np.linalg.norm(v) for v in cell]
-
-    alpha = np.arccos(np.dot(b, c) / (bn * cn))
-    beta = np.arccos(np.dot(a, c) / (an * cn))
-    gamma = np.arccos(np.dot(a, b) / (an * bn))
-
-    xhi = an
-    xyp = np.cos(gamma) * bn
-    yhi = np.sin(gamma) * bn
-    xzp = np.cos(beta) * cn
-    yzp = (bn * cn * np.cos(alpha) - xyp * xzp) / yhi
-    zhi = np.sqrt(cn**2 - xzp**2 - yzp**2)
-
-    return np.array(((xhi, 0, 0), (xyp, yhi, 0), (xzp, yzp, zhi)))
-
-
 def _collate_data(atoms, name: str = None, group_dict: dict = None) -> dict:
     """
     Function to organize fitting data for FitSNAP from ASE atoms objects.
@@ -229,7 +204,7 @@ def _collate_data(atoms, name: str = None, group_dict: dict = None) -> dict:
     """
 
     # Transform ASE cell to be appropriate for LAMMPS.
-    apre = _get_apre(cell=atoms.cell)
+    apre = _get_lammps_compatible_cell(cell=atoms.cell)
     R = np.dot(np.linalg.inv(atoms.cell), apre)
     positions = np.matmul(atoms.get_positions(), R)
     cell = apre.T
