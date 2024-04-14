@@ -56,6 +56,7 @@ phonopy = [
     "spglib==2.4.0",
 ]
 pyxtal = ["pyxtal==0.6.2"]
+fitsnap3 = ["fitsnap3==3.1.0.2"]
 
 [tool.setuptools.packages.find]
 include = ["structuretoolkit*"]
