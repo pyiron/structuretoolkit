@@ -1,4 +1,4 @@
 channels:
 - conda-forge
 dependencies:
-- lammps =2023.11.21
+- lammps =2024.02.07
