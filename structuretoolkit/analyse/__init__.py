@@ -29,6 +29,15 @@ from structuretoolkit.analyse.snap import (
     get_snap_descriptor_derivatives,
 )
 
+try:
+    from structuretoolkit.analyse.fitsnap import (
+        get_snap_descriptor_derivatives as get_snap_descriptor_derivatives_fitsnap,
+        get_ace_descriptor_derivatives as get_ace_descriptor_derivatives_fitsnap,
+        get_ace_descriptor_derivatives,
+    )
+except ImportError:
+    pass
+
 
 def get_symmetry(
     structure, use_magmoms=False, use_elements=True, symprec=1e-5, angle_tolerance=-1.0
