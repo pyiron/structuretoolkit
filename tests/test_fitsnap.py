@@ -55,13 +55,19 @@ class TestSNAP(unittest.TestCase):
         mat_a = get_ace_descriptor_derivatives(
             structure=self.structure,
             atom_types=self.type,
-            ranks=[1, 2, 3, 4, 5, 6],
-            lmax=[1, 2, 2, 2, 1, 1],
-            nmax=[22, 2, 2, 2, 1, 1],
+            ranks=[1, 2, 3, 4],
+            lmax=[0, 5, 2, 1],
+            nmax=[22, 5, 3, 1],
+            mumax=1,
             nmaxbase=22,
-            rcutfac=4.604694451,
-            lambda_value=3.059235105,
-            lmin=[1, 1, 1, 1, 1, 1],
+            erefs=[0.0],
+            rcutfac=4.5,
+            rcinner=1.2,
+            drcinner=0.01,
+            RPI_heuristic="root_SO3_span",
+            lambda_value=1.275,
+            lmin=[0, 0, 1, 1],
+            bzeroflag=True,
             cutoff=10.0,
         )
-        self.assertEqual(mat_a.shape, (16, 68))
+        self.assertEqual(mat_a.shape, (16, 141))
