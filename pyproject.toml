@@ -46,13 +46,13 @@ nglview = ["nglview==3.1.2"]
 matplotlib = ["matplotlib==3.8.4"]
 plotly = ["plotly==5.21.0"]
 clusters = ["scikit-learn==1.4.2"]
-symmetry = ["spglib==2.4.0"]
+symmetry = ["spglib==2.3.1"]
 surface = [
-    "spglib==2.4.0",
+    "spglib==2.3.1",
     "pymatgen==2024.5.1",
 ]
 phonopy = [
-    "phonopy==2.22.1",
+    "phonopy==2.23.1",
     "spglib==2.4.0",
 ]
 pyxtal = ["pyxtal==0.6.2"]
