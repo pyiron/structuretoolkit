@@ -155,7 +155,7 @@ class TestAtoms(unittest.TestCase):
         )
 
     def test_get_primitive_cell_hex(self):
-        elements = ['Fe', 'Fe', 'Fe', 'Fe', 'O', 'O', 'O', 'O', 'O', 'O']
+        elements = ["Fe", "Fe", "Fe", "Fe", "O", "O", "O", "O", "O", "O"]
         positions = [
             [0.0, 0.0, 4.89],
             [0.0, 0.0, 11.78],
@@ -174,8 +174,7 @@ class TestAtoms(unittest.TestCase):
         sym = stk.analyse.get_symmetry(structure=structure_repeat)
         structure_prim_base = sym.get_primitive_cell()
         self.assertEqual(
-            structure_prim_base.get_chemical_symbols(),
-            structure.get_chemical_symbols()
+            structure_prim_base.get_chemical_symbols(), structure.get_chemical_symbols()
         )
 
     def test_get_equivalent_points(self):

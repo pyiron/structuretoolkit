@@ -69,7 +69,7 @@ def pyxtal(
             s.from_random(
                 dim=dim, group=group, species=species, numIons=num_ions, **kwargs
             )
-        except Comp_CompatibilityError as e:
+        except Comp_CompatibilityError:
             if not allow_exceptions:
                 raise ValueError(
                     f"Symmetry group {group} incompatible with stoichiometry {stoich}!"
@@ -95,11 +95,7 @@ def pyxtal(
                 if s is None:
                     failed_groups.append(g)
                     continue
-                structures.append({
-                    "atoms": s,
-                    "symmetry": g,
-                    "repeat": i
-                })
+                structures.append({"atoms": s, "symmetry": g, "repeat": i})
         if len(failed_groups) > 0:
             warnings.warn(
                 f'Groups [{", ".join(map(str,failed_groups))}] could not be generated with stoichiometry {stoich}!'

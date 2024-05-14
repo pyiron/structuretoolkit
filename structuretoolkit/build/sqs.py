@@ -120,6 +120,7 @@ def sqs_structures(
     return_statistics: Optional[bool] = False,
 ):
     from sqsgenerator import sqs_optimize
+
     composition = mole_fractions_to_composition(mole_fractions, len(structure))
 
     settings = dict(
