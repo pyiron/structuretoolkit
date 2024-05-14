@@ -17,7 +17,6 @@ except ImportError:
     skip_pymatgen_test, "pymatgen is not installed, so the pymatgen tests are skipped."
 )
 class TestPymatgen(unittest.TestCase):
-
     def test_pymatgen_to_pyiron_conversion(self):
         """
         Tests pymatgen_to_pyiron conversion functionality (implemented conversion path is pymatgen->ASE->pyiron)
@@ -58,7 +57,9 @@ class TestPymatgen(unittest.TestCase):
                     if i in constraint.get_indices():
                         constraint_lst.append([False, False, False])
 
-        sd_equivalent = struct_with_sd.site_properties["selective_dynamics"] == constraint_lst
+        sd_equivalent = (
+            struct_with_sd.site_properties["selective_dynamics"] == constraint_lst
+        )
         self.assertTrue(
             sd_equivalent,
             "Failed equivalence test of selective dynamics tags after conversion",
@@ -83,7 +84,10 @@ class TestPymatgen(unittest.TestCase):
                     if i in constraint.get_indices():
                         constraint_lst.append([False, False, False])
 
-        sd_equivalent = struct_with_sd_magmom.site_properties["selective_dynamics"] == constraint_lst
+        sd_equivalent = (
+            struct_with_sd_magmom.site_properties["selective_dynamics"]
+            == constraint_lst
+        )
         self.assertTrue(
             magmom_equivalent,
             "Failed equivalence test of magnetic moment tags if selective dynamics present after conversion (it's messing with other site-specific properties)",
@@ -122,9 +126,7 @@ class TestPymatgen(unittest.TestCase):
         3. Checks if other tags are affected when sel dyn is present (magmom is checked)
         4. Checks if other tags are affected when sel dyn is not present (magmom is checked)
         """
-        atoms = bulk(
-            name="Fe", crystalstructure="bcc", a=4.182
-        ) * [1, 2, 1]
+        atoms = bulk(name="Fe", crystalstructure="bcc", a=4.182) * [1, 2, 1]
 
         # First, check conversion actually works
         struct = ase_to_pymatgen(atoms)
@@ -133,7 +135,7 @@ class TestPymatgen(unittest.TestCase):
 
         # Second, ensure that when only sel_dyn is present (no other site-props present), conversion works
         atoms_sd = atoms.copy()
-        c = FixAtoms(indices=[atom.index for atom in atoms_sd if atom.symbol == 'Fe'])
+        c = FixAtoms(indices=[atom.index for atom in atoms_sd if atom.symbol == "Fe"])
         atoms_sd.set_constraint(c)
 
         constraint_lst = []
@@ -146,8 +148,7 @@ class TestPymatgen(unittest.TestCase):
         struct_sd = ase_to_pymatgen(atoms_sd)
         self.assertTrue(
             np.array_equal(
-                struct_sd.site_properties["selective_dynamics"],
-                constraint_lst
+                struct_sd.site_properties["selective_dynamics"], constraint_lst
             ),
             "Failed to produce equivalent selective dynamics after conversion!",
         )
@@ -191,8 +192,7 @@ class TestPymatgen(unittest.TestCase):
 
         self.assertTrue(
             np.array_equal(
-                struct_sd_magmom.site_properties["selective_dynamics"],
-                constraint_lst
+                struct_sd_magmom.site_properties["selective_dynamics"], constraint_lst
             ),
             "Failed to produce equivalent sel_dyn when both magmom + sel_dyn are present!",
         )

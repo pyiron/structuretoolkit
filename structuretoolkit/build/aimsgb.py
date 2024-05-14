@@ -42,6 +42,7 @@ def get_grainboundary_info(axis: np.ndarray, max_sigma: int):
     GBBuilder.gb_build() function along with the rotational axis and initial bulk structure.
     """
     from aimsgb import GBInformation
+
     return GBInformation(axis=axis, max_sigma=max_sigma)
 
 

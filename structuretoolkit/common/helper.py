@@ -1,6 +1,5 @@
 import numpy as np
 from ase.atoms import Atoms
-from ase.data import atomic_numbers
 from scipy.sparse import coo_matrix
 from typing import Optional
 
