@@ -5,10 +5,26 @@ from ase.atoms import Atoms
 
 def create_mesh(
     structure: Atoms,
-    n_mesh: int = 10,
-    density: int|None = None,
+    n_mesh: int|list = 10,
+    density: float|None = None,
     endpoint: bool = False
 ):
+    """
+    Create a mesh based on a structure
+
+    Args:
+        structure (ase.atoms.Atoms): ASE Atoms
+        n_mesh (int): Number of grid points in each direction. If one number
+            is given, it will be repeated in every direction (i.e. n_mesh = 3
+            is the same as n_mesh = [3, 3, 3])
+        density (float): Density of grid points. Ignored when n_mesh is not
+            None
+        endpoint (bool): Whether both the edges get separate points or not.
+            cf. endpoint in numpy.linspace
+
+    Returns:
+        (n, n, n, 3)-array: mesh
+    """
     if n_mesh is None:
         if density is None:
             raise ValueError("either n_mesh or density must be specified")
