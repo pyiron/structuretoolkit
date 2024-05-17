@@ -816,7 +816,7 @@ def plot_isosurface(
     colorscale: Optional[str] = None,
     height: Optional[float] = 600,
     camera: Optional[str] = "orthographic",
-    **kwargs
+    **kwargs,
 ):
     """
     Make a mesh plot
@@ -861,12 +861,12 @@ def plot_isosurface(
         colorbar_nticks=colorbar_nticks,
         caps=caps,
         colorscale=colorscale,
-        **kwargs
+        **kwargs,
     )
     fig = go.Figure(data=data)
     if structure_plot is not None:
         fig = go.Figure(data=fig.data + structure_plot.data)
-    fig.update_scenes(aspectmode='data')
+    fig.update_scenes(aspectmode="data")
     fig.layout.scene.camera.projection.type = camera
     fig.update_layout(autosize=True, height=height)
     return fig
