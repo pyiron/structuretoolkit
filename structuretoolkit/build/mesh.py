@@ -3,8 +3,15 @@ import warnings
 from ase.atoms import Atoms
 
 
-def create_mesh(structure: Atoms, n_mesh=10, density=None, endpoint=False):
+def create_mesh(
+    structure: Atoms,
+    n_mesh: int = 10,
+    density: int|None = None,
+    endpoint: bool = False
+):
     if n_mesh is None:
+        if density is None:
+            raise ValueError("either n_mesh or density must be specified")
         n_mesh = np.rint(np.linalg.norm(structure.cell, axis=-1) / density).astype(int)
     elif density is not None:
         warnings.warn("As n_mesh is not `None`, `density` is ignored")
