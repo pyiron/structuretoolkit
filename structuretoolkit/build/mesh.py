@@ -1,12 +1,13 @@
 import numpy as np
 import warnings
 from ase.atoms import Atoms
+import typing
 
 
 def create_mesh(
     structure: Atoms,
-    n_mesh: int|list = 10,
-    density: float|None = None,
+    n_mesh: typing.Union[int, list] = 10,
+    density: typing.Optional[float] = None,
     endpoint: bool = False
 ):
     """
