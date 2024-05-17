@@ -838,7 +838,7 @@ def plot_isosurface(
         colorbar_nticks(int): Colorbar ticks correspond to isosurface values
         caps(dict): Whether to set cap on sides or not. Default is False. You
             can set: caps=dict(x_show=True, y_show=True, z_show=True)
-        colorscale(str): Colorscale ("Turbo", "Gnuplot" etc.)
+        colorscale(str): Colorscale ("turbo", "gnbu" etc.)
         height(float): Height of the figure. 600px by default
         camera(str): Camera perspective to choose from "orthographic" and
             "perspective". Default is "orthographic"
@@ -867,6 +867,6 @@ def plot_isosurface(
     if structure_plot is not None:
         fig = go.Figure(data=fig.data + structure_plot.data)
     fig.update_scenes(aspectmode='data')
-    fig.layout.scene.camera.projection.type = "camera"
+    fig.layout.scene.camera.projection.type = camera
     fig.update_layout(autosize=True, height=height)
     return fig
