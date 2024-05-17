@@ -800,3 +800,73 @@ def _get_flattened_orientation(
     flattened_orientation[:3, :3] = _get_orientation(view_plane)
 
     return (distance_from_camera * flattened_orientation).ravel().tolist()
+
+
+def plot_isosurface(
+    mesh,
+    value,
+    structure_plot=None,
+    isomin: float = None,
+    isomax: float = None,
+    surface_fill: float = None,
+    opacity: float = None,
+    surface_count: int = None,
+    colorbar_nticks: int = None,
+    caps: dict = dict(x_show=False, y_show=False, z_show=False),
+    colorscale: str = None,
+    height: float = 600,
+    camera: str = "orthographic",
+    **kwargs
+):
+    """
+    Make a mesh plot
+
+    Args:
+        mesh (numpy.ndarray): Mesh grid. Must have a shape of (nx, ny, nz, 3).
+            It can be generated from structuretoolkit.create_mesh
+        value: (numpy.ndarray): Value to plot. Must have a shape of (nx, ny, nz)
+        structure_plot (plotly.graph_objs._figure.Figure): Plot of the
+            structure to overlay. You should basically always use
+            structuretoolkit.plot3d(structure, mode="plotly")
+        isomin(float): Min color value
+        isomax(float): Max color value
+        surface_fill(float): Polygonal filling of the surface to choose between
+            0 and 1
+        opacity(float): Opacity
+        surface_count(int): Number of isosurfaces, 2 by default, which means
+            only min and max
+        colorbar_nticks(int): Colorbar ticks correspond to isosurface values
+        caps(dict): Whether to set cap on sides or not. Default is False. You
+            can set: caps=dict(x_show=True, y_show=True, z_show=True)
+        colorscale(str): Colorscale ("Turbo", "Gnuplot" etc.)
+        height(float): Height of the figure. 600px by default
+        camera(str): Camera perspective to choose from "orthographic" and
+            "perspective". Default is "orthographic"
+    """
+    try:
+        import plotly.graph_objects as go
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError("plotly not installed - use plot3d instead")
+    x_mesh = np.reshape(mesh, (-1, 3)).T
+    data = go.Isosurface(
+        x=x_mesh[0],
+        y=x_mesh[1],
+        z=x_mesh[2],
+        value=np.array(value).flatten(),
+        isomin=isomin,
+        isomax=isomax,
+        surface_fill=surface_fill,
+        opacity=opacity,
+        surface_count=surface_count,
+        colorbar_nticks=colorbar_nticks,
+        caps=caps,
+        colorscale=colorscale,
+        **kwargs
+    )
+    fig = go.Figure(data=data)
+    if structure_plot is not None:
+        fig = go.Figure(data=fig.data + structure_plot.data)
+    fig.update_scenes(aspectmode='data')
+    fig.layout.scene.camera.projection.type = "camera"
+    fig.update_layout(autosize=True, height=height)
+    return fig
