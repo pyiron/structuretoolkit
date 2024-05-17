@@ -37,6 +37,7 @@ from structuretoolkit.build import (
     grainboundary,
     high_index_surface,
     sqs_structures,
+    create_mesh,
 )
 
 # Common

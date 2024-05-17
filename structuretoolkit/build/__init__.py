@@ -9,3 +9,4 @@ from structuretoolkit.build.surface import (
     high_index_surface,
     get_high_index_surface_info
 )
+from structuretoolkit.build.mesh import create_mesh
