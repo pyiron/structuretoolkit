@@ -55,7 +55,7 @@ from structuretoolkit.common import (
 )
 
 # Visualize
-from structuretoolkit.visualize import plot3d
+from structuretoolkit.visualize import plot3d, plot_isosurface
 
 # Analyse - for backwards compatibility
 from structuretoolkit.analyse import (
