@@ -6,7 +6,7 @@ import typing
 
 def create_mesh(
     structure: Atoms,
-    n_mesh: typing.Union[int, list] = 10,
+    n_mesh: typing.Union[int, list[int, int, int]] = 10,
     density: typing.Optional[float] = None,
     endpoint: bool = False
 ):
