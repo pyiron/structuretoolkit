@@ -822,7 +822,7 @@ def plot_isosurface(
     Make a mesh plot
 
     Args:
-        mesh (numpy.ndarray): Mesh grid. Must have a shape of (nx, ny, nz, 3).
+        mesh (numpy.ndarray): Mesh grid. Must have a shape of (3, nx, ny, nz).
             It can be generated from structuretoolkit.create_mesh
         value: (numpy.ndarray): Value to plot. Must have a shape of (nx, ny, nz)
         structure_plot (plotly.graph_objs._figure.Figure): Plot of the
@@ -847,7 +847,7 @@ def plot_isosurface(
         import plotly.graph_objects as go
     except ModuleNotFoundError:
         raise ModuleNotFoundError("plotly not installed - use plot3d instead")
-    x_mesh = np.reshape(mesh, (-1, 3)).T
+    x_mesh = np.reshape(mesh, (3, -1))
     data = go.Isosurface(
         x=x_mesh[0],
         y=x_mesh[1],
