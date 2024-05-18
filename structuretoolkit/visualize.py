@@ -846,7 +846,7 @@ def plot_isosurface(
     try:
         import plotly.graph_objects as go
     except ModuleNotFoundError:
-        raise ModuleNotFoundError("plotly not installed - use plot3d instead")
+        raise ModuleNotFoundError("plotly not installed")
     x_mesh = np.reshape(mesh, (3, -1))
     data = go.Isosurface(
         x=x_mesh[0],
