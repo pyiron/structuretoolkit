@@ -1,11 +1,12 @@
+from __future__ import annotations
+
 import numpy as np
 import warnings
-from ase.atoms import Atoms
 import typing
 
 
 def create_mesh(
-    structure: Atoms,
+    structure: "ase.atoms.Atoms",
     n_mesh: typing.Union[int, list[int, int, int]] = 10,
     density: typing.Optional[float] = None,
     endpoint: bool = False
@@ -24,7 +25,7 @@ def create_mesh(
             cf. endpoint in numpy.linspace
 
     Returns:
-        (n, n, n, 3)-array: mesh
+        (3, n, n, n)-array: mesh
     """
     if n_mesh is None:
         if density is None:
