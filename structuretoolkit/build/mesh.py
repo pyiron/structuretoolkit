@@ -6,7 +6,7 @@ import typing
 
 def create_mesh(
     structure: Atoms,
-    n_mesh: typing.Union[int, list] = 10,
+    n_mesh: typing.Union[int, list[int, int, int]] = 10,
     density: typing.Optional[float] = None,
     endpoint: bool = False
 ):
@@ -37,5 +37,5 @@ def create_mesh(
         n_mesh = np.repeat(n_mesh, 3)
     linspace = [np.linspace(0, 1, nn, endpoint=endpoint) for nn in n_mesh]
     x_mesh = np.meshgrid(*linspace, indexing='ij')
-    return np.einsum("ixyz,ij->xyzj", x_mesh, structure.cell)
+    return np.einsum("ixyz,ij->jxyz", x_mesh, structure.cell)
 
