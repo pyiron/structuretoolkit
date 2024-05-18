@@ -5,8 +5,12 @@ import warnings
 import typing
 
 
+class MeshInputError(ValueError):
+    """ Raised when mesh input format is wrong """
+
+
 def create_mesh(
-    structure: "ase.atoms.Atoms",
+    structure: typing.Union["ase.atoms.Atoms", np.ndarray],
     n_mesh: typing.Union[int, list[int, int, int]] = 10,
     density: typing.Optional[float] = None,
     endpoint: bool = False
@@ -29,10 +33,13 @@ def create_mesh(
     """
     if n_mesh is None:
         if density is None:
-            raise ValueError("either n_mesh or density must be specified")
+            raise MeshInputError("either n_mesh or density must be specified")
         n_mesh = np.rint(np.linalg.norm(structure.cell, axis=-1) / density).astype(int)
     elif density is not None:
-        warnings.warn("As n_mesh is not `None`, `density` is ignored")
+        raise MeshInputError(
+            "You cannot set n_mesh at density at the same time. Set one of"
+            " them to None"
+        )
     n_mesh = np.atleast_1d(n_mesh).astype(int)
     if len(n_mesh) == 1:
         n_mesh = np.repeat(n_mesh, 3)
