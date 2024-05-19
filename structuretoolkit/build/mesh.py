@@ -36,7 +36,7 @@ def create_mesh(
     if n_mesh is None:
         if density is None:
             raise MeshInputError("either n_mesh or density must be specified")
-        n_mesh = np.rint(np.linalg.norm(structure.cell, axis=-1) / density).astype(int)
+        n_mesh = np.rint(np.linalg.norm(cell, axis=-1) / density).astype(int)
     elif density is not None:
         raise MeshInputError(
             "You cannot set n_mesh at density at the same time. Set one of"
