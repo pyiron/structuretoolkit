@@ -25,6 +25,8 @@ class TestMesh(unittest.TestCase):
             ).shape,
             (3, 4, 4, 4),
         )
+        with assertRaises(ValueError):
+            _ = stk.create_mesh(structure, n_mesh=[1, 2, 3, 4])
 
 
 if __name__ == "__main__":
