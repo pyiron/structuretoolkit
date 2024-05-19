@@ -17,7 +17,7 @@ def create_mesh(
     endpoint: bool = False
 ):
     """
-    Create a mesh based on a structure
+    Create a mesh based on a structure cell
 
     Args:
         cell (ase.atoms.Atoms|np.ndarray|list|float): ASE Atoms or cell

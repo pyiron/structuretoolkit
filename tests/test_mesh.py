@@ -13,19 +13,17 @@ class TestMesh(unittest.TestCase):
         self.assertEqual(stk.create_mesh(structure, n_mesh=4).shape, (3, 4, 4, 4))
         with self.assertRaises(stk.build.mesh.MeshInputError):
             stk.create_mesh(structure, n_mesh=None, density=None)
-        self.assertEqual(
+        with self.assertRaises(stk.build.mesh.MeshInputError):
             stk.create_mesh(
                 structure, n_mesh=10, density=structure.cell[0, 0] / 4
-            ).shape,
-            (3, 10, 10, 10),
-        )
+            )
         self.assertEqual(
             stk.create_mesh(
                 structure, n_mesh=None, density=structure.cell[0, 0] / 4
             ).shape,
             (3, 4, 4, 4),
         )
-        with assertRaises(ValueError):
+        with self.assertRaises(stk.build.mesh.MeshInputError):
             _ = stk.create_mesh(structure, n_mesh=[1, 2, 3, 4])
 
 
