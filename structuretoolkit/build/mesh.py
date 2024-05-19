@@ -49,5 +49,5 @@ def create_mesh(
         raise MeshInputError("n_mesh must be a 3-dim vector")
     linspace = [np.linspace(0, 1, nn, endpoint=endpoint) for nn in n_mesh]
     x_mesh = np.meshgrid(*linspace, indexing='ij')
-    return np.einsum("ixyz,ij->jxyz", x_mesh, structure.cell)
+    return np.einsum("ixyz,ij->jxyz", x_mesh, cell)
 
