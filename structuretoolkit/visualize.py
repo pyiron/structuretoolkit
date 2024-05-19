@@ -7,8 +7,9 @@ import warnings
 
 from ase.atoms import Atoms
 import numpy as np
-from typing import Optional
+from typing import Optional, Union
 from scipy.interpolate import interp1d
+from structuretoolkit.common.helper import get_cell
 
 __author__ = "Joerg Neugebauer, Sudarsan Surendralal"
 __copyright__ = (
@@ -806,6 +807,7 @@ def _get_flattened_orientation(
 def plot_isosurface(
     mesh,
     value,
+    cell: Optional[Union[Atoms, list, np.ndarray, float]] = None,
     structure_plot: Optional["plotly.graph_objs._figure.Figure"] = None,
     isomin: Optional[float] = None,
     isomax: Optional[float] = None,
@@ -826,6 +828,8 @@ def plot_isosurface(
         mesh (numpy.ndarray): Mesh grid. Must have a shape of (3, nx, ny, nz).
             It can be generated from structuretoolkit.create_mesh
         value: (numpy.ndarray): Value to plot. Must have a shape of (nx, ny, nz)
+        cell (Atoms|ndarray|list|float|tuple): Cell, ignored if
+            `structure_plot` is given
         structure_plot (plotly.graph_objs._figure.Figure): Plot of the
             structure to overlay. You should basically always use
             structuretoolkit.plot3d(structure, mode="plotly")
@@ -867,6 +871,8 @@ def plot_isosurface(
     fig = go.Figure(data=data)
     if structure_plot is not None:
         fig = go.Figure(data=fig.data + structure_plot.data)
+    elif cell is not None:
+        cell = get_cell(cell)
     fig.update_scenes(aspectmode="data")
     fig.layout.scene.camera.projection.type = camera
     fig.update_layout(autosize=True, height=height)
