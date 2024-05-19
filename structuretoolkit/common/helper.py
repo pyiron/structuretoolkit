@@ -234,7 +234,7 @@ def get_cell(cell: Union[Atoms, list, np.ndarray, float]):
     orthogonal cell.
 
     Args:
-        cell (Atoms|ndarray|list|float): Cell
+        cell (Atoms|ndarray|list|float|tuple): Cell
 
     Returns:
         (3, 3)-array: Cell
@@ -243,7 +243,14 @@ def get_cell(cell: Union[Atoms, list, np.ndarray, float]):
         return cell.cell
     # Convert float into (3,)-array. No effect if it is (3,3)-array or
     # (3,)-array. Raises error if the shape is not correct
-    cell = cell * np.ones(3)
+    try:
+        cell = cell * np.ones(3)
+    except ValueError:
+        raise ValueError(
+            "cell must be a float, (3,)-ndarray/list/tuple or"
+            " (3,3)-ndarray/list/tuple"
+        )
+
     if np.shape(cell) == (3, 3):
         return cell
     # Convert (3,)-array into (3,3)-array. Raises error if the shape is wrong
