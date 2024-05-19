@@ -2,6 +2,7 @@
 # Copyright (c) Max-Planck-Institut für Eisenforschung GmbH - Computational Materials Design (CM) Department
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
+from __future__ import annotations
 import warnings
 
 from ase.atoms import Atoms
@@ -805,7 +806,7 @@ def _get_flattened_orientation(
 def plot_isosurface(
     mesh,
     value,
-    structure_plot=None,
+    structure_plot: Optional["plotly.graph_objs._figure.Figure"] = None,
     isomin: Optional[float] = None,
     isomax: Optional[float] = None,
     surface_fill: Optional[float] = None,
