@@ -254,4 +254,10 @@ def get_cell(cell: Union[Atoms, list, np.ndarray, float]):
     if np.shape(cell) == (3, 3):
         return cell
     # Convert (3,)-array into (3,3)-array. Raises error if the shape is wrong
-    return cell * np.eye(3)
+    try:
+        return cell * np.eye(3)
+    except ValueError:
+        raise ValueError(
+            "cell must be a float, (3,)-ndarray/list/tuple or"
+            " (3,3)-ndarray/list/tuple"
+        )
