@@ -3,7 +3,7 @@ from __future__ import annotations
 import numpy as np
 import warnings
 import typing
-from structuretoolkit.common.helpers import get_cell
+from structuretoolkit.common.helper import get_cell
 
 
 class MeshInputError(ValueError):
@@ -17,7 +17,7 @@ def create_mesh(
     endpoint: bool = False
 ):
     """
-    Create a mesh based on a structure
+    Create a mesh based on a structure cell
 
     Args:
         cell (ase.atoms.Atoms|np.ndarray|list|float): ASE Atoms or cell
@@ -36,7 +36,7 @@ def create_mesh(
     if n_mesh is None:
         if density is None:
             raise MeshInputError("either n_mesh or density must be specified")
-        n_mesh = np.rint(np.linalg.norm(structure.cell, axis=-1) / density).astype(int)
+        n_mesh = np.rint(np.linalg.norm(cell, axis=-1) / density).astype(int)
     elif density is not None:
         raise MeshInputError(
             "You cannot set n_mesh at density at the same time. Set one of"
@@ -45,7 +45,9 @@ def create_mesh(
     n_mesh = np.atleast_1d(n_mesh).astype(int)
     if len(n_mesh) == 1:
         n_mesh = np.repeat(n_mesh, 3)
+    elif len(n_mesh) != 3:
+        raise MeshInputError("n_mesh must be a 3-dim vector")
     linspace = [np.linspace(0, 1, nn, endpoint=endpoint) for nn in n_mesh]
     x_mesh = np.meshgrid(*linspace, indexing='ij')
-    return np.einsum("ixyz,ij->jxyz", x_mesh, structure.cell)
+    return np.einsum("ixyz,ij->jxyz", x_mesh, cell)
 

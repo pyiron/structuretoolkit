@@ -18,6 +18,10 @@ class TestHelpers(unittest.TestCase):
         self.assertEqual(
             atoms.cell.tolist(), stk.get_cell(atoms).tolist()
         )
+        with self.assertRaises(ValueError):
+            stk.get_cell(np.arange(4))
+        with self.assertRaises(ValueError):
+            stk.get_cell(np.ones((4, 3)))
 
 
 if __name__ == "__main__":
