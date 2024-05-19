@@ -875,7 +875,7 @@ def plot_isosurface(
     if structure_plot is not None:
         fig = go.Figure(data=fig.data + structure_plot.data)
     elif cell is not None:
-        cell = get_cell(cell)
+        fig = _draw_box_plotly(fig, cell)
     fig.update_scenes(aspectmode="data")
     fig.layout.scene.camera.projection.type = camera
     fig.update_layout(autosize=True, height=height)
