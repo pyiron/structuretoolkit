@@ -3,7 +3,7 @@ from __future__ import annotations
 import numpy as np
 import warnings
 import typing
-from structuretoolkit.common.helpers import get_cell
+from structuretoolkit.common.helper import get_cell
 
 
 class MeshInputError(ValueError):

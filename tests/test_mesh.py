@@ -11,7 +11,7 @@ class TestMesh(unittest.TestCase):
     def test_mesh(self):
         structure = bulk("Al", cubic=True)
         self.assertEqual(stk.create_mesh(structure, n_mesh=4).shape, (3, 4, 4, 4))
-        with self.assertRaises(ValueError):
+        with self.assertRaises(stk.build.mesh.MeshInputError):
             stk.create_mesh(structure, n_mesh=None, density=None)
         self.assertEqual(
             stk.create_mesh(
