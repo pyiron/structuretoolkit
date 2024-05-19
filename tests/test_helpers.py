@@ -20,6 +20,8 @@ class TestHelpers(unittest.TestCase):
         )
         with self.assertRaises(ValueError):
             stk.get_cell(np.arange(4))
+        with self.assertRaises(ValueError):
+            stk.get_cell(np.ones((4, 3)))
 
 
 if __name__ == "__main__":
