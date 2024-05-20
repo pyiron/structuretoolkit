@@ -9,6 +9,8 @@ import numpy as np
 from typing import Optional
 from scipy.interpolate import interp1d
 
+from structuretoolkit.common.helper import get_cell
+
 __author__ = "Joerg Neugebauer, Sudarsan Surendralal"
 __copyright__ = (
     "Copyright 2021, Max-Planck-Institut für Eisenforschung GmbH - "
@@ -166,7 +168,7 @@ def _get_box_skeleton(cell: np.ndarray):
 
 
 def _draw_box_plotly(fig, structure, px, go):
-    cell = structure.cell
+    cell = get_cell(structure)
     data = fig.data
     for lines in _get_box_skeleton(cell):
         fig = px.line_3d(**{xx: vv for xx, vv in zip(["x", "y", "z"], lines.T)})
