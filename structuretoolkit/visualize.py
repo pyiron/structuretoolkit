@@ -164,6 +164,7 @@ def _get_box_skeleton(cell: np.ndarray):
     # All 12 two-point lines on the unit square
     return all_lines @ cell
 
+
 def _draw_box_plotly(fig, structure, px):
     cell = get_cell(structure)
     data = fig.data
@@ -172,6 +173,7 @@ def _draw_box_plotly(fig, structure, px):
         fig.update_traces(line_color="#000000")
         data = fig.data + data
     return go.Figure(data=data)
+
 
 def _plot3d_plotly(
     structure: Atoms,
