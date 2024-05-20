@@ -166,7 +166,7 @@ def _get_box_skeleton(cell: np.ndarray):
 
 
 def _draw_box_plotly(fig, structure, px):
-    cell = get_cell(structure)
+    cell = structure.cell
     data = fig.data
     for lines in _get_box_skeleton(cell):
         fig = px.line_3d(**{xx: vv for xx, vv in zip(["x", "y", "z"], lines.T)})
