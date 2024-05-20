@@ -164,7 +164,7 @@ def _get_box_skeleton(cell: np.ndarray):
     # All 12 two-point lines on the unit square
     return all_lines @ cell
 
-def _draw_box_plotly(fig, structure):
+def _draw_box_plotly(fig, structure, px):
     cell = get_cell(structure)
     data = fig.data
     for lines in _get_box_skeleton(cell):
@@ -231,7 +231,7 @@ def _plot3d_plotly(
         ),
     )
     if show_cell:
-        fig = _draw_box_plotly(fig, structure)
+        fig = _draw_box_plotly(fig, structure, px)
     fig.layout.scene.camera.projection.type = camera
     rot = _get_orientation(view_plane).T
     rot[0, :] *= distance_from_camera * 1.25
