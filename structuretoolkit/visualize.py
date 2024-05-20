@@ -11,6 +11,8 @@ from typing import Optional, Union
 from scipy.interpolate import interp1d
 from structuretoolkit.common.helper import get_cell
 
+from structuretoolkit.common.helper import get_cell
+
 __author__ = "Joerg Neugebauer, Sudarsan Surendralal"
 __copyright__ = (
     "Copyright 2021, Max-Planck-Institut für Eisenforschung GmbH - "
@@ -166,7 +168,8 @@ def _get_box_skeleton(cell: np.ndarray):
     # All 12 two-point lines on the unit square
     return all_lines @ cell
 
-def _draw_box_plotly(fig, structure):
+
+def _draw_box_plotly(fig, structure, px, go):
     cell = get_cell(structure)
     data = fig.data
     for lines in _get_box_skeleton(cell):
@@ -174,6 +177,7 @@ def _draw_box_plotly(fig, structure):
         fig.update_traces(line_color="#000000")
         data = fig.data + data
     return go.Figure(data=data)
+
 
 def _plot3d_plotly(
     structure: Atoms,
@@ -233,7 +237,7 @@ def _plot3d_plotly(
         ),
     )
     if show_cell:
-        fig = _draw_box_plotly(fig, structure)
+        fig = _draw_box_plotly(fig, structure, px, go)
     fig.layout.scene.camera.projection.type = camera
     rot = _get_orientation(view_plane).T
     rot[0, :] *= distance_from_camera * 1.25
