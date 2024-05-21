@@ -247,8 +247,7 @@ def get_cell(cell: Union[Atoms, list, np.ndarray, float]):
         cell = cell * np.ones(3)
     except ValueError:
         raise ValueError(
-            "cell must be a float, (3,)-ndarray/list/tuple or"
-            " (3,3)-ndarray/list/tuple"
+            f"Invalid cell type or shape: {type(cell).__name__}, {np.shape(cell)}"
         )
 
     if np.shape(cell) == (3, 3):
@@ -258,6 +257,5 @@ def get_cell(cell: Union[Atoms, list, np.ndarray, float]):
         return cell * np.eye(3)
     except ValueError:
         raise ValueError(
-            "cell must be a float, (3,)-ndarray/list/tuple or"
-            " (3,3)-ndarray/list/tuple"
+            f"Invalid cell type or shape: {type(cell).__name__}, {np.shape(cell)}"
         )
