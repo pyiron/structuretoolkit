@@ -228,7 +228,7 @@ def apply_strain(
         return structure_copy
 
 
-def get_cell(cell: Union[Atoms, list, np.ndarray, float]):
+def get_cell(cell: Union[Atoms, list, tuple, np.ndarray, float]):
     """
     Get cell of an ase structure, or convert a float or a (3,)-array into a
     orthogonal cell.
