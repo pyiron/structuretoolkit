@@ -820,7 +820,7 @@ def plot_isosurface(
     isomax: Optional[float] = None,
     surface_fill: Optional[float] = None,
     opacity: Optional[float] = None,
-    surface_count: Optional[int] = 5,
+    surface_count: int = 5,
     colorbar_nticks: Optional[int] = None,
     caps: Optional[dict] = dict(x_show=False, y_show=False, z_show=False),
     colorscale: Optional[str] = None,
