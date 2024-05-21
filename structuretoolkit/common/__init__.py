@@ -6,6 +6,7 @@ from structuretoolkit.common.helper import (
     get_vertical_length,
     get_wrapped_coordinates,
     select_index,
+    get_cell,
 )
 from structuretoolkit.common.pymatgen import (
     ase_to_pymatgen,
