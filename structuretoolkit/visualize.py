@@ -820,7 +820,7 @@ def plot_isosurface(
     isomax: Optional[float] = None,
     surface_fill: Optional[float] = None,
     opacity: Optional[float] = None,
-    surface_count: Optional[int] = None,
+    surface_count: Optional[int] = 5,
     colorbar_nticks: Optional[int] = None,
     caps: Optional[dict] = dict(x_show=False, y_show=False, z_show=False),
     colorscale: Optional[str] = None,
@@ -845,7 +845,7 @@ def plot_isosurface(
         surface_fill(float): Polygonal filling of the surface to choose between
             0 and 1
         opacity(float): Opacity
-        surface_count(int): Number of isosurfaces, 2 by default, which means
+        surface_count(int): Number of isosurfaces, 5 by default, which means
             only min and max
         colorbar_nticks(int): Colorbar ticks correspond to isosurface values
         caps(dict): Whether to set cap on sides or not. Default is False. You
