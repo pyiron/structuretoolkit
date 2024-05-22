@@ -824,7 +824,7 @@ def plot_isosurface(
     colorbar_nticks: Optional[int] = None,
     caps: Optional[dict] = dict(x_show=False, y_show=False, z_show=False),
     colorscale: Optional[str] = None,
-    height: float = 600.,
+    height: float = 600.0,
     camera: Optional[str] = "orthographic",
     **kwargs,
 ):
