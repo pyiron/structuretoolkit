@@ -4,4 +4,4 @@ dependencies:
 - ase =3.22.1
 - coverage
 - numpy =1.26.4
-- scipy =1.13.0
+- scipy =1.13.1
