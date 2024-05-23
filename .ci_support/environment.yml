@@ -16,5 +16,5 @@ dependencies:
 - pyxtal =0.6.6
 - scikit-learn =1.5.0
 - scipy =1.13.1
-- spglib =2.3.1
+- spglib =2.4.0
 - sqsgenerator =0.3
