@@ -4,7 +4,7 @@ dependencies:
 - aimsgb =1.1.1
 - ase =3.22.1
 - coverage
-- dscribe =2.1.0
+- dscribe =2.1.1
 - matplotlib-base =3.8.4
 - nglview =3.1.2
 - notebook
