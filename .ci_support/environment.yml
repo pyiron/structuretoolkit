@@ -2,7 +2,7 @@ channels:
 - conda-forge
 dependencies:
 - aimsgb =1.1.1
-- ase =3.22.1
+- ase =3.23.0
 - coverage
 - dscribe =2.1.1
 - matplotlib-base =3.8.4
