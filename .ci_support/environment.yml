@@ -9,7 +9,7 @@ dependencies:
 - nglview =3.1.2
 - notebook
 - numpy =1.26.4
-- phonopy =2.24.2
+- phonopy =2.24.2.post1
 - plotly =5.22.0
 - pymatgen =2024.6.10
 - pyscal =2.10.18
