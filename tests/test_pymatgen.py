@@ -4,12 +4,11 @@ from ase.build import bulk
 from ase.constraints import FixAtoms
 from structuretoolkit.common import pymatgen_to_ase, ase_to_pymatgen
 
-
 try:
     from pymatgen.core import Structure, Lattice
-
+    from structuretoolkit.analyse.pymatgen import VoronoiSiteFeaturiser
     skip_pymatgen_test = False
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     skip_pymatgen_test = True
 
 
@@ -196,3 +195,56 @@ class TestPymatgen(unittest.TestCase):
             ),
             "Failed to produce equivalent sel_dyn when both magmom + sel_dyn are present!",
         )
+        
+@unittest.skipIf(
+    skip_pymatgen_test, "pymatgen is not installed, so the pymatgen tests are skipped."
+)
+class TestVoronoiSiteFeaturiser(unittest.TestCase):
+    def setUp(self):
+        self.example_structure = bulk("Fe")
+
+    def assertListsAlmostEqual(self, list1, list2, decimal=4):
+        """
+        Check if two lists are approximately equal up to a specified number of decimal places.
+
+        Parameters:
+        list1 (list): The first list for comparison.
+        list2 (list): The second list for comparison.
+        decimal (int): The number of decimal places to consider for comparison.
+
+        Raises:
+        AssertionError: Raised if the lists are not approximately equal.
+        """
+        self.assertEqual(len(list1), len(list2), "Lists have different lengths")
+
+        for i in range(len(list1)):
+            self.assertAlmostEqual(list1[i], list2[i], places=decimal,
+                                msg=f"Lists differ at index {i}: {list1[i]} != {list2[i]}")
+
+    def test_VoronoiSiteFeaturiser(self):
+        # Calculate the expected output manually
+        expected_output = {
+            "VorNN_CoordNo": 14,
+            "VorNN_tot_vol": 11.819951,
+            "VorNN_tot_area": 27.577769,
+            "VorNN_volumes_std": 0.304654,
+            "VorNN_volumes_mean": 0.844282,
+            "VorNN_volumes_min": 0.492498,
+            "VorNN_volumes_max": 1.10812,
+            "VorNN_vertices_std": 0.989743,
+            "VorNN_vertices_mean": 5.142857,
+            "VorNN_vertices_min": 4,
+            "VorNN_vertices_max": 6,
+            "VorNN_areas_std": 0.814261,
+            "VorNN_areas_mean": 1.969841,
+            "VorNN_areas_min": 1.029612,
+            "VorNN_areas_max": 2.675012,
+            "VorNN_distances_std": 0.095141,
+            "VorNN_distances_mean": 1.325141,
+            "VorNN_distances_min": 1.242746,
+            "VorNN_distances_max": 1.435
+        }
+
+        # Call the function with the example structure
+        df = VoronoiSiteFeaturiser(self.example_structure, 0)
+        self.assertListsAlmostEqual(df.values.tolist()[0], list(expected_output.values()), decimal=4)
