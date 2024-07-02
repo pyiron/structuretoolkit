@@ -12,11 +12,7 @@ def ase_to_pyscal(structure: Atoms):
     Returns:
         Pyscal system: See the pyscal documentation.
     """
-    import pyscal.core as pc
+    import pyscal3 as pc
 
-    sys = pc.System()
-    sys.read_inputfile(
-        filename=structure,
-        format="ase",
-    )
+    sys = pc.System(structure, format='ase')
     return sys
