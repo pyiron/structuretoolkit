@@ -47,11 +47,8 @@ def get_steinhardt_parameters(
     sys = ase_to_pyscal(structure)
     q = (4, 6) if q is None else q
 
-    sys.find_neighbors(method=neighbor_method, cutoff=cutoff)
-
-    sys.calculate_q(q, averaged=averaged)
-
-    sysq = np.array(sys.get_qvals(q, averaged=averaged))
+    sys.find.neighbors(method=neighbor_method, cutoff=cutoff)
+    sysq = sys.calculate.steinhardt_parameter(q, averaged=averaged)
 
     if n_clusters is not None:
         from sklearn import cluster
@@ -78,7 +75,7 @@ def get_centro_symmetry_descriptors(
         csm (list) : list of centrosymmetry parameter
     """
     sys = ase_to_pyscal(structure)
-    return np.array(sys.calculate_centrosymmetry(nmax=num_neighbors))
+    return np.array(sys.calculate.centrosymmetry(nmax=num_neighbors))
 
 
 def get_diamond_structure_descriptors(
@@ -101,7 +98,7 @@ def get_diamond_structure_descriptors(
         (depends on `mode`)
     """
     sys = ase_to_pyscal(structure)
-    diamond_dict = sys.identify_diamond()
+    diamond_dict = sys.analyze.diamond_structure()
 
     ovito_identifiers = [
         "Cubic diamond",
@@ -217,7 +214,7 @@ def get_adaptive_cna_descriptors(
         "CommonNeighborAnalysis.counts.ICO",
     ]
 
-    cna = sys.calculate_cna()
+    cna = sys.analyze.common_neighbor_analysis()
 
     if mode == "total":
         if not ovito_compatibility:
@@ -250,7 +247,7 @@ def get_voronoi_volumes(structure: Atoms) -> np.ndarray:
         structure : (ase.atoms.Atoms): The structure to analyze.
     """
     sys = ase_to_pyscal(structure)
-    sys.find_neighbors(method="voronoi")
+    sys.find.neighbors(method="voronoi")
     structure = sys.atoms
     return np.array([atom.volume for atom in structure])
 
@@ -287,8 +284,8 @@ def find_solids(
         pyscal system: pyscal system when return_sys=True
     """
     sys = ase_to_pyscal(structure)
-    sys.find_neighbors(method=neighbor_method, cutoff=cutoff)
-    sys.find_solids(
+    sys.find.neighbors(method=neighbor_method, cutoff=cutoff)
+    sys.find.solids(
         bonds=bonds,
         threshold=threshold,
         avgthreshold=avgthreshold,
