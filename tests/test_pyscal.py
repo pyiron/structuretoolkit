@@ -9,7 +9,7 @@ from ase.atoms import Atoms
 import structuretoolkit as stk
 
 try:
-    import pyscal
+    import pyscal3 as pyscal
 
     skip_pyscal_test = False
 except ImportError:
@@ -17,7 +17,7 @@ except ImportError:
 
 
 @unittest.skipIf(
-    skip_pyscal_test, "pyscal is not installed, so the pyscal tests are skipped."
+    skip_pyscal_test, "pyscal3 is not installed, so the pyscal3 tests are skipped."
 )
 class Testpyscal(unittest.TestCase):
     @classmethod

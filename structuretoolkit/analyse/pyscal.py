@@ -163,17 +163,17 @@ def get_diamond_structure_descriptors(
             }
     elif mode == "numeric":
         if not ovito_compatibility:
-            return np.array([atom.structure for atom in sys.atoms])
+            return np.array(sys.atoms.structure)
         else:
-            return np.array([convert_to_ovito[atom.structure] for atom in sys.atoms])
+            return np.array([convert_to_ovito[structure] for structure in sys.atoms.structure])
     elif mode == "str":
         if not ovito_compatibility:
-            return np.array([pyscal_identifiers[atom.structure] for atom in sys.atoms])
+            return np.array([pyscal_identifiers[structure] for structure in sys.atoms.structure])
         else:
             return np.array(
                 [
-                    ovito_identifiers[convert_to_ovito[atom.structure]]
-                    for atom in sys.atoms
+                    ovito_identifiers[convert_to_ovito[structure]]
+                    for structure in sys.atoms.structure
                 ]
             )
     else:
@@ -222,8 +222,7 @@ def get_adaptive_cna_descriptors(
         else:
             return {o: cna[p] for o, p in zip(ovito_parameter, pyscal_parameter)}
     else:
-        structure = sys.atoms
-        cnalist = np.array([atom.structure for atom in structure])
+        cnalist = np.array(sys.atoms.structure)
         if mode == "numeric":
             return cnalist
         elif mode == "str":
@@ -248,8 +247,7 @@ def get_voronoi_volumes(structure: Atoms) -> np.ndarray:
     """
     sys = ase_to_pyscal(structure)
     sys.find.neighbors(method="voronoi")
-    structure = sys.atoms
-    return np.array([atom.volume for atom in structure])
+    return np.array(sys.atoms.voronoi.volume)
 
 
 def find_solids(
@@ -296,6 +294,4 @@ def find_solids(
     )
     if return_sys:
         return sys
-    structure = sys.atoms
-    solids = [atom for atom in structure if atom.solid]
-    return len(solids)
+    return np.sum(sys.atoms.solid)
