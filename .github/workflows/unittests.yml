@@ -49,7 +49,7 @@ jobs:
       if:  matrix.operating-system != 'windows-latest'
       run: tail --lines=+4 .ci_support/environment-lammps.yml >> .ci_support/environment.yml
     - name: Setup Mambaforge
-      uses: conda-incubator/setup-miniconda@v2
+      uses: conda-incubator/setup-miniconda@v3
       with:
         python-version: ${{ matrix.python-version }}
         miniforge-variant: Mambaforge
