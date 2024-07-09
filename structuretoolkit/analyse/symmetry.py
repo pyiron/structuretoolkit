@@ -9,6 +9,8 @@ import numpy as np
 import spglib
 from scipy.spatial import cKDTree
 from typing import Optional
+import string
+from functools import cached_property
 
 import structuretoolkit.common.helper
 from structuretoolkit.common.error import SymmetryError
@@ -230,6 +232,33 @@ class Symmetry(dict):
             np.einsum("ijk->jki", v_reshaped)[self.permutations],
         ).reshape(np.shape(vectors)) / len(self["rotations"])
 
+    def symmetrize_tensor(self, tensor: np.ndarray) -> np.ndarray:
+        """
+        Symmetrization of any tensor. The tensor is defined by a matrix with a
+        shape of `n * (n_atoms, 3)`. For example, if the structure has 100
+        atoms, the vector can have a shape of (100, 3), (100, 3, 100, 3),
+        (100, 3, 100, 3, 100, 3) etc. Additionally, you can also have an array
+        of tensors, i.e. in this example you can have a shape like (4, 100, 3)
+        or (2, 100, 3, 100, 3). When the shape is (n, n_atoms, 3), the function
+        works in the same way as `symmetrize_vectors`, which might be somewhat
+        faster.
+
+        This function can be useful for the symmetrization of Hessian tensors,
+        or any other tensors which should be symmetric.
+
+        Args:
+            tensors (ndarray): n * (n_atoms, 3) tensor to symmetrize
+
+        Returns
+            (np.ndarray) symmetrized tensor of the same shape
+        """
+        return _SymmetrizeTensor(
+            tensor=tensor,
+            structure=self._structure,
+            rotations=self.rotations,
+            permutations=self.permutations,
+        ).result
+
     def _get_spglib_cell(
         self, use_elements: Optional[bool] = None, use_magmoms: Optional[bool] = None
     ) -> tuple:
@@ -389,3 +418,73 @@ class Symmetry(dict):
         if mesh is None:
             raise SymmetryError(spglib.spglib.spglib_error.message)
         return mesh
+
+
+class _SymmetrizeTensor:
+    def __init__(self, tensor, structure, rotations, permutations):
+        self._tensor = np.array(tensor)
+        self._structure = structure
+        self._rotations = rotations
+        self._permutations = permutations
+
+    @cached_property
+    def order(self):
+        order = len(self._tensor.shape) // 2
+        if self._tensor.shape[-2 * order :] != order * self._structure.positions.shape:
+            raise ValueError(
+                "Tensor must have a shape of a multiple of (n_atoms, 3). See"
+                " docstring for more info"
+            )
+        return order
+
+    @cached_property
+    def ij(self):
+        return string.ascii_lowercase[: 2 * self.order]
+
+    @property
+    def IJ(self):
+        return self.ij.upper()
+
+    @property
+    def ij_reorder(self):
+        return "".join(
+            [self.ij[ii] for ii in np.arange(2 * self.order).reshape(-1, 2).T.flatten()]
+        )
+
+    @property
+    def IJ_reorder(self):
+        return "".join(
+            [self.IJ[ii] for ii in np.arange(2 * self.order).reshape(2, -1).T.flatten()]
+        )
+
+    @cached_property
+    def t_t(self):
+        return np.einsum("...{}->{}...".format(self.ij, self.ij_reorder), self._tensor)
+
+    @cached_property
+    def str_einsum(self):
+        return (
+            ",".join(
+                [I + i for i, I in zip(self.ij[-self.order :], self.IJ[-self.order :])]
+            )
+            + ","
+            + self.IJ[: self.order]
+            + self.ij[self.order :]
+            + "...->..."
+            + self.IJ_reorder
+        )
+
+    @property
+    def result(self):
+        return np.mean(
+            [
+                np.einsum(
+                    self.str_einsum,
+                    *self.order * (rot,),
+                    self.t_t[tuple(np.meshgrid(*self.order * (perm,), indexing="ij"))],
+                    optimize=True,
+                )
+                for rot, perm in zip(self._rotations, self._permutations)
+            ],
+            axis=0,
+        )

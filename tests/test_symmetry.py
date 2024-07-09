@@ -18,6 +18,7 @@ except ImportError:
 
 try:
     import spglib
+    from structuretoolkit.analyse.symmetry import _SymmetrizeTensor
 
     skip_spglib_test = False
 except ImportError:
@@ -108,19 +109,21 @@ class TestAtoms(unittest.TestCase):
             "AlAl", scaled_positions=[(0, 0, 0), (0.5, 0.5, 0.5)], cell=cell, pbc=True
         )
         v = np.random.rand(6).reshape(-1, 3)
+        sym = stk.analyse.get_symmetry(structure=Al)
         self.assertAlmostEqual(
-            np.linalg.norm(
-                stk.analyse.get_symmetry(structure=Al).symmetrize_vectors(v)
-            ),
+            np.linalg.norm(sym.symmetrize_vectors(v)),
             0,
         )
         vv = np.random.rand(12).reshape(2, 2, 3)
-        for vvv in stk.analyse.get_symmetry(structure=Al).symmetrize_vectors(vv):
+        for vvv in sym.symmetrize_vectors(vv):
             self.assertAlmostEqual(np.linalg.norm(vvv), 0)
         Al.positions[0, 0] += 0.01
-        w = stk.analyse.get_symmetry(structure=Al).symmetrize_vectors(v)
+        w = sym.symmetrize_vectors(v)
         self.assertAlmostEqual(
             np.absolute(w[:, 0]).sum(), np.linalg.norm(w, axis=-1).sum()
+        )
+        self.assertAlmostEqual(
+            np.linalg.norm(sym.symmetrize_vectors(v) - sym.symmetrize_tensor(v)), 0
         )
 
     def test_get_symmetry_dataset(self):
@@ -155,7 +158,7 @@ class TestAtoms(unittest.TestCase):
         )
 
     def test_get_primitive_cell_hex(self):
-        elements = ['Fe', 'Fe', 'Fe', 'Fe', 'O', 'O', 'O', 'O', 'O', 'O']
+        elements = ["Fe", "Fe", "Fe", "Fe", "O", "O", "O", "O", "O", "O"]
         positions = [
             [0.0, 0.0, 4.89],
             [0.0, 0.0, 11.78],
@@ -174,8 +177,7 @@ class TestAtoms(unittest.TestCase):
         sym = stk.analyse.get_symmetry(structure=structure_repeat)
         structure_prim_base = sym.get_primitive_cell()
         self.assertEqual(
-            structure_prim_base.get_chemical_symbols(),
-            structure.get_chemical_symbols()
+            structure_prim_base.get_chemical_symbols(), structure.get_chemical_symbols()
         )
 
     def test_get_equivalent_points(self):
@@ -282,6 +284,58 @@ class TestAtoms(unittest.TestCase):
         structure += structure[-1]
         with self.assertRaises(stk.common.SymmetryError):
             stk.analyse.get_symmetry(structure=structure)
+
+
+@unittest.skipIf(
+    skip_spglib_test, "spglib is not installed, so the spglib tests are skipped."
+)
+class TestSymmetrizeTensors(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.structure = bulk("Al", cubic=True, a=4.0).repeat(2)
+        cls.dataset = {
+            "structure": cls.structure,
+            "rotations": np.eye(3),
+            "permutations": np.arange(len(cls.structure)),
+        }
+
+    def test_order(self):
+        with self.assertRaises(ValueError):
+            _SymmetrizeTensor(
+                tensor=np.array([1]), **self.dataset
+            ).order
+        self.assertEqual(
+            _SymmetrizeTensor(
+                tensor=np.random.randn(*self.structure.positions.shape), **self.dataset
+            ).order,
+            1,
+        )
+        self.assertEqual(
+            _SymmetrizeTensor(
+                tensor=np.random.randn(*2 * self.structure.positions.shape),
+                **self.dataset,
+            ).order,
+            2,
+        )
+
+    def test_indexing(self):
+        st = _SymmetrizeTensor(
+            tensor=np.random.randn(*2 * self.structure.positions.shape), **self.dataset
+        )
+        self.assertEqual(st.ij, "abcd")
+        self.assertEqual(st.ij_reorder, "acbd")
+        self.assertEqual(st.IJ, "ABCD")
+        self.assertEqual(st.IJ_reorder, "ACBD")
+
+    def test_str_einsum(self):
+        st = _SymmetrizeTensor(
+            tensor=np.random.randn(*2 * self.structure.positions.shape), **self.dataset
+        )
+        self.assertEqual(st.str_einsum, "Cc,Dd,ABcd...->...ACBD")
+        st = _SymmetrizeTensor(
+            tensor=np.random.randn(*self.structure.positions.shape), **self.dataset
+        )
+        self.assertEqual(st.str_einsum, "Bb,Ab...->...AB")
 
 
 if __name__ == "__main__":
