@@ -7,7 +7,6 @@ import numpy as np
 from ase.build import bulk
 from ase.atoms import Atoms
 import structuretoolkit as stk
-from structuretoolkit.analyse.symmetry import _SymmetrizeTensor
 
 try:
     import pyscal
@@ -19,6 +18,7 @@ except ImportError:
 
 try:
     import spglib
+    from structuretoolkit.analyse.symmetry import _SymmetrizeTensor
 
     skip_spglib_test = False
 except ImportError:
