@@ -437,7 +437,7 @@ class Testpyscalatoms(unittest.TestCase):
         self.assertEqual(
             sum([k in res_dict_total.keys() for k in pyscal_keys]), len(pyscal_keys)
         )
-        self.assertEqual(res_dict_total[pyscal_keys[5]], len(self.si_dia))
+        self.assertEqual(res_dict_total[pyscal_keys[1]], len(self.si_dia))
 
         res_numeric = stk.analyse.get_diamond_structure_descriptors(
             structure=self.al_fcc, mode="numeric", ovito_compatibility=False

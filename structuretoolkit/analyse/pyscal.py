@@ -111,10 +111,6 @@ def get_diamond_structure_descriptors(
     ]
     pyscal_identifiers = [
         "others",
-        "fcc",
-        "hcp",
-        "bcc",
-        "ico",
         "cubic diamond",
         "cubic diamond 1NN",
         "cubic diamond 2NN",
@@ -156,10 +152,6 @@ def get_diamond_structure_descriptors(
                     "hex diamond 2NN"
                 ],
                 "IdentifyDiamond.counts.OTHER": diamond_dict["others"]
-                + diamond_dict["fcc"]
-                + diamond_dict["hcp"]
-                + diamond_dict["bcc"]
-                + diamond_dict["ico"],
             }
     elif mode == "numeric":
         if not ovito_compatibility:
