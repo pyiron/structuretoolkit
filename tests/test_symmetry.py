@@ -7,6 +7,7 @@ import numpy as np
 from ase.build import bulk
 from ase.atoms import Atoms
 import structuretoolkit as stk
+from structuretoolkit.analyse.symmetry import _SymmetrizeTensor
 
 try:
     import pyscal
@@ -297,17 +298,17 @@ class TestSymmetrizeTensors(unittest.TestCase):
 
     def test_order(self):
         with self.assertRaises(ValueError):
-            stk.analyse.symmetry._SymmetrizeTensor(
+            _SymmetrizeTensor(
                 tensor=np.array([1]), **self.dataset
             ).order
         self.assertEqual(
-            stk.analyse.symmetry._SymmetrizeTensor(
+            _SymmetrizeTensor(
                 tensor=np.random.randn(*self.structure.positions.shape), **self.dataset
             ).order,
             1,
         )
         self.assertEqual(
-            stk.analyse.symmetry._SymmetrizeTensor(
+            _SymmetrizeTensor(
                 tensor=np.random.randn(*2 * self.structure.positions.shape),
                 **self.dataset,
             ).order,
@@ -315,7 +316,7 @@ class TestSymmetrizeTensors(unittest.TestCase):
         )
 
     def test_indexing(self):
-        st = stk.analyse.symmetry._SymmetrizeTensor(
+        st = _SymmetrizeTensor(
             tensor=np.random.randn(*2 * self.structure.positions.shape), **self.dataset
         )
         self.assertEqual(st.ij, "abcd")
@@ -324,11 +325,11 @@ class TestSymmetrizeTensors(unittest.TestCase):
         self.assertEqual(st.IJ_reorder, "ACBD")
 
     def test_str_einsum(self):
-        st = stk.analyse.symmetry._SymmetrizeTensor(
+        st = _SymmetrizeTensor(
             tensor=np.random.randn(*2 * self.structure.positions.shape), **self.dataset
         )
         self.assertEqual(st.str_einsum, "Cc,Dd,ABcd...->...ACBD")
-        st = stk.analyse.symmetry._SymmetrizeTensor(
+        st = _SymmetrizeTensor(
             tensor=np.random.randn(*self.structure.positions.shape), **self.dataset
         )
         self.assertEqual(st.str_einsum, "Bb,Ab...->...AB")
