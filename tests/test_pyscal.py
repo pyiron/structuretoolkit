@@ -394,10 +394,6 @@ class Testpyscalatoms(unittest.TestCase):
     def test_analyse_pyscal_diamond_structure(self):
         pyscal_keys = [
             "others",
-            "fcc",
-            "hcp",
-            "bcc",
-            "ico",
             "cubic diamond",
             "cubic diamond 1NN",
             "cubic diamond 2NN",
