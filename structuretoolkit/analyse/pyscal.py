@@ -48,7 +48,7 @@ def get_steinhardt_parameters(
     q = (4, 6) if q is None else q
 
     sys.find.neighbors(method=neighbor_method, cutoff=cutoff)
-    sysq = sys.calculate.steinhardt_parameter(q, averaged=averaged)
+    sysq = np.array(sys.calculate.steinhardt_parameter(q, averaged=averaged))
 
     if n_clusters is not None:
         from sklearn import cluster
