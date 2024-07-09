@@ -413,12 +413,15 @@ class _SymmetrizeTensor:
     @cached_property
     def order(self):
         order = len(self._tensor.shape) // 2
-        assert self._tensor.shape[-2 * order:] == order * self._sym._structure.positions.shape
+        assert (
+            self._tensor.shape[-2 * order :]
+            == order * self._sym._structure.positions.shape
+        )
         return order
 
     @cached_property
     def ij(self):
-        return string.ascii_lowercase[:2 * self.order]
+        return string.ascii_lowercase[: 2 * self.order]
 
     @property
     def IJ(self):
@@ -426,11 +429,15 @@ class _SymmetrizeTensor:
 
     @property
     def ij_reorder(self):
-        return "".join([self.ij[ii] for ii in np.arange(2 * self.order).reshape(-1, 2).T.flatten()])
+        return "".join(
+            [self.ij[ii] for ii in np.arange(2 * self.order).reshape(-1, 2).T.flatten()]
+        )
 
     @property
     def IJ_reorder(self):
-        return "".join([self.IJ[ii] for ii in np.arange(2 * self.order).reshape(2, -1).T.flatten()])
+        return "".join(
+            [self.IJ[ii] for ii in np.arange(2 * self.order).reshape(2, -1).T.flatten()]
+        )
 
     @cached_property
     def t_t(self):
@@ -438,9 +445,16 @@ class _SymmetrizeTensor:
 
     @cached_property
     def str_einsum(self):
-        return ",".join([
-            I + i for i, I in zip(self.ij[-self.order:], self.IJ[-self.order:])
-        ]) + "," + self.IJ[:self.order] + self.ij[self.order:] + "...->..." + self.IJ_reorder
+        return (
+            ",".join(
+                [I + i for i, I in zip(self.ij[-self.order :], self.IJ[-self.order :])]
+            )
+            + ","
+            + self.IJ[: self.order]
+            + self.ij[self.order :]
+            + "...->..."
+            + self.IJ_reorder
+        )
 
     @property
     def result(self):
@@ -448,11 +462,11 @@ class _SymmetrizeTensor:
             [
                 np.einsum(
                     self.str_einsum,
-                    * self.order * (rot, ),
-                    self.t_t[*np.meshgrid(* self.order * (perm,), indexing="ij")],
-                    optimize=True
+                    *self.order * (rot,),
+                    self.t_t[*np.meshgrid(*self.order * (perm,), indexing="ij")],
+                    optimize=True,
                 )
                 for rot, perm in zip(self._sym.rotations, self._sym.permutations)
             ],
-            axis=0
+            axis=0,
         )
