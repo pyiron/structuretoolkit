@@ -478,7 +478,7 @@ class _SymmetrizeTensor:
                 np.einsum(
                     self.str_einsum,
                     *self.order * (rot,),
-                    self.t_t[*np.meshgrid(*self.order * (perm,), indexing="ij")],
+                    self.t_t[tuple(np.meshgrid(*self.order * (perm,), indexing="ij"))],
                     optimize=True,
                 )
                 for rot, perm in zip(self._rotations, self._permutations)
