@@ -286,6 +286,9 @@ class TestAtoms(unittest.TestCase):
             stk.analyse.get_symmetry(structure=structure)
 
 
+@unittest.skipIf(
+    skip_spglib_test, "spglib is not installed, so the spglib tests are skipped."
+)
 class TestSymmetrizeTensors(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
