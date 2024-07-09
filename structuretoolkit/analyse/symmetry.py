@@ -247,7 +247,7 @@ class Symmetry(dict):
         or any other tensors which should be symmetric.
 
         Args:
-            tensors (ndarray): n x (n_atoms x 3) tensor to symmetrize
+            tensors (ndarray): n * (n_atoms, 3) tensor to symmetrize
 
         Returns
             (np.ndarray) symmetrized tensor of the same shape
@@ -431,7 +431,10 @@ class _SymmetrizeTensor:
     def order(self):
         order = len(self._tensor.shape) // 2
         if self._tensor.shape[-2 * order :] != order * self._structure.positions.shape:
-            raise ValueError("Tensor must have a shape of a multiple of n_atoms x 3")
+            raise ValueError(
+                "Tensor must have a shape of a multiple of (n_atoms, 3). See"
+                " docstring for more info"
+            )
         return order
 
     @cached_property
