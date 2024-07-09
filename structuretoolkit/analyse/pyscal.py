@@ -141,15 +141,17 @@ def get_diamond_structure_descriptors(
                 "IdentifyDiamond.counts.OTHER": diamond_dict["others"]
             }
     elif mode == "numeric":
-        return np.array(sys.atoms.structure)
+        if not ovito_compatibility:
+            return np.array(sys.atoms.structure)
+        else:
+            return np.array([6 if x==0 else x-1 for x in sys.atoms.structure])
     
     elif mode == "str":
         if not ovito_compatibility:
-            return np.array([pyscal_identifiers.index(structure) for structure in sys.atoms.structure])
+            return np.array([pyscal_identifiers[structure] for structure in sys.atoms.structure])
         else:
             return np.array(
-                [
-                    ovito_identifiers.index(structure)
+                [ovito_identifiers[structure]
                     for structure in sys.atoms.structure
                 ]
             )
