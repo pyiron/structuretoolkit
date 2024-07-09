@@ -319,6 +319,16 @@ class TestSymmetrizeTensors(unittest.TestCase):
         self.assertEqual(st.IJ, "ABCD")
         self.assertEqual(st.IJ_reorder, "ACBD")
 
+    def test_str_einsum(self):
+        st = stk.analyse.symmetry._SymmetrizeTensor(
+            tensor=np.random.randn(*2 * self.structure.positions.shape), **self.dataset
+        )
+        self.assertEqual(st.str_einsum, "Cc,Dd,ABcd...->...ACBD")
+        st = stk.analyse.symmetry._SymmetrizeTensor(
+            tensor=np.random.randn(*self.structure.positions.shape), **self.dataset
+        )
+        self.assertEqual(st.str_einsum, "Bb,Ab...->...AB")
+
 
 if __name__ == "__main__":
     unittest.main()
