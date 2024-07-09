@@ -256,7 +256,7 @@ class Symmetry(dict):
             tensor=tensor,
             structure=self._structure,
             rotations=self.rotations,
-            permutations=self.permutations
+            permutations=self.permutations,
         ).result
 
     def _get_spglib_cell(

@@ -110,7 +110,8 @@ class TestAtoms(unittest.TestCase):
         v = np.random.rand(6).reshape(-1, 3)
         sym = stk.analyse.get_symmetry(structure=Al)
         self.assertAlmostEqual(
-            np.linalg.norm(sym.symmetrize_vectors(v)), 0,
+            np.linalg.norm(sym.symmetrize_vectors(v)),
+            0,
         )
         vv = np.random.rand(12).reshape(2, 2, 3)
         for vvv in sym.symmetrize_vectors(vv):
@@ -156,7 +157,7 @@ class TestAtoms(unittest.TestCase):
         )
 
     def test_get_primitive_cell_hex(self):
-        elements = ['Fe', 'Fe', 'Fe', 'Fe', 'O', 'O', 'O', 'O', 'O', 'O']
+        elements = ["Fe", "Fe", "Fe", "Fe", "O", "O", "O", "O", "O", "O"]
         positions = [
             [0.0, 0.0, 4.89],
             [0.0, 0.0, 11.78],
@@ -175,8 +176,7 @@ class TestAtoms(unittest.TestCase):
         sym = stk.analyse.get_symmetry(structure=structure_repeat)
         structure_prim_base = sym.get_primitive_cell()
         self.assertEqual(
-            structure_prim_base.get_chemical_symbols(),
-            structure.get_chemical_symbols()
+            structure_prim_base.get_chemical_symbols(), structure.get_chemical_symbols()
         )
 
     def test_get_equivalent_points(self):
@@ -292,23 +292,26 @@ class TestSymmetrizeTensors(unittest.TestCase):
         cls.dataset = {
             "structure": cls.structure,
             "rotations": np.eye(3),
-            "permutations": np.arange(len(cls.structure))
+            "permutations": np.arange(len(cls.structure)),
         }
 
     def test_order(self):
         with self.assertRaises(ValueError):
-            stk.analyse.symmetry._SymmetrizeTensor(tensor=np.array([1]), **self.dataset).order
+            stk.analyse.symmetry._SymmetrizeTensor(
+                tensor=np.array([1]), **self.dataset
+            ).order
         self.assertEqual(
             stk.analyse.symmetry._SymmetrizeTensor(
                 tensor=np.random.randn(*self.structure.positions.shape), **self.dataset
             ).order,
-            1
+            1,
         )
         self.assertEqual(
             stk.analyse.symmetry._SymmetrizeTensor(
-                tensor=np.random.randn(*2 * self.structure.positions.shape), **self.dataset
+                tensor=np.random.randn(*2 * self.structure.positions.shape),
+                **self.dataset,
             ).order,
-            2
+            2,
         )
 
     def test_indexing(self):
