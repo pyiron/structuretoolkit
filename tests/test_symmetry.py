@@ -284,5 +284,32 @@ class TestAtoms(unittest.TestCase):
             stk.analyse.get_symmetry(structure=structure)
 
 
+class TestSymmetrizeTensors(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.structure = bulk("Al", cubic=True, a=4.0).repeat(2)
+        cls.dataset = {
+            "structure": cls.structure,
+            "rotations": np.eye(3),
+            "permutations": np.arange(len(cls.structure))
+        }
+
+    def test_order(self):
+        with self.assertRaises(ValueError):
+            stk.analyse.symmetry._SymmetrizeTensor(tensor=np.array([1]), **self.dataset).order
+        self.assertEqual(
+            stk.analyse.symmetry._SymmetrizeTensor(
+                tensor=np.random.randn(*self.structure.positions.shape), **self.dataset
+            ).order,
+            1
+        )
+        self.assertEqual(
+            stk.analyse.symmetry._SymmetrizeTensor(
+                tensor=np.random.randn(*2 * self.structure.positions.shape), **self.dataset
+            ).order,
+            2
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

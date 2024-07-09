@@ -252,7 +252,12 @@ class Symmetry(dict):
         Returns
             (np.ndarray) symmetrized tensor of the same shape
         """
-        return _SymmetrizeTensor(tensor, self).result
+        return _SymmetrizeTensor(
+            tensor=tensor,
+            structure=self._structure,
+            rotations=self.rotations,
+            permutations=self.permutations
+        ).result
 
     def _get_spglib_cell(
         self, use_elements: Optional[bool] = None, use_magmoms: Optional[bool] = None
@@ -416,14 +421,16 @@ class Symmetry(dict):
 
 
 class _SymmetrizeTensor:
-    def __init__(self, tensor, symmetry):
+    def __init__(self, tensor, structure, rotations, permutations):
         self._tensor = np.array(tensor)
-        self._sym = symmetry
+        self._structure = structure
+        self._rotations = rotations
+        self._permutations = permutations
 
     @cached_property
     def order(self):
         order = len(self._tensor.shape) // 2
-        if self._tensor.shape[-2 * order :] != order * self._sym._structure.positions.shape:
+        if self._tensor.shape[-2 * order :] != order * self._structure.positions.shape:
             raise ValueError("Tensor must have a shape of a multiple of n_atoms x 3")
         return order
 
@@ -474,7 +481,7 @@ class _SymmetrizeTensor:
                     self.t_t[*np.meshgrid(*self.order * (perm,), indexing="ij")],
                     optimize=True,
                 )
-                for rot, perm in zip(self._sym.rotations, self._sym.permutations)
+                for rot, perm in zip(self._rotations, self._permutations)
             ],
             axis=0,
         )
