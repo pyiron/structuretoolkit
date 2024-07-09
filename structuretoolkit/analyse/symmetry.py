@@ -234,7 +234,17 @@ class Symmetry(dict):
 
     def symmetrize_tensor(self, tensor: np.ndarray) -> np.ndarray:
         """
-        Symmetrization of a tensor
+        Symmetrization of any tensor. The tensor is defined by a matrix with a
+        shape of `n * (n_atoms, 3)`. For example, if the structure has 100
+        atoms, the vector can have a shape of (100, 3), (100, 3, 100, 3),
+        (100, 3, 100, 3, 100, 3) etc. Additionally, you can also have an array
+        of tensors, i.e. in this example you can have a shape like (4, 100, 3)
+        or (2, 100, 3, 100, 3). When the shape is (n, n_atoms, 3), the function
+        works in the same way as `symmetrize_vectors`, which might be somewhat
+        faster.
+
+        This function can be useful for the symmetrization of Hessian tensors,
+        or any other tensors which should be symmetric.
 
         Args:
             tensors (ndarray): n x (n_atoms x 3) tensor to symmetrize
@@ -413,10 +423,8 @@ class _SymmetrizeTensor:
     @cached_property
     def order(self):
         order = len(self._tensor.shape) // 2
-        assert (
-            self._tensor.shape[-2 * order :]
-            == order * self._sym._structure.positions.shape
-        )
+        if self._tensor.shape[-2 * order :] != order * self._sym._structure.positions.shape:
+            raise ValueError("Tensor must have a shape of a multiple of n_atoms x 3")
         return order
 
     @cached_property
