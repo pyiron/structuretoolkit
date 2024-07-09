@@ -10,7 +10,7 @@ import spglib
 from scipy.spatial import cKDTree
 from typing import Optional
 import string
-from scipy.sparse import csr_matrix
+from functools import cached_property
 
 import structuretoolkit.common.helper
 from structuretoolkit.common.error import SymmetryError
@@ -242,35 +242,7 @@ class Symmetry(dict):
         Returns
             (np.ndarray) symmetrized tensor of the same shape
         """
-        order = len(np.shape(tensor)) // 2
-        if np.shape(tensor)[-2 * order :] != order * self._structure.positions.shape:
-            raise ValueError(
-                "The tensor must have a shape of a multiplication of natoms x 3"
-            )
-        ij = string.ascii_lowercase[: 2 * order]
-        IJ = ij.upper()
-        str_einsum = (
-            ",".join([I + i for i, I in zip(ij, IJ)]) + ",..." + ij + "->..." + IJ
-        )
-        n = len(self._structure)
-        return np.mean(
-            [
-                np.einsum(
-                    str_einsum,
-                    *order
-                    * (
-                        csr_matrix(
-                            (np.ones(n, dtype=int), (np.arange(n), perm)), shape=(n, n)
-                        ).toarray(),
-                        rot,
-                    ),
-                    tensor,
-                    optimize=True,
-                )
-                for rot, perm in zip(self.rotations, self.permutations)
-            ],
-            axis=0
-        )
+        return _SymmetrizeTensor(tensor, self).result
 
     def _get_spglib_cell(
         self, use_elements: Optional[bool] = None, use_magmoms: Optional[bool] = None
@@ -431,3 +403,56 @@ class Symmetry(dict):
         if mesh is None:
             raise SymmetryError(spglib.spglib.spglib_error.message)
         return mesh
+
+
+class _SymmetrizeTensor:
+    def __init__(self, tensor, symmetry):
+        self._tensor = np.array(tensor)
+        self._sym = symmetry
+
+    @cached_property
+    def order(self):
+        order = len(self._tensor.shape) // 2
+        assert self._tensor.shape[-2 * order:] == order * self._sym._structure.positions.shape
+        return order
+
+    @cached_property
+    def ij(self):
+        return string.ascii_lowercase[:2 * self.order]
+
+    @property
+    def IJ(self):
+        return self.ij.upper()
+
+    @property
+    def ij_reorder(self):
+        return "".join([self.ij[ii] for ii in np.arange(2 * self.order).reshape(-1, 2).T.flatten()])
+
+    @property
+    def IJ_reorder(self):
+        return "".join([self.IJ[ii] for ii in np.arange(2 * self.order).reshape(2, -1).T.flatten()])
+
+    @cached_property
+    def t_t(self):
+        return np.einsum("...{}->{}...".format(self.ij, self.ij_reorder), self._tensor)
+
+    @cached_property
+    def str_einsum(self):
+        return ",".join([
+            I + i for i, I in zip(self.ij[-self.order:], self.IJ[-self.order:])
+        ]) + "," + self.IJ[:self.order] + self.ij[self.order:] + "...->..." + self.IJ_reorder
+
+    @property
+    def result(self):
+        return np.mean(
+            [
+                np.einsum(
+                    self.str_einsum,
+                    * self.order * (rot, ),
+                    self.t_t[*np.meshgrid(* self.order * (perm,), indexing="ij")],
+                    optimize=True
+                )
+                for rot, perm in zip(self._sym.rotations, self._sym.permutations)
+            ],
+            axis=0
+        )
