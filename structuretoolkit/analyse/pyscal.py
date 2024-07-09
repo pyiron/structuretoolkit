@@ -101,13 +101,13 @@ def get_diamond_structure_descriptors(
     diamond_dict = sys.analyze.diamond_structure()
 
     ovito_identifiers = [
+        "Other",
         "Cubic diamond",
         "Cubic diamond (1st neighbor)",
         "Cubic diamond (2nd neighbor)",
         "Hexagonal diamond",
         "Hexagonal diamond (1st neighbor)",
         "Hexagonal diamond (2nd neighbor)",
-        "Other",
     ]
     pyscal_identifiers = [
         "others",
@@ -118,19 +118,6 @@ def get_diamond_structure_descriptors(
         "hex diamond 1NN",
         "hex diamond 2NN",
     ]
-    convert_to_ovito = {
-        0: 6,
-        1: 6,
-        2: 6,
-        3: 6,
-        4: 6,
-        5: 0,
-        6: 1,
-        7: 2,
-        8: 3,
-        9: 4,
-        10: 5,
-    }
 
     if mode == "total":
         if not ovito_compatibility:
@@ -154,17 +141,15 @@ def get_diamond_structure_descriptors(
                 "IdentifyDiamond.counts.OTHER": diamond_dict["others"]
             }
     elif mode == "numeric":
-        if not ovito_compatibility:
-            return np.array(sys.atoms.structure)
-        else:
-            return np.array([convert_to_ovito[structure] for structure in sys.atoms.structure])
+        return np.array(sys.atoms.structure)
+    
     elif mode == "str":
         if not ovito_compatibility:
-            return np.array([pyscal_identifiers[structure] for structure in sys.atoms.structure])
+            return np.array([pyscal_identifiers.index(structure) for structure in sys.atoms.structure])
         else:
             return np.array(
                 [
-                    ovito_identifiers[convert_to_ovito[structure]]
+                    ovito_identifiers.index(structure)
                     for structure in sys.atoms.structure
                 ]
             )
