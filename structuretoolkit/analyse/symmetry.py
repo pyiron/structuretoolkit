@@ -232,10 +232,7 @@ class Symmetry(dict):
             np.einsum("ijk->jki", v_reshaped)[self.permutations],
         ).reshape(np.shape(vectors)) / len(self["rotations"])
 
-    def symmetrize_tensor(
-        self,
-        tensor: np.ndarray
-    ) -> np.ndarray:
+    def symmetrize_tensor(self, tensor: np.ndarray) -> np.ndarray:
         """
         Symmetrization of a tensor
 
@@ -246,15 +243,33 @@ class Symmetry(dict):
             (np.ndarray) symmetrized tensor of the same shape
         """
         order = len(np.shape(tensor)) // 2
-        if np.shape(tensor)[-2 * order:] != order * self._structure.positions.shape:
+        if np.shape(tensor)[-2 * order :] != order * self._structure.positions.shape:
             raise ValueError(
                 "The tensor must have a shape of a multiplication of natoms x 3"
             )
-        ij = string.ascii_lowercase[:2 * order]
+        ij = string.ascii_lowercase[: 2 * order]
         IJ = ij.upper()
-        str_einsum = ",".join([I + i for i, I in zip(ij, IJ)]) + ",..." + ij + "->..." + IJ
+        str_einsum = (
+            ",".join([I + i for i, I in zip(ij, IJ)]) + ",..." + ij + "->..." + IJ
+        )
         n = len(self._structure)
-        return np.mean([np.einsum(str_einsum, * order * (csr_matrix((np.ones(n, dtype=int), (np.arange(n), perm)), shape=(n,n)).toarray(), rot), tensor, optimize=True) for rot, perm in zip(self.rotations, self.permutations)])
+        return np.mean(
+            [
+                np.einsum(
+                    str_einsum,
+                    *order
+                    * (
+                        csr_matrix(
+                            (np.ones(n, dtype=int), (np.arange(n), perm)), shape=(n, n)
+                        ).toarray(),
+                        rot,
+                    ),
+                    tensor,
+                    optimize=True,
+                )
+                for rot, perm in zip(self.rotations, self.permutations)
+            ]
+        )
 
     def _get_spglib_cell(
         self, use_elements: Optional[bool] = None, use_magmoms: Optional[bool] = None
