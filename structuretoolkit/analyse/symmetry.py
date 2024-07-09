@@ -9,6 +9,8 @@ import numpy as np
 import spglib
 from scipy.spatial import cKDTree
 from typing import Optional
+import string
+from scipy.sparse import csr_matrix
 
 import structuretoolkit.common.helper
 from structuretoolkit.common.error import SymmetryError
@@ -229,6 +231,30 @@ class Symmetry(dict):
             self["rotations"],
             np.einsum("ijk->jki", v_reshaped)[self.permutations],
         ).reshape(np.shape(vectors)) / len(self["rotations"])
+
+    def symmetrize_tensor(
+        self,
+        tensor: np.ndarray
+    ) -> np.ndarray:
+        """
+        Symmetrization of a tensor
+
+        Args:
+            tensors (ndarray): n x (n_atoms x 3) tensor to symmetrize
+
+        Returns
+            (np.ndarray) symmetrized tensor of the same shape
+        """
+        order = len(np.shape(tensor)) // 2
+        if np.shape(tensor)[-2 * order:] != order * self._structure.positions.shape:
+            raise ValueError(
+                "The tensor must have a shape of a multiplication of natoms x 3"
+            )
+        ij = string.ascii_lowercase[:2 * order]
+        IJ = ij.upper()
+        str_einsum = ",".join([I + i for i, I in zip(ij, IJ)]) + ",..." + ij + "->..." + IJ
+        n = len(self._structure)
+        return np.mean([np.einsum(str_einsum, * order * (csr_matrix((np.ones(n, dtype=int), (np.arange(n), perm)), shape=(n,n)).toarray(), rot), tensor, optimize=True) for rot, perm in zip(self.rotations, self.permutations)])
 
     def _get_spglib_cell(
         self, use_elements: Optional[bool] = None, use_magmoms: Optional[bool] = None
