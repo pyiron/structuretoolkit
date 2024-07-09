@@ -310,6 +310,12 @@ class TestSymmetrizeTensors(unittest.TestCase):
             2
         )
 
+    def test_indexing(self):
+        st = stk.analyse.symmetry._SymmetrizeTensor(
+            tensor=np.random.randn(*2 * self.structure.positions.shape), **self.dataset
+        )
+        print(st.ij)
+
 
 if __name__ == "__main__":
     unittest.main()
