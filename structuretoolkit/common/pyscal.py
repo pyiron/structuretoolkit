@@ -14,5 +14,5 @@ def ase_to_pyscal(structure: Atoms):
     """
     import pyscal3 as pc
 
-    sys = pc.System(structure, format='ase')
+    sys = pc.System(structure, format="ase")
     return sys
