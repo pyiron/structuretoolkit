@@ -268,7 +268,8 @@ class Symmetry(dict):
                     optimize=True,
                 )
                 for rot, perm in zip(self.rotations, self.permutations)
-            ]
+            ],
+            axis=0
         )
 
     def _get_spglib_cell(
