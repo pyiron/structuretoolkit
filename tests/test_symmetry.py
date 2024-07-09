@@ -314,7 +314,10 @@ class TestSymmetrizeTensors(unittest.TestCase):
         st = stk.analyse.symmetry._SymmetrizeTensor(
             tensor=np.random.randn(*2 * self.structure.positions.shape), **self.dataset
         )
-        print(st.ij)
+        self.assertEqual(st.ij, "abcd")
+        self.assertEqual(st.ij_reorder, "acbd")
+        self.assertEqual(st.IJ, "ABCD")
+        self.assertEqual(st.IJ_reorder, "ACBD")
 
 
 if __name__ == "__main__":
