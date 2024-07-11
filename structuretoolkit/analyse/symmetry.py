@@ -232,7 +232,9 @@ class Symmetry(dict):
             np.einsum("ijk->jki", v_reshaped)[self.permutations],
         ).reshape(np.shape(vectors)) / len(self["rotations"])
 
-    def symmetrize_tensor(self, tensor: np.ndarray) -> np.ndarray:
+    def symmetrize_tensor(
+        self, tensor: np.ndarray, exclude_first_axis=False
+    ) -> np.ndarray:
         """
         Symmetrization of any tensor. The tensor is defined by a matrix with a
         shape of `n * (n_atoms, 3)`. For example, if the structure has 100
@@ -247,7 +249,12 @@ class Symmetry(dict):
         or any other tensors which should be symmetric.
 
         Args:
-            tensors (ndarray): n * (n_atoms, 3) tensor to symmetrize
+            tensors (numpy.ndarray): n * (n_atoms, 3) tensor to symmetrize
+            exclude_first_axis (bool): Whether to exclude the first axis from
+                the symmetry consideration. Useful when multiple tensors are
+                inserted at the same time. If the length along the first axis
+                does not coincide with the number of atoms, it will be set to
+                True automatically.
 
         Returns
             (np.ndarray) symmetrized tensor of the same shape
