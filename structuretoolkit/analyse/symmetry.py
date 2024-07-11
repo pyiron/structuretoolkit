@@ -264,6 +264,7 @@ class Symmetry(dict):
             structure=self._structure,
             rotations=self.rotations,
             permutations=self.permutations,
+            exclude_first_axis=exclude_first_axis,
         ).result
 
     def _get_spglib_cell(
@@ -428,11 +429,18 @@ class Symmetry(dict):
 
 
 class _SymmetrizeTensor:
-    def __init__(self, tensor, structure, rotations, permutations):
-        self._tensor = np.array(tensor)
+    def __init__(
+        self, tensor, structure, rotations, permutations, exclude_first_axis=False
+    ):
+        self._tensor = np.asarray(tensor)
         self._structure = structure
         self._rotations = rotations
         self._permutations = permutations
+        self._exclude_first_axis = exclude_first_axis
+
+    @property
+    def exclude_first_axis(self):
+        return self._exclude_first_axis or len(self._structure) != self._tensor.shape[0]
 
     @cached_property
     def order(self):
