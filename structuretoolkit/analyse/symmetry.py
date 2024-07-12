@@ -233,7 +233,7 @@ class Symmetry(dict):
         ).reshape(np.shape(vectors)) / len(self["rotations"])
 
     def symmetrize_tensor(
-        self, tensor: np.ndarray, exclude_first_axis=False
+        self, tensor: np.ndarray, axes_to_exclude=tuple()
     ) -> np.ndarray:
         """
         Symmetrization of any tensor. The tensor is defined by a matrix with a
@@ -250,11 +250,11 @@ class Symmetry(dict):
 
         Args:
             tensors (numpy.ndarray): n * (n_atoms, 3) tensor to symmetrize
-            exclude_first_axis (bool): Whether to exclude the first axis from
-                the symmetry consideration. Useful when multiple tensors are
-                inserted at the same time. If the length along the first axis
-                does not coincide with the number of atoms, it will be set to
-                True automatically.
+            axes_to_exclude (tuple): Axes to exclude from the symmetry
+                consideration. Useful when multiple tensors are inserted at
+                the same time. If the length along the first axis does not 
+                coincide with the number of atoms, it will be automatically
+                set to True.
 
         Returns
             (np.ndarray) symmetrized tensor of the same shape
@@ -264,7 +264,7 @@ class Symmetry(dict):
             structure=self._structure,
             rotations=self.rotations,
             permutations=self.permutations,
-            exclude_first_axis=exclude_first_axis,
+            axes_to_exclude=axes_to_exclude,
         ).result
 
     def _get_spglib_cell(
@@ -430,64 +430,100 @@ class Symmetry(dict):
 
 class _SymmetrizeTensor:
     def __init__(
-        self, tensor, structure, rotations, permutations, exclude_first_axis=False
+        self,
+        tensor,
+        length,
+        rotations,
+        permutations,
+        axes_to_exclude=tuple(),
+        dim=3,
     ):
+        if len(structure) == dim:
+            raise ValueError(
+                "Currently you cannot run the algorithm for a system with"
+                f" {dim} atoms, because it coincides with the dimension."
+            )
         self._tensor = np.asarray(tensor)
-        self._structure = structure
+        self._n = length
         self._rotations = rotations
         self._permutations = permutations
-        self._exclude_first_axis = exclude_first_axis
+        self._axes_to_exclude = axes_to_exclude
+        self._dim = 3
 
     @property
-    def exclude_first_axis(self):
-        return self._exclude_first_axis or len(self._structure) != self._tensor.shape[0]
+    def axes_to_exclude(self):
+        return set(
+            list(self._exclude_first_axis)
+            + [s not in [self._n, 3] for s in self._tensor.shape]
+        )
 
-    @cached_property
-    def order(self):
-        order = len(self._tensor.shape) // 2
-        if self._tensor.shape[-2 * order :] != order * self._structure.positions.shape:
-            raise ValueError(
-                "Tensor must have a shape of a multiple of (n_atoms, 3). See"
-                " docstring for more info"
-            )
-        return order
+    def __len__(self):
+        return len(self.shape)
+
+    @property
+    def shape(self):
+        return self._tensor.shape
 
     @cached_property
     def ij(self):
-        return string.ascii_lowercase[: 2 * self.order]
+        return string.ascii_lowercase[: len(self)]
 
     @property
-    def IJ(self):
-        return self.ij.upper()
+    def _axis_order(self):
+        axis_1 = [len(self), self._dim]
+        all_axes = np.array(axis_1 + list(set(self.shape).difference(axis_1)))
+        indices, order = np.where([n == all_axes for n in self.shape])
+        return indices, order
+
+    @property
+    def _axis_indices(self):
+        indices, order = self._axis_order
+        return indices[np.argsort(order)]
 
     @property
     def ij_reorder(self):
         return "".join(
-            [self.ij[ii] for ii in np.arange(2 * self.order).reshape(-1, 2).T.flatten()]
+            [string.ascii_lowercase[ii] for ii in self._axis_indices]
         )
 
     @property
-    def IJ_reorder(self):
+    def _ind_rot(self):
+        return self._axis_indices[1] == 1
+
+    @property
+    def _ind_perm(self):
+        return self._axis_indices[1] == 0
+
+    @property
+    def ij_reverse(self):
+        indices, order = self._axis_order
         return "".join(
-            [self.IJ[ii] for ii in np.arange(2 * self.order).reshape(2, -1).T.flatten()]
+            [self.ij.upper()[ii] for ii in np.argsort(self._axis_indices)]
         )
 
     @cached_property
     def t_t(self):
-        return np.einsum("...{}->{}...".format(self.ij, self.ij_reorder), self._tensor)
+        return np.einsum("{}->{}".format(self.ij, self.ij_reorder), self._tensor)
 
     @cached_property
     def str_einsum(self):
+        ij = [
+            self.ij[idx].upper() if idx in self._ind_rot else self.id[idx]
+            for idx in range(len(self.ij))
+        ]
         return (
             ",".join(
-                [I + i for i, I in zip(self.ij[-self.order :], self.IJ[-self.order :])]
+                [let.upper() + let for let in self.ij[self._ind_rot]]
             )
             + ","
-            + self.IJ[: self.order]
-            + self.ij[self.order :]
-            + "...->..."
-            + self.IJ_reorder
+            + "".join(ij)
+            + "->"
+            + self.ij_reverse.upper()
         )
+
+    @property
+    def _ind_mesh(self):
+        return tuple(np.meshgrid(*len(self._ind_perm) * (perm,), indexing="ij"))
 
     @property
     def result(self):
@@ -495,8 +531,8 @@ class _SymmetrizeTensor:
             [
                 np.einsum(
                     self.str_einsum,
-                    *self.order * (rot,),
-                    self.t_t[tuple(np.meshgrid(*self.order * (perm,), indexing="ij"))],
+                    *len(self._ind_rot) * (rot,),
+                    self.t_t[self._ind_mesh],
                     optimize=True,
                 )
                 for rot, perm in zip(self._rotations, self._permutations)
