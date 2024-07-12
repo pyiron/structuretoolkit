@@ -488,11 +488,11 @@ class _SymmetrizeTensor:
 
     @property
     def _ind_rot(self):
-        return self._axis_indices[1] == 1
+        return self._axis_order[1] == 1
 
     @property
     def _ind_perm(self):
-        return self._axis_indices[1] == 0
+        return self._axis_order[1] == 0
 
     @property
     def ij_reverse(self):
@@ -508,7 +508,7 @@ class _SymmetrizeTensor:
     @cached_property
     def str_einsum(self):
         ij = [
-            self.ij[idx].upper() if idx in self._ind_rot else self.id[idx]
+            self.ij[idx].upper() if idx in self._ind_rot else self.ij[idx]
             for idx in range(len(self.ij))
         ]
         return (
