@@ -435,7 +435,7 @@ class _SymmetrizeTensor:
         length,
         rotations,
         permutations,
-        axes_to_exclude=tuple(),
+        axes_to_exclude=None,
         dim=3,
     ):
         if len(structure) == dim:
@@ -450,13 +450,6 @@ class _SymmetrizeTensor:
         self._axes_to_exclude = axes_to_exclude
         self._dim = 3
 
-    @property
-    def axes_to_exclude(self):
-        return set(
-            list(self._exclude_first_axis)
-            + [s not in [self._n, 3] for s in self._tensor.shape]
-        )
-
     def __len__(self):
         return len(self.shape)
 
@@ -470,9 +463,12 @@ class _SymmetrizeTensor:
 
     @property
     def _axis_order(self):
-        axis_1 = [len(self), self._dim]
+        axis_1 = [self._n, self._dim]
         all_axes = np.array(axis_1 + list(set(self.shape).difference(axis_1)))
         indices, order = np.where([n == all_axes for n in self.shape])
+        if self._axes_to_exclude is not None:
+            for idx in np.atleast_1d(self._axes_to_exclude):
+                order[idx] = 2
         return indices, order
 
     @property
@@ -488,11 +484,11 @@ class _SymmetrizeTensor:
 
     @property
     def _ind_rot(self):
-        return self._axis_order[1] == 1
+        return np.sort(self._axis_order[1]) == 1
 
     @property
     def _ind_perm(self):
-        return self._axis_order[1] == 0
+        return np.sort(self._axis_order[1]) == 0
 
     @property
     def ij_reverse(self):
@@ -508,17 +504,23 @@ class _SymmetrizeTensor:
     @cached_property
     def str_einsum(self):
         ij = [
-            self.ij[idx].upper() if idx in self._ind_rot else self.ij[idx]
+            self.ij[idx] if self._ind_rot[idx] else self.ij[idx].upper()
+            for idx in range(len(self.ij))
+        ]
+        IJ = [
+            self.ij_reverse[idx].upper()
+            if self._ind_rot[idx] or self._ind_perm[idx]
+            else self.ij_reverse[idx]
             for idx in range(len(self.ij))
         ]
         return (
             ",".join(
-                [let.upper() + let for let in self.ij[self._ind_rot]]
+                [let.upper() + let for i, let in enumerate(self.ij) if self._ind_rot[i]]
             )
             + ","
             + "".join(ij)
             + "->"
-            + self.ij_reverse.upper()
+            + "".join(IJ)
         )
 
     @property
