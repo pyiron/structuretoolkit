@@ -524,17 +524,13 @@ class _SymmetrizeTensor:
         )
 
     @property
-    def _ind_mesh(self):
-        return tuple(np.meshgrid(*len(self._ind_perm) * (perm,), indexing="ij"))
-
-    @property
     def result(self):
         return np.mean(
             [
                 np.einsum(
                     self.str_einsum,
                     *len(self._ind_rot) * (rot,),
-                    self.t_t[self._ind_mesh],
+                    self.t_t[tuple(np.meshgrid(*len(self._ind_perm) * (perm,), indexing="ij"))],
                     optimize=True,
                 )
                 for rot, perm in zip(self._rotations, self._permutations)
