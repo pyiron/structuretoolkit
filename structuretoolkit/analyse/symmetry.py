@@ -537,3 +537,10 @@ class _SymmetrizeTensor:
             ],
             axis=0,
         )
+
+
+def get_inner_slicer(n, i):
+    s = [None for nn in range(n)]
+    s[0] = slice(None)
+    s[i] = slice(None)
+    return tuple(s)
