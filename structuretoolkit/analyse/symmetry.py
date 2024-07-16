@@ -232,9 +232,7 @@ class Symmetry(dict):
             np.einsum("ijk->jki", v_reshaped)[self.permutations],
         ).reshape(np.shape(vectors)) / len(self["rotations"])
 
-    def symmetrize_tensor(
-        self, tensor: np.ndarray
-    ) -> np.ndarray:
+    def symmetrize_tensor(self, tensor: np.ndarray) -> np.ndarray:
         """
         Symmetrization of any tensor. The tensor is defined by a matrix with a
         shape of `n * (n_atoms, 3)`. For example, if the structure has 100
@@ -256,14 +254,13 @@ class Symmetry(dict):
         """
         v = np.transpose(
             tensor[_get_outer_slicer(tensor.shape, self.permutations)],
-            _back_order(tensor.shape, len(self._structure))
+            _back_order(tensor.shape, len(self._structure)),
         )
         return np.einsum(
             _get_einsum_str(tensor.shape, len(self._structure)),
             *sum([s == len(self._structure) for s in tensor.shape]) * [self.rotations],
             tensor,
         )
-
 
     def _get_spglib_cell(
         self, use_elements: Optional[bool] = None, use_magmoms: Optional[bool] = None
@@ -454,7 +451,7 @@ def _back_order(shape, length):
     elif len(order) == 1 or np.max(np.diff(order)) == 1:
         arr = np.arange(len(shape))
         return np.argsort(
-            np.concatenate([arr[:order[0]], [len(shape)], arr[order[0]:]])
+            np.concatenate([arr[: order[0]], [len(shape)], arr[order[0] :]])
         )
     cond = np.asarray(shape) == length
     return np.append(np.argsort(np.where([cond, ~cond])[1]) + 1, 0)
