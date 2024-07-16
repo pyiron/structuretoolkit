@@ -558,3 +558,18 @@ def get_outer_slicer(shape, perm):
             s.append(perm[get_inner_slicer(n_3, i_3)])
             i_3 += 1
     return tuple(s)
+
+
+def back_order(shape, length):
+    order = [ii for ii, ss in enumerate(shape) if ss == length]
+    if len(order) < 1:
+        return np.arange(len(shape))
+    elif len(order) == 1 or np.max(np.diff(order)) == 1:
+        arr = np.arange(len(shape))
+        return np.argsort(
+            np.concatenate([arr[:order[0]], [len(shape)], arr[order[0]:]])
+        )
+    cond = np.asarray(shape) == length
+    return np.append(np.argsort(np.where([cond, ~cond])[1]) + 1, 0)
+
+
