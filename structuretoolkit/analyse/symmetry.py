@@ -254,12 +254,16 @@ class Symmetry(dict):
         Returns
             (np.ndarray) symmetrized tensor of the same shape
         """
-        return _SymmetrizeTensor(
-            tensor=tensor,
-            structure=self._structure,
-            rotations=self.rotations,
-            permutations=self.permutations,
-        ).result
+        v = np.transpose(
+            tensor[_get_outer_slicer(tensor.shape, self.permutations)],
+            _back_order(tensor.shape, len(self._structure))
+        )
+        return np.einsum(
+            _get_einsum_str(tensor.shape, len(self._structure)),
+            *sum([s == len(self._structure) for s in tensor.shape]) * [self.rotations],
+            tensor,
+        )
+
 
     def _get_spglib_cell(
         self, use_elements: Optional[bool] = None, use_magmoms: Optional[bool] = None
@@ -422,120 +426,14 @@ class Symmetry(dict):
         return mesh
 
 
-class _SymmetrizeTensor:
-    def __init__(
-        self,
-        tensor,
-        length,
-        rotations,
-        permutations,
-        dim=3,
-    ):
-        if length == dim:
-            raise ValueError(
-                "Currently you cannot run the algorithm for a system with"
-                f" {dim} atoms, because it coincides with the dimension."
-            )
-        self._tensor = np.asarray(tensor)
-        self._n = length
-        self._rotations = rotations
-        self._permutations = permutations
-        self._dim = 3
-
-    def __len__(self):
-        return len(self.shape)
-
-    @property
-    def shape(self):
-        return self._tensor.shape
-
-    @cached_property
-    def ij(self):
-        return string.ascii_lowercase[: len(self)]
-
-    @property
-    def _axis_order(self):
-        axis_1 = [self._n, self._dim]
-        all_axes = np.array(axis_1 + list(set(self.shape).difference(axis_1)))
-        indices, order = np.where([n == all_axes for n in self.shape])
-        return indices, order
-
-    @property
-    def _axis_indices(self):
-        indices, order = self._axis_order
-        return indices[np.argsort(order)]
-
-    @property
-    def ij_reorder(self):
-        return "".join(
-            [string.ascii_lowercase[ii] for ii in self._axis_indices]
-        )
-
-    @property
-    def _ind_rot(self):
-        return np.sort(self._axis_order[1]) == 1
-
-    @property
-    def _ind_perm(self):
-        return np.sort(self._axis_order[1]) == 0
-
-    @property
-    def ij_reverse(self):
-        indices, order = self._axis_order
-        return "".join(
-            [self.ij.upper()[ii] for ii in np.argsort(self._axis_indices)]
-        )
-
-    @cached_property
-    def t_t(self):
-        return np.einsum("{}->{}".format(self.ij, self.ij_reorder), self._tensor)
-
-    @cached_property
-    def str_einsum(self):
-        ij = [
-            self.ij[idx] if self._ind_rot[idx] else self.ij[idx].upper()
-            for idx in range(len(self.ij))
-        ]
-        IJ = [
-            self.ij_reverse[idx].upper()
-            if self._ind_rot[idx] or self._ind_perm[idx]
-            else self.ij_reverse[idx]
-            for idx in range(len(self.ij))
-        ]
-        return (
-            ",".join(
-                [let.upper() + let for i, let in enumerate(self.ij) if self._ind_rot[i]]
-            )
-            + ","
-            + "".join(ij)
-            + "->"
-            + "".join(IJ)
-        )
-
-    @property
-    def result(self):
-        return np.mean(
-            [
-                np.einsum(
-                    self.str_einsum,
-                    *len(self._ind_rot) * (rot,),
-                    self.t_t[tuple(np.meshgrid(*len(self._ind_perm) * (perm,), indexing="ij"))],
-                    optimize=True,
-                )
-                for rot, perm in zip(self._rotations, self._permutations)
-            ],
-            axis=0,
-        )
-
-
-def get_inner_slicer(n, i):
+def _get_inner_slicer(n, i):
     s = [None for nn in range(n)]
     s[0] = slice(None)
     s[i] = slice(None)
     return tuple(s)
 
 
-def get_outer_slicer(shape, perm):
+def _get_outer_slicer(shape, perm):
     length = perm.shape[-1]
     s = []
     n_3 = np.sum(np.asarray(shape) == length) + 1
@@ -544,12 +442,12 @@ def get_outer_slicer(shape, perm):
         if ss != length:
             s.append(slice(None))
         else:
-            s.append(perm[get_inner_slicer(n_3, i_3)])
+            s.append(perm[_get_inner_slicer(n_3, i_3)])
             i_3 += 1
     return tuple(s)
 
 
-def back_order(shape, length):
+def _back_order(shape, length):
     order = [ii for ii, ss in enumerate(shape) if ss == length]
     if len(order) < 1:
         return np.arange(len(shape))
@@ -562,7 +460,7 @@ def back_order(shape, length):
     return np.append(np.argsort(np.where([cond, ~cond])[1]) + 1, 0)
 
 
-def get_einsum_str(shape, length):
+def _get_einsum_str(shape, length):
     s = [string.ascii_lowercase[i] for i in range(len(shape))]
     s_rot = ""
     s_mul = ""
@@ -572,4 +470,4 @@ def get_einsum_str(shape, length):
             s_mul += ss.upper()
         else:
             s_mul += ss
-    return s_rot + s_mul + "->" + "".join(s)
+    return s_rot + s_mul + "...->" + "".join(s) + "..."
