@@ -257,9 +257,8 @@ class Symmetry(dict):
             _back_order(tensor.shape, len(self._structure)),
         )
         return np.einsum(
-            _get_einsum_str(tensor.shape, len(self._structure)),
-            *sum([s == len(self._structure) for s in tensor.shape]) * [self.rotations],
-            tensor,
+            _get_einsum_str(tensor.shape, 3, v.shape == tensor.shape),
+            *sum([s == 3 for s in tensor.shape]) * [self.rotations], v,
         )
 
     def _get_spglib_cell(
@@ -457,14 +456,16 @@ def _back_order(shape, length):
     return np.append(np.argsort(np.where([cond, ~cond])[1]) + 1, 0)
 
 
-def _get_einsum_str(shape, length):
+def _get_einsum_str(shape, length, omit_dots=True):
     s = [string.ascii_lowercase[i] for i in range(len(shape))]
     s_rot = ""
     s_mul = ""
     for ii, ss in enumerate(s):
         if shape[ii] == length:
-            s_rot += ss + ss.upper() + ","
+            s_rot += "z" + ss + ss.upper() + ","
             s_mul += ss.upper()
         else:
             s_mul += ss
-    return s_rot + s_mul + "...->" + "".join(s) + "..."
+    if not omit_dots:
+        s_mul += "z"
+    return s_rot + s_mul + "->" + "".join(s)
