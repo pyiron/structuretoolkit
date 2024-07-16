@@ -233,7 +233,7 @@ class Symmetry(dict):
         ).reshape(np.shape(vectors)) / len(self["rotations"])
 
     def symmetrize_tensor(
-        self, tensor: np.ndarray, axes_to_exclude=tuple()
+        self, tensor: np.ndarray
     ) -> np.ndarray:
         """
         Symmetrization of any tensor. The tensor is defined by a matrix with a
@@ -250,11 +250,6 @@ class Symmetry(dict):
 
         Args:
             tensors (numpy.ndarray): n * (n_atoms, 3) tensor to symmetrize
-            axes_to_exclude (tuple): Axes to exclude from the symmetry
-                consideration. Useful when multiple tensors are inserted at
-                the same time. If the length along the first axis does not 
-                coincide with the number of atoms, it will be automatically
-                set to True.
 
         Returns
             (np.ndarray) symmetrized tensor of the same shape
@@ -264,7 +259,6 @@ class Symmetry(dict):
             structure=self._structure,
             rotations=self.rotations,
             permutations=self.permutations,
-            axes_to_exclude=axes_to_exclude,
         ).result
 
     def _get_spglib_cell(
