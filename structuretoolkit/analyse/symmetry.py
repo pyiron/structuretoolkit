@@ -544,3 +544,17 @@ def get_inner_slicer(n, i):
     s[0] = slice(None)
     s[i] = slice(None)
     return tuple(s)
+
+
+def get_outer_slicer(shape, perm):
+    length = perm.shape[-1]
+    s = []
+    n_3 = np.sum(np.asarray(shape) == length) + 1
+    i_3 = 1
+    for ss in shape:
+        if ss != length:
+            s.append(slice(None))
+        else:
+            s.append(perm[get_inner_slicer(n_3, i_3)])
+            i_3 += 1
+    return tuple(s)
