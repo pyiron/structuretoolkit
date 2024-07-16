@@ -435,7 +435,6 @@ class _SymmetrizeTensor:
         length,
         rotations,
         permutations,
-        axes_to_exclude=None,
         dim=3,
     ):
         if len(structure) == dim:
@@ -447,7 +446,6 @@ class _SymmetrizeTensor:
         self._n = length
         self._rotations = rotations
         self._permutations = permutations
-        self._axes_to_exclude = axes_to_exclude
         self._dim = 3
 
     def __len__(self):
@@ -466,9 +464,6 @@ class _SymmetrizeTensor:
         axis_1 = [self._n, self._dim]
         all_axes = np.array(axis_1 + list(set(self.shape).difference(axis_1)))
         indices, order = np.where([n == all_axes for n in self.shape])
-        if self._axes_to_exclude is not None:
-            for idx in np.atleast_1d(self._axes_to_exclude):
-                order[idx] = 2
         return indices, order
 
     @property
