@@ -247,17 +247,20 @@ class Symmetry(dict):
         or any other tensors which should be symmetric.
 
         Args:
-            tensors (ndarray): n * (n_atoms, 3) tensor to symmetrize
+            tensors (numpy.ndarray): n * (n_atoms, 3) tensor to symmetrize
 
         Returns
             (np.ndarray) symmetrized tensor of the same shape
         """
-        return _SymmetrizeTensor(
-            tensor=tensor,
-            structure=self._structure,
-            rotations=self.rotations,
-            permutations=self.permutations,
-        ).result
+        v = np.transpose(
+            tensor[_get_outer_slicer(tensor.shape, self.permutations)],
+            _back_order(tensor.shape, len(self._structure)),
+        )
+        return np.einsum(
+            _get_einsum_str(tensor.shape, 3, v.shape == tensor.shape),
+            *sum([s == 3 for s in tensor.shape]) * [self.rotations],
+            v,
+        )
 
     def _get_spglib_cell(
         self, use_elements: Optional[bool] = None, use_magmoms: Optional[bool] = None
@@ -420,71 +423,50 @@ class Symmetry(dict):
         return mesh
 
 
-class _SymmetrizeTensor:
-    def __init__(self, tensor, structure, rotations, permutations):
-        self._tensor = np.array(tensor)
-        self._structure = structure
-        self._rotations = rotations
-        self._permutations = permutations
+def _get_inner_slicer(n, i):
+    s = [None for nn in range(n)]
+    s[0] = slice(None)
+    s[i] = slice(None)
+    return tuple(s)
 
-    @cached_property
-    def order(self):
-        order = len(self._tensor.shape) // 2
-        if self._tensor.shape[-2 * order :] != order * self._structure.positions.shape:
-            raise ValueError(
-                "Tensor must have a shape of a multiple of (n_atoms, 3). See"
-                " docstring for more info"
-            )
-        return order
 
-    @cached_property
-    def ij(self):
-        return string.ascii_lowercase[: 2 * self.order]
+def _get_outer_slicer(shape, perm):
+    length = perm.shape[-1]
+    s = []
+    n_3 = np.sum(np.asarray(shape) == length) + 1
+    i_3 = 1
+    for ss in shape:
+        if ss != length:
+            s.append(slice(None))
+        else:
+            s.append(perm[_get_inner_slicer(n_3, i_3)])
+            i_3 += 1
+    return tuple(s)
 
-    @property
-    def IJ(self):
-        return self.ij.upper()
 
-    @property
-    def ij_reorder(self):
-        return "".join(
-            [self.ij[ii] for ii in np.arange(2 * self.order).reshape(-1, 2).T.flatten()]
+def _back_order(shape, length):
+    order = [ii for ii, ss in enumerate(shape) if ss == length]
+    if len(order) < 1:
+        return np.arange(len(shape))
+    elif len(order) == 1 or np.max(np.diff(order)) == 1:
+        arr = np.arange(len(shape))
+        return np.argsort(
+            np.concatenate([arr[: order[0]], [len(shape)], arr[order[0] :]])
         )
+    cond = np.asarray(shape) == length
+    return np.append(np.argsort(np.where([cond, ~cond])[1]) + 1, 0)
 
-    @property
-    def IJ_reorder(self):
-        return "".join(
-            [self.IJ[ii] for ii in np.arange(2 * self.order).reshape(2, -1).T.flatten()]
-        )
 
-    @cached_property
-    def t_t(self):
-        return np.einsum("...{}->{}...".format(self.ij, self.ij_reorder), self._tensor)
-
-    @cached_property
-    def str_einsum(self):
-        return (
-            ",".join(
-                [I + i for i, I in zip(self.ij[-self.order :], self.IJ[-self.order :])]
-            )
-            + ","
-            + self.IJ[: self.order]
-            + self.ij[self.order :]
-            + "...->..."
-            + self.IJ_reorder
-        )
-
-    @property
-    def result(self):
-        return np.mean(
-            [
-                np.einsum(
-                    self.str_einsum,
-                    *self.order * (rot,),
-                    self.t_t[tuple(np.meshgrid(*self.order * (perm,), indexing="ij"))],
-                    optimize=True,
-                )
-                for rot, perm in zip(self._rotations, self._permutations)
-            ],
-            axis=0,
-        )
+def _get_einsum_str(shape, length, omit_dots=True):
+    s = [string.ascii_lowercase[i] for i in range(len(shape))]
+    s_rot = ""
+    s_mul = ""
+    for ii, ss in enumerate(s):
+        if shape[ii] == length:
+            s_rot += "z" + ss + ss.upper() + ","
+            s_mul += ss.upper()
+        else:
+            s_mul += ss
+    if not omit_dots:
+        s_mul += "z"
+    return s_rot + s_mul + "->" + "".join(s)
