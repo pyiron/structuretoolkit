@@ -431,7 +431,7 @@ class _SymmetrizeTensor:
         permutations,
         dim=3,
     ):
-        if len(structure) == dim:
+        if length == dim:
             raise ValueError(
                 "Currently you cannot run the algorithm for a system with"
                 f" {dim} atoms, because it coincides with the dimension."
@@ -562,3 +562,14 @@ def back_order(shape, length):
     return np.append(np.argsort(np.where([cond, ~cond])[1]) + 1, 0)
 
 
+def get_einsum_str(shape, length):
+    s = [string.ascii_lowercase[i] for i in range(len(shape))]
+    s_rot = ""
+    s_mul = ""
+    for ii, ss in enumerate(s):
+        if shape[ii] == length:
+            s_rot += ss + ss.upper() + ","
+            s_mul += ss.upper()
+        else:
+            s_mul += ss
+    return s_rot + s_mul + "->" + "".join(s)
