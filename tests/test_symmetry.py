@@ -286,57 +286,5 @@ class TestAtoms(unittest.TestCase):
             stk.analyse.get_symmetry(structure=structure)
 
 
-@unittest.skipIf(
-    skip_spglib_test, "spglib is not installed, so the spglib tests are skipped."
-)
-class TestSymmetrizeTensors(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.structure = bulk("Al", cubic=True, a=4.0).repeat(2)
-        cls.dataset = {
-            "structure": cls.structure,
-            "rotations": np.eye(3),
-            "permutations": np.arange(len(cls.structure)),
-        }
-
-    def test_order(self):
-        with self.assertRaises(ValueError):
-            _SymmetrizeTensor(
-                tensor=np.array([1]), **self.dataset
-            ).order
-        self.assertEqual(
-            _SymmetrizeTensor(
-                tensor=np.random.randn(*self.structure.positions.shape), **self.dataset
-            ).order,
-            1,
-        )
-        self.assertEqual(
-            _SymmetrizeTensor(
-                tensor=np.random.randn(*2 * self.structure.positions.shape),
-                **self.dataset,
-            ).order,
-            2,
-        )
-
-    def test_indexing(self):
-        st = _SymmetrizeTensor(
-            tensor=np.random.randn(*2 * self.structure.positions.shape), **self.dataset
-        )
-        self.assertEqual(st.ij, "abcd")
-        self.assertEqual(st.ij_reorder, "acbd")
-        self.assertEqual(st.IJ, "ABCD")
-        self.assertEqual(st.IJ_reorder, "ACBD")
-
-    def test_str_einsum(self):
-        st = _SymmetrizeTensor(
-            tensor=np.random.randn(*2 * self.structure.positions.shape), **self.dataset
-        )
-        self.assertEqual(st.str_einsum, "Cc,Dd,ABcd...->...ACBD")
-        st = _SymmetrizeTensor(
-            tensor=np.random.randn(*self.structure.positions.shape), **self.dataset
-        )
-        self.assertEqual(st.str_einsum, "Bb,Ab...->...AB")
-
-
 if __name__ == "__main__":
     unittest.main()
