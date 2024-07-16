@@ -258,7 +258,8 @@ class Symmetry(dict):
         )
         return np.einsum(
             _get_einsum_str(tensor.shape, 3, v.shape == tensor.shape),
-            *sum([s == 3 for s in tensor.shape]) * [self.rotations], v,
+            *sum([s == 3 for s in tensor.shape]) * [self.rotations],
+            v,
         )
 
     def _get_spglib_cell(
