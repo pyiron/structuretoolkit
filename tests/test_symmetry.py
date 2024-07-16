@@ -28,7 +28,7 @@ except ImportError:
 @unittest.skipIf(
     skip_spglib_test, "spglib is not installed, so the spglib tests are skipped."
 )
-class TestAtoms(unittest.TestCase):
+class TestSymmetry(unittest.TestCase):
     def test_get_arg_equivalent_sites(self):
         a_0 = 4.0
         structure = bulk("Al", cubic=True, a=a_0).repeat(2)
@@ -125,6 +125,28 @@ class TestAtoms(unittest.TestCase):
         self.assertAlmostEqual(
             np.linalg.norm(sym.symmetrize_vectors(v) - sym.symmetrize_tensor(v)), 0
         )
+
+    def test_symmetrize_tensor(self):
+        structure = Atoms(
+            "AlAlAlAl",
+            positions=[(0, 0, 0), (0, 0.5, 0.5), (0.5, 0, 0.5), (0.5, 0.5, 0)],
+            cell=np.identity(3),
+            pbc=True
+        ).repeat(2)
+        structure.symbols[0] = "Ni"
+        symmetry = stk.analyse.get_symmetry(structure=structure)
+        self.assertLess(symmetry.symmetrize_tensor(np.random.randn(3)).ptp(), 1.0e-8)
+        sym_tensor = symmetry.symmetrize_tensor(np.random.randn(3, 3))
+        self.assertLess(sym_tensor.diagonal().ptp(), 1.0e-8)
+        self.assertLess(sym_tensor[np.triu_indices(3, k=1)].ptp(), 1.0e-8)
+        i = np.all(structure.positions == [0.5, 0, 0.5], axis=-1)
+        j = np.all(structure.positions == [0, 0.5, 0.5], axis=-1)
+        s_tensor = symmetry.symmetrize_tensor(np.random.randn(len(structure)))
+        self.assertAlmostEqual(s_tensor[i][0], s_tensor[j][0])
+        s_tensor = symmetry.symmetrize_tensor(np.random.randn(4, len(structure), 3, len(structure), 3))
+        self.assertEqual(s_tensor.shape, (4, len(structure), 3, len(structure), 3))
+        s_tensor = symmetry.symmetrize_tensor(np.random.randn(4, len(structure), 3, 3, len(structure)))
+        self.assertEqual(s_tensor.shape, (4, len(structure), 3, 3, len(structure)))
 
     def test_get_symmetry_dataset(self):
         cell = 2.2 * np.identity(3)
