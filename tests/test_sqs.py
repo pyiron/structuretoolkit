@@ -3,6 +3,15 @@ from ase.build import bulk
 import structuretoolkit as stk
 
 
+try:
+    import sqsgenerator
+
+    sqsgenerator_not_available = False
+except ImportError:
+    sqsgenerator_not_available = True
+
+
+@unittest.skipIf(sqsgenerator_not_available, "sqsgenerator is not available, so the sqsgenerator related unittests are skipped.")
 class SQSTestCase(unittest.TestCase):
     def test_sqs_structures_no_stats(self):
         structures_lst = stk.build.sqs_structures(
