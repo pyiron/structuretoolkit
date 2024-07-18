@@ -1,8 +1,9 @@
+from typing import Optional, Union
+
 import numpy as np
 from ase.atoms import Atoms
 from ase.data import atomic_numbers
 from scipy.sparse import coo_matrix
-from typing import Optional
 
 
 def get_extended_positions(
@@ -226,3 +227,36 @@ def apply_strain(
     structure_copy.set_cell(cell, scale_atoms=True)
     if return_box:
         return structure_copy
+
+
+def get_cell(cell: Union[Atoms, list, tuple, np.ndarray, float]):
+    """
+    Get cell of an ase structure, or convert a float or a (3,)-array into a
+    orthogonal cell.
+
+    Args:
+        cell (Atoms|ndarray|list|float|tuple): Cell
+
+    Returns:
+        (3, 3)-array: Cell
+    """
+    if isinstance(cell, Atoms):
+        return cell.cell
+    # Convert float into (3,)-array. No effect if it is (3,3)-array or
+    # (3,)-array. Raises error if the shape is not correct
+    try:
+        cell = cell * np.ones(3)
+    except ValueError:
+        raise ValueError(
+            f"Invalid cell type or shape: {type(cell).__name__}, {np.shape(cell)}"
+        )
+
+    if np.shape(cell) == (3, 3):
+        return cell
+    # Convert (3,)-array into (3,3)-array. Raises error if the shape is wrong
+    try:
+        return cell * np.eye(3)
+    except ValueError:
+        raise ValueError(
+            f"Invalid cell type or shape: {type(cell).__name__}, {np.shape(cell)}"
+        )

@@ -3,11 +3,13 @@
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import warnings
-
-from ase.atoms import Atoms
-import numpy as np
 from typing import Optional
+
+import numpy as np
+from ase.atoms import Atoms
 from scipy.interpolate import interp1d
+
+from structuretoolkit.common.helper import get_cell
 
 __author__ = "Joerg Neugebauer, Sudarsan Surendralal"
 __copyright__ = (
@@ -165,6 +167,16 @@ def _get_box_skeleton(cell: np.ndarray):
     return all_lines @ cell
 
 
+def _draw_box_plotly(fig, structure, px, go):
+    cell = get_cell(structure)
+    data = fig.data
+    for lines in _get_box_skeleton(cell):
+        fig = px.line_3d(**{xx: vv for xx, vv in zip(["x", "y", "z"], lines.T)})
+        fig.update_traces(line_color="#000000")
+        data = fig.data + data
+    return go.Figure(data=data)
+
+
 def _plot3d_plotly(
     structure: Atoms,
     show_cell: bool = True,
@@ -223,12 +235,7 @@ def _plot3d_plotly(
         ),
     )
     if show_cell:
-        data = fig.data
-        for lines in _get_box_skeleton(structure.cell):
-            fig = px.line_3d(**{xx: vv for xx, vv in zip(["x", "y", "z"], lines.T)})
-            fig.update_traces(line_color="#000000")
-            data = fig.data + data
-        fig = go.Figure(data=data)
+        fig = _draw_box_plotly(fig, structure, px, go)
     fig.layout.scene.camera.projection.type = camera
     rot = _get_orientation(view_plane).T
     rot[0, :] *= distance_from_camera * 1.25

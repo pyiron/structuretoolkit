@@ -3,8 +3,10 @@
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import unittest
+
 import numpy as np
-from structuretoolkit.visualize import _get_flattened_orientation, _get_box_skeleton
+
+from structuretoolkit.visualize import _get_box_skeleton, _get_flattened_orientation
 
 
 class TestAtoms(unittest.TestCase):
@@ -24,15 +26,12 @@ class TestAtoms(unittest.TestCase):
     def test_get_frame(self):
         frame = _get_box_skeleton(np.eye(3))
         self.assertLessEqual(
-            np.unique(frame.reshape(-1, 6), axis=0, return_counts=True)[1].max(),
-            1
+            np.unique(frame.reshape(-1, 6), axis=0, return_counts=True)[1].max(), 1
         )
         dx, counts = np.unique(
             np.diff(frame, axis=-2).squeeze().astype(int), axis=0, return_counts=True
         )
-        self.assertEqual(
-            dx.ptp(), 1, msg="Frames not drawn along the nearest edges"
-        )
+        self.assertEqual(dx.ptp(), 1, msg="Frames not drawn along the nearest edges")
         msg = (
             "There must be four lines along each direction"
             + " (4 x [1, 0, 0], 4 x [0, 1, 0] and 4 x [0, 0, 1])"

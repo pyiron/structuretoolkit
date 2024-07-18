@@ -6,7 +6,6 @@ on:
   push:
     branches: [ main ]
   pull_request:
-    branches: [ main ]
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -50,7 +49,7 @@ jobs:
       if:  matrix.operating-system != 'windows-latest'
       run: tail --lines=+4 .ci_support/environment-lammps.yml >> .ci_support/environment.yml
     - name: Setup Mambaforge
-      uses: conda-incubator/setup-miniconda@v2
+      uses: conda-incubator/setup-miniconda@v3
       with:
         python-version: ${{ matrix.python-version }}
         miniforge-variant: Mambaforge
@@ -66,6 +65,7 @@ jobs:
         pip install versioneer[toml]==0.29
         pip install . --no-deps --no-build-isolation
         coverage run  --omit="structuretoolkit/_version.py,tests/*" -m unittest discover tests
+        coverage xml
     - name: Coverage
       if:  matrix.label == 'linux-64-py-3-12'
       uses: coverallsapp/github-action@v2

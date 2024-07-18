@@ -1,7 +1,9 @@
 # coding: utf-8
 import unittest
+
 import numpy as np
 from ase.build import bulk
+
 import structuretoolkit as stk
 
 try:

@@ -1,7 +1,8 @@
-from ase.atoms import Atoms
+from ctypes import POINTER, c_double, c_int, cast
 from typing import Optional, Union
-from ctypes import c_double, c_int, cast, POINTER
+
 import numpy as np
+from ase.atoms import Atoms
 from scipy.constants import physical_constants
 
 eV_div_A3_to_bar = 1e25 / physical_constants["joule-electron volt relationship"][0]

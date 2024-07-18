@@ -2,8 +2,8 @@
 # Copyright (c) Max-Planck-Institut für Eisenforschung GmbH - Computational Materials Design (CM) Department
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
-from ase.atoms import Atoms
 import numpy as np
+from ase.atoms import Atoms
 
 __author__ = "Osamu Waseda"
 __copyright__ = (
@@ -41,5 +41,7 @@ def get_equivalent_atoms(
     positions = np.reshape(np.array(positions), (natom, 3))
     cell = np.reshape(np.array(cell), (3, 3))
     unitcell = PhonopyAtoms(symbols=types, cell=cell, scaled_positions=positions)
-    ops = spg.get_symmetry(unitcell, symprec=symprec, angle_tolerance=angle_tolerance)
+    ops = spg.get_symmetry(
+        cell=unitcell.totuple(), symprec=symprec, angle_tolerance=angle_tolerance
+    )
     return ops["equivalent_atoms"]

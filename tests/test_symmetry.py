@@ -3,9 +3,11 @@
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import unittest
+
 import numpy as np
-from ase.build import bulk
 from ase.atoms import Atoms
+from ase.build import bulk
+
 import structuretoolkit as stk
 
 try:
@@ -27,7 +29,7 @@ except ImportError:
 @unittest.skipIf(
     skip_spglib_test, "spglib is not installed, so the spglib tests are skipped."
 )
-class TestAtoms(unittest.TestCase):
+class TestSymmetry(unittest.TestCase):
     def test_get_arg_equivalent_sites(self):
         a_0 = 4.0
         structure = bulk("Al", cubic=True, a=a_0).repeat(2)
@@ -108,20 +110,48 @@ class TestAtoms(unittest.TestCase):
             "AlAl", scaled_positions=[(0, 0, 0), (0.5, 0.5, 0.5)], cell=cell, pbc=True
         )
         v = np.random.rand(6).reshape(-1, 3)
+        sym = stk.analyse.get_symmetry(structure=Al)
         self.assertAlmostEqual(
-            np.linalg.norm(
-                stk.analyse.get_symmetry(structure=Al).symmetrize_vectors(v)
-            ),
+            np.linalg.norm(sym.symmetrize_vectors(v)),
             0,
         )
         vv = np.random.rand(12).reshape(2, 2, 3)
-        for vvv in stk.analyse.get_symmetry(structure=Al).symmetrize_vectors(vv):
+        for vvv in sym.symmetrize_vectors(vv):
             self.assertAlmostEqual(np.linalg.norm(vvv), 0)
         Al.positions[0, 0] += 0.01
-        w = stk.analyse.get_symmetry(structure=Al).symmetrize_vectors(v)
+        w = sym.symmetrize_vectors(v)
         self.assertAlmostEqual(
             np.absolute(w[:, 0]).sum(), np.linalg.norm(w, axis=-1).sum()
         )
+        self.assertAlmostEqual(
+            np.linalg.norm(sym.symmetrize_vectors(v) - sym.symmetrize_tensor(v)), 0
+        )
+
+    def test_symmetrize_tensor(self):
+        structure = Atoms(
+            "AlAlAlAl",
+            positions=[(0, 0, 0), (0, 0.5, 0.5), (0.5, 0, 0.5), (0.5, 0.5, 0)],
+            cell=np.identity(3),
+            pbc=True,
+        ).repeat(2)
+        structure.symbols[0] = "Ni"
+        symmetry = stk.analyse.get_symmetry(structure=structure)
+        self.assertLess(symmetry.symmetrize_tensor(np.random.randn(3)).ptp(), 1.0e-8)
+        sym_tensor = symmetry.symmetrize_tensor(np.random.randn(3, 3))
+        self.assertLess(sym_tensor.diagonal().ptp(), 1.0e-8)
+        self.assertLess(sym_tensor[np.triu_indices(3, k=1)].ptp(), 1.0e-8)
+        i = np.all(structure.positions == [0.5, 0, 0.5], axis=-1)
+        j = np.all(structure.positions == [0, 0.5, 0.5], axis=-1)
+        s_tensor = symmetry.symmetrize_tensor(np.random.randn(len(structure)))
+        self.assertAlmostEqual(s_tensor[i][0], s_tensor[j][0])
+        s_tensor = symmetry.symmetrize_tensor(
+            np.random.randn(4, len(structure), 3, len(structure), 3)
+        )
+        self.assertEqual(s_tensor.shape, (4, len(structure), 3, len(structure), 3))
+        s_tensor = symmetry.symmetrize_tensor(
+            np.random.randn(4, len(structure), 3, 3, len(structure))
+        )
+        self.assertEqual(s_tensor.shape, (4, len(structure), 3, 3, len(structure)))
 
     def test_get_symmetry_dataset(self):
         cell = 2.2 * np.identity(3)
@@ -155,7 +185,7 @@ class TestAtoms(unittest.TestCase):
         )
 
     def test_get_primitive_cell_hex(self):
-        elements = ['Fe', 'Fe', 'Fe', 'Fe', 'O', 'O', 'O', 'O', 'O', 'O']
+        elements = ["Fe", "Fe", "Fe", "Fe", "O", "O", "O", "O", "O", "O"]
         positions = [
             [0.0, 0.0, 4.89],
             [0.0, 0.0, 11.78],
@@ -174,8 +204,7 @@ class TestAtoms(unittest.TestCase):
         sym = stk.analyse.get_symmetry(structure=structure_repeat)
         structure_prim_base = sym.get_primitive_cell()
         self.assertEqual(
-            structure_prim_base.get_chemical_symbols(),
-            structure.get_chemical_symbols()
+            structure_prim_base.get_chemical_symbols(), structure.get_chemical_symbols()
         )
 
     def test_get_equivalent_points(self):
