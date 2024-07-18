@@ -173,7 +173,9 @@ class TestSymmetry(unittest.TestCase):
 
     def test_get_primitive_cell(self):
         cell = 2.2 * np.identity(3)
-        basis = Atoms("AlFe", scaled_positions=[(0, 0, 0), (0.5, 0.5, 0.5)], cell=cell, pbc=True)
+        basis = Atoms(
+            "AlFe", scaled_positions=[(0, 0, 0), (0.5, 0.5, 0.5)], cell=cell, pbc=True
+        )
         structure = basis.repeat([2, 2, 2])
         sym = stk.analyse.get_symmetry(structure=structure)
         self.assertEqual(len(basis), len(sym.get_primitive_cell(standardize=True)))
