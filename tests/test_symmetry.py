@@ -3,9 +3,11 @@
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import unittest
+
 import numpy as np
-from ase.build import bulk
 from ase.atoms import Atoms
+from ase.build import bulk
+
 import structuretoolkit as stk
 
 try:
@@ -130,7 +132,7 @@ class TestSymmetry(unittest.TestCase):
             "AlAlAlAl",
             positions=[(0, 0, 0), (0, 0.5, 0.5), (0.5, 0, 0.5), (0.5, 0.5, 0)],
             cell=np.identity(3),
-            pbc=True
+            pbc=True,
         ).repeat(2)
         structure.symbols[0] = "Ni"
         symmetry = stk.analyse.get_symmetry(structure=structure)
@@ -142,9 +144,13 @@ class TestSymmetry(unittest.TestCase):
         j = np.all(structure.positions == [0, 0.5, 0.5], axis=-1)
         s_tensor = symmetry.symmetrize_tensor(np.random.randn(len(structure)))
         self.assertAlmostEqual(s_tensor[i][0], s_tensor[j][0])
-        s_tensor = symmetry.symmetrize_tensor(np.random.randn(4, len(structure), 3, len(structure), 3))
+        s_tensor = symmetry.symmetrize_tensor(
+            np.random.randn(4, len(structure), 3, len(structure), 3)
+        )
         self.assertEqual(s_tensor.shape, (4, len(structure), 3, len(structure), 3))
-        s_tensor = symmetry.symmetrize_tensor(np.random.randn(4, len(structure), 3, 3, len(structure)))
+        s_tensor = symmetry.symmetrize_tensor(
+            np.random.randn(4, len(structure), 3, 3, len(structure))
+        )
         self.assertEqual(s_tensor.shape, (4, len(structure), 3, 3, len(structure)))
 
     def test_get_symmetry_dataset(self):

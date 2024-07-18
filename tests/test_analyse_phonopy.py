@@ -1,9 +1,10 @@
 import unittest
-from ase.build import bulk
+
 import numpy as np
+from ase.build import bulk
+
 from structuretoolkit.analyse.phonopy import get_equivalent_atoms
 from structuretoolkit.common.phonopy import atoms_to_phonopy, phonopy_to_atoms
-
 
 try:
     import spglib

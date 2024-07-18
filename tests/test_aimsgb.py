@@ -3,7 +3,9 @@
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import unittest
+
 from ase.build import bulk
+
 import structuretoolkit as stk
 
 try:

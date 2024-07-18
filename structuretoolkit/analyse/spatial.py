@@ -2,11 +2,12 @@
 # Copyright (c) Max-Planck-Institut für Eisenforschung GmbH - Computational Materials Design (CM) Department
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
-from ase.atoms import Atoms
+from typing import Optional
+
 import numpy as np
+from ase.atoms import Atoms
 from scipy.sparse import coo_matrix
 from scipy.spatial import ConvexHull, Delaunay, Voronoi
-from typing import Optional
 
 from structuretoolkit.analyse.neighbors import get_neighborhood, get_neighbors
 from structuretoolkit.common.helper import (

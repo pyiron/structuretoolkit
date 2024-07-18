@@ -1,6 +1,7 @@
+from typing import Optional
+
 import numpy as np
 from ase.atoms import Atoms
-from typing import Optional
 
 
 def soap_descriptor_per_atom(

@@ -3,6 +3,7 @@
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 from typing import Optional
+
 import numpy as np
 from ase.atoms import Atoms
 

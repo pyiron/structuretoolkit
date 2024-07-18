@@ -3,9 +3,11 @@
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import unittest
+
 import numpy as np
-from ase.build import bulk
 from ase.atoms import Atoms
+from ase.build import bulk
+
 import structuretoolkit as stk
 
 try:
@@ -85,11 +87,13 @@ class TestSymmetry(unittest.TestCase):
         cell = 2.2 * np.identity(3)
         basis = Atoms("AlFe", scaled_positions=[(0, 0, 0), (0.5, 0.5, 0.5)], cell=cell)
         structure = basis.repeat([2, 2, 2])
-        self.assertEqual(len(basis), len(stk.analyse.get_primitive_cell(structure=structure)))
         self.assertEqual(
-            stk.analyse.get_symmetry(structure=stk.analyse.get_primitive_cell(structure=structure)).spacegroup[
-                "Number"
-            ],
+            len(basis), len(stk.analyse.get_primitive_cell(structure=structure))
+        )
+        self.assertEqual(
+            stk.analyse.get_symmetry(
+                structure=stk.analyse.get_primitive_cell(structure=structure)
+            ).spacegroup["Number"],
             221,
         )
 
@@ -124,7 +128,8 @@ class TestSymmetry(unittest.TestCase):
             points=[[0, 0, 0.5]],
         )
         self.assertAlmostEqual(
-            np.linalg.norm(arr - np.array([0.51, 0.5, 0]), axis=-1).min(), 0.7142128534267638
+            np.linalg.norm(arr - np.array([0.51, 0.5, 0]), axis=-1).min(),
+            0.7142128534267638,
         )
 
 

@@ -1,11 +1,12 @@
+import itertools
 import random
 import warnings
-import itertools
 from multiprocessing import cpu_count
-from ase.data import atomic_numbers
-from ase.atoms import Atoms
+from typing import Dict, Iterable, Optional, Union
+
 import numpy as np
-from typing import Dict, Optional, Union, Iterable
+from ase.atoms import Atoms
+from ase.data import atomic_numbers
 
 
 def chemical_formula(atoms: Atoms) -> str:
@@ -120,6 +121,7 @@ def sqs_structures(
     return_statistics: Optional[bool] = False,
 ):
     from sqsgenerator import sqs_optimize
+
     composition = mole_fractions_to_composition(mole_fractions, len(structure))
 
     settings = dict(

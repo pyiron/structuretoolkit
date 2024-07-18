@@ -3,9 +3,11 @@
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import unittest
+
 import numpy as np
-from ase.build import bulk
 from ase.atoms import Atoms
+from ase.build import bulk
+
 import structuretoolkit as stk
 
 try:

@@ -1,4 +1,5 @@
 import unittest
+
 import structuretoolkit as stk
 
 try:
