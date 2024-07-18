@@ -3,12 +3,14 @@
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import ast
+import string
+from functools import cached_property
+from typing import Optional
 
-from ase.atoms import Atoms
 import numpy as np
 import spglib
+from ase.atoms import Atoms
 from scipy.spatial import cKDTree
-from typing import Optional
 
 import structuretoolkit.common.helper
 from structuretoolkit.common.error import SymmetryError
@@ -230,6 +232,37 @@ class Symmetry(dict):
             np.einsum("ijk->jki", v_reshaped)[self.permutations],
         ).reshape(np.shape(vectors)) / len(self["rotations"])
 
+    def symmetrize_tensor(self, tensor: np.ndarray) -> np.ndarray:
+        """
+        Symmetrization of any tensor. The tensor is defined by a matrix with a
+        shape of `n * (n_atoms, 3)`. For example, if the structure has 100
+        atoms, the vector can have a shape of (100, 3), (100, 3, 100, 3),
+        (100, 3, 100, 3, 100, 3) etc. Additionally, you can also have an array
+        of tensors, i.e. in this example you can have a shape like (4, 100, 3)
+        or (2, 100, 3, 100, 3). When the shape is (n, n_atoms, 3), the function
+        works in the same way as `symmetrize_vectors`, which might be somewhat
+        faster.
+
+        This function can be useful for the symmetrization of Hessian tensors,
+        or any other tensors which should be symmetric.
+
+        Args:
+            tensors (numpy.ndarray): n * (n_atoms, 3) tensor to symmetrize
+
+        Returns
+            (np.ndarray) symmetrized tensor of the same shape
+        """
+        v = np.transpose(
+            tensor[_get_outer_slicer(tensor.shape, self.permutations)],
+            _back_order(tensor.shape, len(self._structure)),
+        )
+        return np.einsum(
+            _get_einsum_str(tensor.shape, 3, v.shape == tensor.shape),
+            *sum([s == 3 for s in tensor.shape]) * [self.rotations],
+            v,
+            optimize=True,
+        )
+
     def _get_spglib_cell(
         self, use_elements: Optional[bool] = None, use_magmoms: Optional[bool] = None
     ) -> tuple:
@@ -389,3 +422,52 @@ class Symmetry(dict):
         if mesh is None:
             raise SymmetryError(spglib.spglib.spglib_error.message)
         return mesh
+
+
+def _get_inner_slicer(n, i):
+    s = [None for nn in range(n)]
+    s[0] = slice(None)
+    s[i] = slice(None)
+    return tuple(s)
+
+
+def _get_outer_slicer(shape, perm):
+    length = perm.shape[-1]
+    s = []
+    n_3 = np.sum(np.asarray(shape) == length) + 1
+    i_3 = 1
+    for ss in shape:
+        if ss != length:
+            s.append(slice(None))
+        else:
+            s.append(perm[_get_inner_slicer(n_3, i_3)])
+            i_3 += 1
+    return tuple(s)
+
+
+def _back_order(shape, length):
+    order = [ii for ii, ss in enumerate(shape) if ss == length]
+    if len(order) < 1:
+        return np.arange(len(shape))
+    elif len(order) == 1 or np.max(np.diff(order)) == 1:
+        arr = np.arange(len(shape))
+        return np.argsort(
+            np.concatenate([arr[: order[0]], [len(shape)], arr[order[0] :]])
+        )
+    cond = np.asarray(shape) == length
+    return np.append(np.argsort(np.where([cond, ~cond])[1]) + 1, 0)
+
+
+def _get_einsum_str(shape, length, omit_dots=True):
+    s = [string.ascii_lowercase[i] for i in range(len(shape))]
+    s_rot = ""
+    s_mul = ""
+    for ii, ss in enumerate(s):
+        if shape[ii] == length:
+            s_rot += "z" + ss + ss.upper() + ","
+            s_mul += ss.upper()
+        else:
+            s_mul += ss
+    if not omit_dots:
+        s_mul += "z"
+    return s_rot + s_mul + "->" + "".join(s)

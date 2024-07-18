@@ -4,10 +4,10 @@
 
 from __future__ import annotations
 import warnings
+from typing import Optional
 
-from ase.atoms import Atoms
 import numpy as np
-from typing import Optional, Union
+from ase.atoms import Atoms
 from scipy.interpolate import interp1d
 from structuretoolkit.common.helper import get_cell
 

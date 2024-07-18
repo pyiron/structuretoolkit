@@ -4,8 +4,10 @@
 
 
 import unittest
-from ase.build import bulk
+
 import numpy as np
+from ase.build import bulk
+
 import structuretoolkit as stk
 
 try:

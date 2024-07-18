@@ -1,8 +1,10 @@
-import numpy as np
 from typing import Optional
+
+import numpy as np
 from ase.atoms import Atoms
 from ase.build import bulk
 from ase.spacegroup import crystal
+
 from structuretoolkit.analyse.neighbors import get_neighbors
 
 
@@ -28,7 +30,14 @@ def B2(element_a: str, element_b: str, a: Optional[float] = None):
     )
 
 
-def C14(element_a: str, element_b: str , a: Optional[float] = None, c_over_a: float = 1.626, x1: float = 0.1697, z1: float = 0.5629) -> Atoms:
+def C14(
+    element_a: str,
+    element_b: str,
+    a: Optional[float] = None,
+    c_over_a: float = 1.626,
+    x1: float = 0.1697,
+    z1: float = 0.5629,
+) -> Atoms:
     """
     Builds a hexagonal $A B_2$ C14 Laves phase cell.
 

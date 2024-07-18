@@ -3,13 +3,15 @@
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import unittest
+
 import numpy as np
-from ase.build import bulk
 from ase.atoms import Atoms
+from ase.build import bulk
+
 import structuretoolkit as stk
 
 try:
-    import pyscal
+    import pyscal3 as pyscal
 
     skip_pyscal_test = False
 except ImportError:
@@ -17,7 +19,7 @@ except ImportError:
 
 
 @unittest.skipIf(
-    skip_pyscal_test, "pyscal is not installed, so the pyscal tests are skipped."
+    skip_pyscal_test, "pyscal3 is not installed, so the pyscal3 tests are skipped."
 )
 class Testpyscal(unittest.TestCase):
     @classmethod
@@ -394,10 +396,6 @@ class Testpyscalatoms(unittest.TestCase):
     def test_analyse_pyscal_diamond_structure(self):
         pyscal_keys = [
             "others",
-            "fcc",
-            "hcp",
-            "bcc",
-            "ico",
             "cubic diamond",
             "cubic diamond 1NN",
             "cubic diamond 2NN",
@@ -438,10 +436,11 @@ class Testpyscalatoms(unittest.TestCase):
         res_dict_total = stk.analyse.get_diamond_structure_descriptors(
             structure=self.si_dia, mode="total", ovito_compatibility=False
         )
+
         self.assertEqual(
             sum([k in res_dict_total.keys() for k in pyscal_keys]), len(pyscal_keys)
         )
-        self.assertEqual(res_dict_total[pyscal_keys[5]], len(self.si_dia))
+        self.assertEqual(res_dict_total[pyscal_keys[1]], len(self.si_dia))
 
         res_numeric = stk.analyse.get_diamond_structure_descriptors(
             structure=self.al_fcc, mode="numeric", ovito_compatibility=False
@@ -462,7 +461,7 @@ class Testpyscalatoms(unittest.TestCase):
             structure=self.si_dia, mode="numeric", ovito_compatibility=False
         )
         self.assertEqual(len(res_numeric), len(self.si_dia))
-        self.assertTrue(all([v == 5 for v in res_numeric]))
+        self.assertTrue(all([v == 1 for v in res_numeric]))
 
         res_str = stk.analyse.get_diamond_structure_descriptors(
             structure=self.al_fcc, mode="str", ovito_compatibility=False

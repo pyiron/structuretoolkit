@@ -6,8 +6,8 @@ import itertools
 import warnings
 from typing import Optional
 
-from ase.atoms import Atoms
 import numpy as np
+from ase.atoms import Atoms
 from scipy.sparse import coo_matrix
 from scipy.spatial import cKDTree
 from scipy.spatial.transform import Rotation

@@ -12,6 +12,11 @@ from structuretoolkit.analyse.pyscal import (
     get_steinhardt_parameters,
     get_voronoi_volumes,
 )
+from structuretoolkit.analyse.snap import (
+    get_snap_descriptor_derivatives,
+    get_snap_descriptor_names,
+    get_snap_descriptors_per_atom,
+)
 from structuretoolkit.analyse.spatial import (
     get_average_of_unique_labels,
     get_cluster_positions,
@@ -23,11 +28,6 @@ from structuretoolkit.analyse.spatial import (
     get_voronoi_vertices,
 )
 from structuretoolkit.analyse.strain import get_strain
-from structuretoolkit.analyse.snap import (
-    get_snap_descriptor_names,
-    get_snap_descriptors_per_atom,
-    get_snap_descriptor_derivatives,
-)
 
 
 def get_symmetry(
