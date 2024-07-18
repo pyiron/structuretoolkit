@@ -18,7 +18,6 @@ except ImportError:
 
 try:
     import spglib
-    from structuretoolkit.analyse.symmetry import _SymmetrizeTensor
 
     skip_spglib_test = False
 except ImportError:
