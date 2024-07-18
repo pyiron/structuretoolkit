@@ -3,6 +3,7 @@
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import numpy as np
+from ase.atoms import Atoms
 
 __author__ = "Osamu Waseda"
 __copyright__ = (
@@ -16,7 +17,9 @@ __status__ = "development"
 __date__ = "Sep 1, 2018"
 
 
-def get_equivalent_atoms(structure, symprec=1e-5, angle_tolerance=-1.0):
+def get_equivalent_atoms(
+    structure: Atoms, symprec: float = 1e-5, angle_tolerance: float = -1.0
+):
     """
     Args: (read phonopy.structure.spglib for more details)
         symprec:
@@ -38,5 +41,7 @@ def get_equivalent_atoms(structure, symprec=1e-5, angle_tolerance=-1.0):
     positions = np.reshape(np.array(positions), (natom, 3))
     cell = np.reshape(np.array(cell), (3, 3))
     unitcell = PhonopyAtoms(symbols=types, cell=cell, scaled_positions=positions)
-    ops = spg.get_symmetry(unitcell, symprec=symprec, angle_tolerance=angle_tolerance)
+    ops = spg.get_symmetry(
+        cell=unitcell.totuple(), symprec=symprec, angle_tolerance=angle_tolerance
+    )
     return ops["equivalent_atoms"]

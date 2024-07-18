@@ -1,20 +1,24 @@
+from typing import Optional
+
 import numpy as np
+from ase.atoms import Atoms
 from ase.build import bulk, surface
+
 from structuretoolkit.analyse import get_symmetry
 from structuretoolkit.common.pymatgen import ase_to_pymatgen, pymatgen_to_ase
 
 
 def get_high_index_surface_info(
-        element,
-        crystal_structure,
-        lattice_constant,
-        terrace_orientation=None,
-        step_orientation=None,
-        kink_orientation=None,
-        step_down_vector=None,
-        length_step=3,
-        length_terrace=3,
-        length_kink=1,
+    element: str,
+    crystal_structure: str,
+    lattice_constant: float,
+    terrace_orientation: Optional[list] = None,
+    step_orientation: Optional[list] = None,
+    kink_orientation: Optional[list] = None,
+    step_down_vector: Optional[list] = None,
+    length_step: int = 3,
+    length_terrace: int = 3,
+    length_kink: int = 1,
 ):
     """
     Gives the miller indices of high index surface required to create a stepped and kink surface, based
@@ -45,20 +49,11 @@ def get_high_index_surface_info(
     terrace_orientation = (
         terrace_orientation if terrace_orientation is not None else [1, 1, 1]
     )
-    step_orientation = (
-        step_orientation if step_orientation is not None else [1, 1, 0]
-    )
-    kink_orientation = (
-        kink_orientation if kink_orientation is not None else [1, 1, 1]
-    )
-    step_down_vector = (
-        step_down_vector if step_down_vector is not None else [1, 1, 0]
-    )
+    step_orientation = step_orientation if step_orientation is not None else [1, 1, 0]
+    kink_orientation = kink_orientation if kink_orientation is not None else [1, 1, 1]
+    step_down_vector = step_down_vector if step_down_vector is not None else [1, 1, 0]
     basis = bulk(
-        name=element,
-        crystalstructure=crystal_structure,
-        a=lattice_constant,
-        cubic=True
+        name=element, crystalstructure=crystal_structure, a=lattice_constant, cubic=True
     )
     sym = get_symmetry(structure=basis)
     eqvdirs = np.unique(
@@ -91,9 +86,7 @@ def get_high_index_surface_info(
     vec1 = (np.asanyarray(fin_step_orientation).dot(length_step)) + (
         np.asanyarray(fin_kink_orientation).dot(length_kink)
     )
-    vec2 = (
-               np.asanyarray(fin_kink_orientation).dot(length_terrace)
-           ) + step_down_vector
+    vec2 = (np.asanyarray(fin_kink_orientation).dot(length_terrace)) + step_down_vector
     high_index_surface = np.cross(np.asanyarray(vec1), np.asanyarray(vec2))
     high_index_surface = np.array(
         high_index_surface / np.gcd.reduce(high_index_surface), dtype=int
@@ -103,19 +96,19 @@ def get_high_index_surface_info(
 
 
 def high_index_surface(
-        element,
-        crystal_structure,
-        lattice_constant,
-        terrace_orientation=None,
-        step_orientation=None,
-        kink_orientation=None,
-        step_down_vector=None,
-        length_step=3,
-        length_terrace=3,
-        length_kink=1,
-        layers=60,
-        vacuum=10,
-):
+    element: str,
+    crystal_structure: str,
+    lattice_constant: float,
+    terrace_orientation: Optional[list] = None,
+    step_orientation: Optional[list] = None,
+    kink_orientation: Optional[list] = None,
+    step_down_vector: Optional[list] = None,
+    length_step: int = 3,
+    length_terrace: int = 3,
+    length_kink: int = 1,
+    layers: int = 60,
+    vacuum: int = 10,
+) -> Atoms:
     """
     Gives a slab positioned at the bottom with the high index surface computed by high_index_surface_info().
     Args:
@@ -136,11 +129,9 @@ def high_index_surface(
         slab: ase.atoms.Atoms instance Required surface
     """
     from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
+
     basis = bulk(
-        name=element,
-        crystalstructure=crystal_structure,
-        a=lattice_constant,
-        cubic=True
+        name=element, crystalstructure=crystal_structure, a=lattice_constant, cubic=True
     )
     high_index_surface, _, _ = get_high_index_surface_info(
         element=element,

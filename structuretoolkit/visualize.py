@@ -3,9 +3,13 @@
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import warnings
+from typing import Optional
 
 import numpy as np
+from ase.atoms import Atoms
 from scipy.interpolate import interp1d
+
+from structuretoolkit.common.helper import get_cell
 
 __author__ = "Joerg Neugebauer, Sudarsan Surendralal"
 __copyright__ = (
@@ -20,28 +24,28 @@ __date__ = "Sep 1, 2017"
 
 
 def plot3d(
-    structure,
-    mode="NGLview",
-    show_cell=True,
-    show_axes=True,
-    camera="orthographic",
-    spacefill=True,
-    particle_size=1.0,
-    select_atoms=None,
-    background="white",
-    color_scheme=None,
-    colors=None,
-    scalar_field=None,
-    scalar_start=None,
-    scalar_end=None,
-    scalar_cmap=None,
-    vector_field=None,
-    vector_color=None,
-    magnetic_moments=False,
-    view_plane=np.array([0, 0, 1]),
-    distance_from_camera=1.0,
-    opacity=1.0,
-    height=None,
+    structure: Atoms,
+    mode: str = "NGLview",
+    show_cell: bool = True,
+    show_axes: bool = True,
+    camera: str = "orthographic",
+    spacefill: bool = True,
+    particle_size: float = 1.0,
+    select_atoms: Optional[np.ndarray] = None,
+    background: str = "white",
+    color_scheme: Optional[str] = None,
+    colors: Optional[np.ndarray] = None,
+    scalar_field: Optional[np.ndarray] = None,
+    scalar_start: Optional[float] = None,
+    scalar_end: Optional[float] = None,
+    scalar_cmap: Optional = None,
+    vector_field: Optional[np.ndarray] = None,
+    vector_color: Optional[np.ndarray] = None,
+    magnetic_moments: bool = False,
+    view_plane: np.ndarray = np.array([0, 0, 1]),
+    distance_from_camera: float = 1.0,
+    opacity: float = 1.0,
+    height: Optional[float] = None,
 ):
     """
     Plot3d relies on NGLView or plotly to visualize atomic structures. Here, we construct a string in the "protein database"
@@ -152,7 +156,7 @@ def plot3d(
         raise ValueError("plot method not recognized")
 
 
-def _get_box_skeleton(cell):
+def _get_box_skeleton(cell: np.ndarray):
     lines_dz = np.stack(np.meshgrid(*3 * [[0, 1]], indexing="ij"), axis=-1)
     # eight corners of a unit cube, paired as four z-axis lines
 
@@ -163,17 +167,27 @@ def _get_box_skeleton(cell):
     return all_lines @ cell
 
 
+def _draw_box_plotly(fig, structure, px, go):
+    cell = get_cell(structure)
+    data = fig.data
+    for lines in _get_box_skeleton(cell):
+        fig = px.line_3d(**{xx: vv for xx, vv in zip(["x", "y", "z"], lines.T)})
+        fig.update_traces(line_color="#000000")
+        data = fig.data + data
+    return go.Figure(data=data)
+
+
 def _plot3d_plotly(
-    structure,
-    show_cell=True,
-    scalar_field=None,
-    select_atoms=None,
-    particle_size=1.0,
-    camera="orthographic",
-    view_plane=np.array([1, 1, 1]),
-    distance_from_camera=1,
-    opacity=1,
-    height=None,
+    structure: Atoms,
+    show_cell: bool = True,
+    scalar_field: Optional[np.ndarray] = None,
+    select_atoms: Optional[np.ndarray] = None,
+    particle_size: float = 1.0,
+    camera: str = "orthographic",
+    view_plane: np.ndarray = np.array([1, 1, 1]),
+    distance_from_camera: float = 1.0,
+    opacity: float = 1.0,
+    height: Optional[float] = None,
 ):
     """
     Make a 3D plot of the atomic structure.
@@ -221,12 +235,7 @@ def _plot3d_plotly(
         ),
     )
     if show_cell:
-        data = fig.data
-        for lines in _get_box_skeleton(structure.cell):
-            fig = px.line_3d(**{xx: vv for xx, vv in zip(["x", "y", "z"], lines.T)})
-            fig.update_traces(line_color="#000000")
-            data = fig.data + data
-        fig = go.Figure(data=data)
+        fig = _draw_box_plotly(fig, structure, px, go)
     fig.layout.scene.camera.projection.type = camera
     rot = _get_orientation(view_plane).T
     rot[0, :] *= distance_from_camera * 1.25
@@ -245,25 +254,25 @@ def _plot3d_plotly(
 
 
 def _plot3d(
-    structure,
-    show_cell=True,
-    show_axes=True,
-    camera="orthographic",
-    spacefill=True,
-    particle_size=1.0,
-    select_atoms=None,
-    background="white",
-    color_scheme=None,
-    colors=None,
-    scalar_field=None,
-    scalar_start=None,
-    scalar_end=None,
-    scalar_cmap=None,
-    vector_field=None,
-    vector_color=None,
-    magnetic_moments=False,
-    view_plane=np.array([0, 0, 1]),
-    distance_from_camera=1.0,
+    structure: Atoms,
+    show_cell: bool = True,
+    show_axes: bool = True,
+    camera: str = "orthographic",
+    spacefill: bool = True,
+    particle_size: float = 1.0,
+    select_atoms: Optional[np.ndarray] = None,
+    background: str = "white",
+    color_scheme: Optional[str] = None,
+    colors: Optional[np.ndarray] = None,
+    scalar_field: Optional[np.ndarray] = None,
+    scalar_start: Optional[float] = None,
+    scalar_end: Optional[float] = None,
+    scalar_cmap: Optional = None,
+    vector_field: Optional[np.ndarray] = None,
+    vector_color: Optional[np.ndarray] = None,
+    magnetic_moments: bool = False,
+    view_plane: np.ndarray = np.array([0, 0, 1]),
+    distance_from_camera: float = 1.0,
 ):
     """
     Plot3d relies on NGLView to visualize atomic structures. Here, we construct a string in the "protein database"
@@ -462,14 +471,14 @@ def _plot3d(
 
 
 def _plot3d_ase(
-    structure,
-    spacefill=True,
-    show_cell=True,
-    camera="perspective",
-    particle_size=0.5,
-    background="white",
-    color_scheme="element",
-    show_axes=True,
+    structure: Atoms,
+    spacefill: bool = True,
+    show_cell: bool = True,
+    camera: str = "perspective",
+    particle_size: float = 0.5,
+    background: str = "white",
+    color_scheme: str = "element",
+    show_axes: bool = True,
 ):
     """
     Possible color schemes:
@@ -510,7 +519,14 @@ def _plot3d_ase(
     return view
 
 
-def _ngl_write_cell(a1, a2, a3, f1=90, f2=90, f3=90):
+def _ngl_write_cell(
+    a1: float,
+    a2: float,
+    a3: float,
+    f1: float = 90.0,
+    f2: float = 90.0,
+    f3: float = 90.0,
+):
     """
     Writes a PDB-formatted line to represent the simulation cell.
 
@@ -527,16 +543,16 @@ def _ngl_write_cell(a1, a2, a3, f1=90, f2=90, f3=90):
 
 
 def _ngl_write_atom(
-    num,
-    species,
-    x,
-    y,
-    z,
-    group=None,
-    num2=None,
-    occupancy=1.0,
-    temperature_factor=0.0,
-):
+    num: int,
+    species: str,
+    x: float,
+    y: float,
+    z: float,
+    group: Optional[str] = None,
+    num2: Optional[int] = None,
+    occupancy: float = 1.0,
+    temperature_factor: float = 0.0,
+) -> str:
     """
     Writes a PDB-formatted line to represent an atom.
 
@@ -566,7 +582,9 @@ def _ngl_write_atom(
     )
 
 
-def _ngl_write_structure(elements, positions, cell):
+def _ngl_write_structure(
+    elements: np.ndarray, positions: np.ndarray, cell: np.ndarray
+) -> str:
     """
     Turns structure information into a NGLView-readable protein-database-formatted string.
 
@@ -602,7 +620,9 @@ def _ngl_write_structure(elements, positions, cell):
     return pdb_str
 
 
-def _atomic_number_to_radius(atomic_number, shift=0.2, slope=0.1, scale=1.0):
+def _atomic_number_to_radius(
+    atomic_number: int, shift: float = 0.2, slope: float = 0.1, scale: float = 1.0
+) -> float:
     """
     Give the atomic radius for plotting, which scales like the root of the atomic number.
 
@@ -619,7 +639,11 @@ def _atomic_number_to_radius(atomic_number, shift=0.2, slope=0.1, scale=1.0):
 
 
 def _add_colorscheme_spacefill(
-    view, elements, atomic_numbers, particle_size, scheme="element"
+    view,
+    elements: np.ndarray,
+    atomic_numbers: np.ndarray,
+    particle_size: float,
+    scheme: str = "element",
 ):
     """
     Set NGLView spacefill parameters according to a color-scheme.
@@ -649,7 +673,9 @@ def _add_colorscheme_spacefill(
     return view
 
 
-def _add_custom_color_spacefill(view, atomic_numbers, particle_size, colors):
+def _add_custom_color_spacefill(
+    view, atomic_numbers: np.ndarray, particle_size: float, colors: np.ndarray
+):
     """
     Set NGLView spacefill parameters according to per-atom colors.
 
@@ -672,7 +698,12 @@ def _add_custom_color_spacefill(view, atomic_numbers, particle_size, colors):
     return view
 
 
-def _scalars_to_hex_colors(scalar_field, start=None, end=None, cmap=None):
+def _scalars_to_hex_colors(
+    scalar_field: np.ndarray,
+    start: Optional[float] = None,
+    end: Optional[float] = None,
+    cmap=None,
+):
     """
     Convert scalar values to hex codes using a colormap.
 
@@ -710,7 +741,7 @@ def _scalars_to_hex_colors(scalar_field, start=None, end=None, cmap=None):
     ]  # The slice gets RGB but leaves alpha
 
 
-def _get_orientation(view_plane):
+def _get_orientation(view_plane: np.ndarray) -> np.ndarray:
     """
     A helper method to plot3d, which generates a rotation matrix from the input `view_plane`, and returns a
     flattened list of len = 16. This flattened list becomes the input argument to `view.contol.orient`.
@@ -751,7 +782,9 @@ def _get_orientation(view_plane):
     ).T
 
 
-def _get_flattened_orientation(view_plane, distance_from_camera):
+def _get_flattened_orientation(
+    view_plane: np.ndarray, distance_from_camera: float
+) -> list:
     """
     A helper method to plot3d, which generates a rotation matrix from the input `view_plane`, and returns a
     flattened list of len = 16. This flattened list becomes the input argument to `view.contol.orient`.

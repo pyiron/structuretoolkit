@@ -1,19 +1,21 @@
+name: pyiron-structuretoolkit
 channels:
 - conda-forge
 dependencies:
-- aimsgb =1.1.0
-- ase =3.22.1
+- aimsgb =1.1.1
+- ase =3.23.0
 - coverage
-- matplotlib-base =3.8.2
-- nglview =3.1.1
+- dscribe =2.1.1
+- matplotlib-base =3.9.1
+- nglview =3.1.2
 - notebook
 - numpy =1.26.4
-- phonopy =2.21.0
-- plotly =5.18.0
-- pymatgen =2024.2.8
-- pyscal =2.10.18
-- pyxtal =0.6.2
-- scikit-learn =1.4.0
-- scipy =1.12.0
-- spglib =2.3.1
+- phonopy =2.26.5
+- plotly =5.22.0
+- pymatgen =2024.6.10
+- pyscal3 =3.2.6
+- pyxtal =0.6.7
+- scikit-learn =1.5.1
+- scipy =1.14.0
+- spglib =2.5.0
 - sqsgenerator =0.3

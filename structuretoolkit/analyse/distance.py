@@ -1,7 +1,16 @@
+from typing import Optional
+
 import numpy as np
+from ase.atoms import Atoms
 
 
-def get_distances_array(structure, p1=None, p2=None, mic=True, vectors=False):
+def get_distances_array(
+    structure: Atoms,
+    p1: Optional[np.ndarray] = None,
+    p2: Optional[np.ndarray] = None,
+    mic: bool = True,
+    vectors: bool = False,
+):
     """
     Return distance matrix of every position in p1 with every position in
     p2. If p2 is not set, it is assumed that distances between all
@@ -39,7 +48,7 @@ def get_distances_array(structure, p1=None, p2=None, mic=True, vectors=False):
     return find_mic(structure=structure, v=diff_relative, vectors=vectors)
 
 
-def find_mic(structure, v, vectors=True):
+def find_mic(structure: Atoms, v: np.ndarray, vectors: bool = True):
     """
     Find vectors following minimum image convention (mic). In principle this
     function does the same as ase.geometry.find_mic

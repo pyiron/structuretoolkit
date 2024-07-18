@@ -11,22 +11,22 @@ authors = [
 readme = "README.md"
 license = { file = "LICENSE" }
 keywords = ["pyiron"]
-requires-python = ">=3.8"
+requires-python = ">=3.9, <3.13"
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Topic :: Scientific/Engineering :: Physics",
     "License :: OSI Approved :: BSD License",
     "Intended Audience :: Science/Research",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
-    "ase==3.22.1",
+    "ase==3.23.0",
     "numpy==1.26.4",
-    "scipy==1.12.0",
+    "scipy==1.14.0",
 ]
 dynamic = ["version"]
 
@@ -36,25 +36,26 @@ Documentation = "https://github.com/pyiron/structuretoolkit"
 Repository = "https://github.com/pyiron/structuretoolkit"
 
 [project.optional-dependencies]
+dscribe = ["dscribe==2.1.1"]
 grainboundary = [
-    "aimsgb==1.1.0",
-    "pymatgen==2024.2.8",
+    "aimsgb==1.1.1",
+    "pymatgen==2024.6.10",
 ]
-pyscal = ["pyscal2==2.10.18"]
-nglview = ["nglview==3.1.1"]
-matplotlib = ["matplotlib==3.8.2"]
-plotly = ["plotly==5.18.0"]
-clusters = ["scikit-learn==1.4.0"]
-symmetry = ["spglib==2.3.1"]
+pyscal = ["pyscal3==3.2.6"]
+nglview = ["nglview==3.1.2"]
+matplotlib = ["matplotlib==3.9.1"]
+plotly = ["plotly==5.22.0"]
+clusters = ["scikit-learn==1.5.1"]
+symmetry = ["spglib==2.5.0"]
 surface = [
-    "spglib==2.3.1",
-    "pymatgen==2024.2.8",
+    "spglib==2.5.0",
+    "pymatgen==2024.6.10",
 ]
 phonopy = [
-    "phonopy==2.21.0",
-    "spglib==2.3.1",
+    "phonopy==2.26.5",
+    "spglib==2.5.0",
 ]
-pyxtal = ["pyxtal==0.6.2"]
+pyxtal = ["pyxtal==0.6.7"]
 
 [tool.setuptools.packages.find]
 include = ["structuretoolkit*"]

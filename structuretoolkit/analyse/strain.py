@@ -1,4 +1,7 @@
+from typing import Optional
+
 import numpy as np
+from ase.atoms import Atoms
 from scipy.spatial.transform import Rotation
 
 from structuretoolkit.analyse.neighbors import get_neighbors
@@ -24,7 +27,11 @@ class Strain:
     """
 
     def __init__(
-        self, structure, ref_structure, num_neighbors=None, only_bulk_type=False
+        self,
+        structure: Atoms,
+        ref_structure: Atoms,
+        num_neighbors: Optional[int] = None,
+        only_bulk_type: bool = False,
     ):
         """
 
@@ -50,26 +57,28 @@ class Strain:
         self._rotations = None
 
     @property
-    def num_neighbors(self):
+    def num_neighbors(self) -> int:
         """Number of neighbors to consider the local frame. Should be the coordination number."""
         if self._num_neighbors is None:
             self._num_neighbors = self._get_number_of_neighbors(self.crystal_phase)
         return self._num_neighbors
 
     @property
-    def crystal_phase(self):
+    def crystal_phase(self) -> str:
         """Majority crystal phase calculated via common neighbor analysis."""
         if self._crystal_phase is None:
             self._crystal_phase = self._get_majority_phase(self.ref_structure)
         return self._crystal_phase
 
     @property
-    def _nullify_non_bulk(self):
+    def _nullify_non_bulk(self) -> np.ndarray:
         return np.array(
             self.structure.analyse.pyscal_cna_adaptive(mode="str") != self.crystal_phase
         )
 
-    def _get_perpendicular_unit_vectors(self, vec, vec_axis=None):
+    def _get_perpendicular_unit_vectors(
+        self, vec: np.ndarray, vec_axis: Optional[np.ndarray] = None
+    ) -> np.ndarray:
         if vec_axis is not None:
             vec_axis = self._get_safe_unit_vectors(vec_axis)
             vec = np.array(
@@ -78,12 +87,14 @@ class Strain:
         return self._get_safe_unit_vectors(vec)
 
     @staticmethod
-    def _get_safe_unit_vectors(vectors, minimum_value=1.0e-8):
+    def _get_safe_unit_vectors(
+        vectors: np.ndarray, minimum_value: float = 1.0e-8
+    ) -> np.ndarray:
         v = np.linalg.norm(vectors, axis=-1)
         v += (v < minimum_value) * minimum_value
         return np.einsum("...i,...->...i", vectors, 1 / v)
 
-    def _get_angle(self, v, w):
+    def _get_angle(self, v: np.ndarray, w: np.ndarray) -> np.ndarray:
         v = self._get_safe_unit_vectors(v)
         w = self._get_safe_unit_vectors(w)
         prod = np.sum(v * w, axis=-1)
@@ -92,7 +103,12 @@ class Strain:
             prod[np.absolute(prod) > 1] = np.sign(prod)[np.absolute(prod) > 1]
         return np.arccos(prod)
 
-    def _get_rotation_from_vectors(self, vec_before, vec_after, vec_axis=None):
+    def _get_rotation_from_vectors(
+        self,
+        vec_before: np.ndarray,
+        vec_after: np.ndarray,
+        vec_axis: Optional[np.ndarray] = None,
+    ) -> np.ndarray:
         v = self._get_perpendicular_unit_vectors(vec_before, vec_axis)
         w = self._get_perpendicular_unit_vectors(vec_after, vec_axis)
         if vec_axis is None:
@@ -105,7 +121,7 @@ class Strain:
         return Rotation.from_mrp(vec_axis).as_matrix()
 
     @property
-    def rotations(self):
+    def rotations(self) -> np.ndarray:
         """Rotation for each atom to find the correct pairs of coordinates."""
         if self._rotations is None:
             v = self.coords.copy()[:, 0, :]
@@ -130,19 +146,21 @@ class Strain:
         return self._rotations
 
     @staticmethod
-    def _get_best_match_indices(coords, ref_coord):
+    def _get_best_match_indices(
+        coords: np.ndarray, ref_coord: np.ndarray
+    ) -> np.ndarray:
         distances = np.linalg.norm(
             coords[:, :, None, :] - ref_coord[None, None, :, :], axis=-1
         )
         return np.argmin(distances, axis=-1)
 
     @staticmethod
-    def _get_majority_phase(structure):
+    def _get_majority_phase(structure: Atoms) -> np.ndarray:
         cna = get_adaptive_cna_descriptors(structure=structure)
         return np.asarray([k for k in cna.keys()])[np.argmax([v for v in cna.values()])]
 
     @staticmethod
-    def _get_number_of_neighbors(crystal_phase):
+    def _get_number_of_neighbors(crystal_phase: str) -> int:
         if crystal_phase == "bcc":
             return 8
         elif crystal_phase == "fcc" or crystal_phase == "hcp":
@@ -151,7 +169,7 @@ class Strain:
             raise ValueError(f'Crystal structure "{crystal_phase}" not recognized')
 
     @property
-    def ref_coord(self):
+    def ref_coord(self) -> np.ndarray:
         """Reference local coordinates."""
         if self._ref_coord is None:
             self._ref_coord = get_neighbors(
@@ -160,7 +178,7 @@ class Strain:
         return self._ref_coord
 
     @property
-    def coords(self):
+    def coords(self) -> np.ndarray:
         """Local coordinates of each atom."""
         if self._coords is None:
             self._coords = get_neighbors(
@@ -169,12 +187,12 @@ class Strain:
         return self._coords
 
     @property
-    def _indices(self):
+    def _indices(self) -> np.ndarray:
         all_vecs = np.einsum("nij,nkj->nki", self.rotations, self.coords)
         return self._get_best_match_indices(all_vecs, self.ref_coord)
 
     @property
-    def strain(self):
+    def strain(self) -> np.ndarray:
         """Strain value of each atom"""
         Dinverse = np.einsum("ij,ik->jk", self.ref_coord, self.ref_coord)
         D = np.linalg.inv(Dinverse)
@@ -191,11 +209,11 @@ class Strain:
 
 
 def get_strain(
-    structure,
-    ref_structure,
-    num_neighbors=None,
-    only_bulk_type=False,
-    return_object=False,
+    structure: Atoms,
+    ref_structure: Atoms,
+    num_neighbors: Optional[int] = None,
+    only_bulk_type: bool = False,
+    return_object: bool = False,
 ):
     """
     Calculate local strain of each atom following the Lagrangian strain tensor:

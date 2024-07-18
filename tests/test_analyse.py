@@ -3,18 +3,18 @@
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import unittest
+
 import numpy as np
-from ase.build import bulk
 from ase.atom import Atom
 from ase.atoms import Atoms
-from scipy.spatial import Voronoi
+from ase.build import bulk
 from ase.lattice.cubic import BodyCenteredCubic
-import structuretoolkit as stk
-from scipy.spatial import cKDTree
+from scipy.spatial import Voronoi, cKDTree
 
+import structuretoolkit as stk
 
 try:
-    from sklearn.cluster import AgglomerativeClustering, DBSCAN
+    from sklearn.cluster import DBSCAN, AgglomerativeClustering
 
     skip_cluster_test = False
 except ImportError:

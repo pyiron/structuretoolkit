@@ -1,6 +1,7 @@
 import numpy as np
 
 from structuretoolkit.analyse.distance import find_mic, get_distances_array
+from structuretoolkit.analyse.dscribe import soap_descriptor_per_atom
 from structuretoolkit.analyse.neighbors import get_neighborhood, get_neighbors
 from structuretoolkit.analyse.phonopy import get_equivalent_atoms
 from structuretoolkit.analyse.pyscal import (
@@ -10,6 +11,11 @@ from structuretoolkit.analyse.pyscal import (
     get_diamond_structure_descriptors,
     get_steinhardt_parameters,
     get_voronoi_volumes,
+)
+from structuretoolkit.analyse.snap import (
+    get_snap_descriptor_derivatives,
+    get_snap_descriptor_names,
+    get_snap_descriptors_per_atom,
 )
 from structuretoolkit.analyse.spatial import (
     get_average_of_unique_labels,

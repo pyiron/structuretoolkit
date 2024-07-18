@@ -3,10 +3,13 @@
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import ast
-from logging import warning
+import string
+from functools import cached_property
+from typing import Optional
 
 import numpy as np
 import spglib
+from ase.atoms import Atoms
 from scipy.spatial import cKDTree
 
 import structuretoolkit.common.helper
@@ -38,12 +41,12 @@ class Symmetry(dict):
 
     def __init__(
         self,
-        structure,
-        use_magmoms=False,
-        use_elements=True,
-        symprec=1e-5,
-        angle_tolerance=-1.0,
-        epsilon=1.0e-8,
+        structure: Atoms,
+        use_magmoms: bool = False,
+        use_elements: bool = True,
+        symprec: float = 1e-5,
+        angle_tolerance: float = -1.0,
+        epsilon: float = 1.0e-8,
     ):
         """
         Args:
@@ -68,11 +71,11 @@ class Symmetry(dict):
             self[k] = v
 
     @property
-    def arg_equivalent_atoms(self):
+    def arg_equivalent_atoms(self) -> np.ndarray:
         return self["equivalent_atoms"]
 
     @property
-    def arg_equivalent_vectors(self):
+    def arg_equivalent_vectors(self) -> np.ndarray:
         """
         Get 3d vector components which are equivalent under symmetry operation. For example, if
         the `i`-direction (`i = x, y, z`) of the `n`-th atom is equivalent to the `j`-direction
@@ -89,7 +92,7 @@ class Symmetry(dict):
         return enum.reshape(-1, 3)
 
     @property
-    def rotations(self):
+    def rotations(self) -> np.ndarray:
         """
         All rotational matrices. Two points x and y are equivalent with respect to the box
         box symmetry, if there is a rotational matrix R and a translational vector t which
@@ -100,7 +103,7 @@ class Symmetry(dict):
         return self["rotations"]
 
     @property
-    def translations(self):
+    def translations(self) -> np.ndarray:
         """
         All translational vectors. Two points x and y are equivalent with respect to the box
         box symmetry, if there is a rotational matrix R and a translational vector t which
@@ -112,10 +115,10 @@ class Symmetry(dict):
 
     def generate_equivalent_points(
         self,
-        points,
-        return_unique=True,
-        decimals=5,
-    ):
+        points: np.ndarray,
+        return_unique: bool = True,
+        decimals: int = 5,
+    ) -> np.ndarray:
         """
 
         Args:
@@ -150,9 +153,9 @@ class Symmetry(dict):
 
     def get_arg_equivalent_sites(
         self,
-        points,
-        decimals=5,
-    ):
+        points: np.ndarray,
+        decimals: int = 5,
+    ) -> np.ndarray:
         """
         Group points according to the box symmetries
 
@@ -177,7 +180,7 @@ class Symmetry(dict):
         return np.unique(indices, return_inverse=True)[1]
 
     @property
-    def permutations(self):
+    def permutations(self) -> np.ndarray:
         """
         Permutations for the corresponding symmetry operations.
 
@@ -211,8 +214,8 @@ class Symmetry(dict):
 
     def symmetrize_vectors(
         self,
-        vectors,
-    ):
+        vectors: np.ndarray,
+    ) -> np.ndarray:
         """
         Symmetrization of natom x 3 vectors according to box symmetries
 
@@ -229,7 +232,40 @@ class Symmetry(dict):
             np.einsum("ijk->jki", v_reshaped)[self.permutations],
         ).reshape(np.shape(vectors)) / len(self["rotations"])
 
-    def _get_spglib_cell(self, use_elements=None, use_magmoms=None):
+    def symmetrize_tensor(self, tensor: np.ndarray) -> np.ndarray:
+        """
+        Symmetrization of any tensor. The tensor is defined by a matrix with a
+        shape of `n * (n_atoms, 3)`. For example, if the structure has 100
+        atoms, the vector can have a shape of (100, 3), (100, 3, 100, 3),
+        (100, 3, 100, 3, 100, 3) etc. Additionally, you can also have an array
+        of tensors, i.e. in this example you can have a shape like (4, 100, 3)
+        or (2, 100, 3, 100, 3). When the shape is (n, n_atoms, 3), the function
+        works in the same way as `symmetrize_vectors`, which might be somewhat
+        faster.
+
+        This function can be useful for the symmetrization of Hessian tensors,
+        or any other tensors which should be symmetric.
+
+        Args:
+            tensors (numpy.ndarray): n * (n_atoms, 3) tensor to symmetrize
+
+        Returns
+            (np.ndarray) symmetrized tensor of the same shape
+        """
+        v = np.transpose(
+            tensor[_get_outer_slicer(tensor.shape, self.permutations)],
+            _back_order(tensor.shape, len(self._structure)),
+        )
+        return np.einsum(
+            _get_einsum_str(tensor.shape, 3, v.shape == tensor.shape),
+            *sum([s == 3 for s in tensor.shape]) * [self.rotations],
+            v,
+            optimize=True,
+        )
+
+    def _get_spglib_cell(
+        self, use_elements: Optional[bool] = None, use_magmoms: Optional[bool] = None
+    ) -> tuple:
         lattice = np.array(self._structure.get_cell(), dtype="double", order="C")
         positions = np.array(
             self._structure.get_scaled_positions(wrap=False), dtype="double", order="C"
@@ -261,7 +297,7 @@ class Symmetry(dict):
             )
         return lattice, positions, numbers
 
-    def _get_symmetry(self, symprec=1e-5, angle_tolerance=-1.0):
+    def _get_symmetry(self, symprec: float = 1e-5, angle_tolerance: float = -1.0):
         """
 
         Args:
@@ -298,7 +334,7 @@ class Symmetry(dict):
         return info
 
     @property
-    def spacegroup(self):
+    def spacegroup(self) -> dict:
         """
 
         Args:
@@ -325,8 +361,11 @@ class Symmetry(dict):
         }
 
     def get_primitive_cell(
-        self, standardize=False, use_elements=None, use_magmoms=None
-    ):
+        self,
+        standardize: bool = False,
+        use_elements: Optional[bool] = None,
+        use_magmoms: Optional[bool] = None,
+    ) -> Atoms:
         """
         Get primitive cell of a given structure.
 
@@ -385,10 +424,10 @@ class Symmetry(dict):
 
     def get_ir_reciprocal_mesh(
         self,
-        mesh,
-        is_shift=np.zeros(3, dtype="intc"),
-        is_time_reversal=True,
-    ):
+        mesh: np.ndarray,
+        is_shift: np.ndarray = np.zeros(3, dtype="intc"),
+        is_time_reversal: bool = True,
+    ) -> np.ndarray:
         mesh = spglib.get_ir_reciprocal_mesh(
             mesh=mesh,
             cell=self._get_spglib_cell(),
@@ -399,3 +438,52 @@ class Symmetry(dict):
         if mesh is None:
             raise SymmetryError(spglib.spglib.spglib_error.message)
         return mesh
+
+
+def _get_inner_slicer(n, i):
+    s = [None for nn in range(n)]
+    s[0] = slice(None)
+    s[i] = slice(None)
+    return tuple(s)
+
+
+def _get_outer_slicer(shape, perm):
+    length = perm.shape[-1]
+    s = []
+    n_3 = np.sum(np.asarray(shape) == length) + 1
+    i_3 = 1
+    for ss in shape:
+        if ss != length:
+            s.append(slice(None))
+        else:
+            s.append(perm[_get_inner_slicer(n_3, i_3)])
+            i_3 += 1
+    return tuple(s)
+
+
+def _back_order(shape, length):
+    order = [ii for ii, ss in enumerate(shape) if ss == length]
+    if len(order) < 1:
+        return np.arange(len(shape))
+    elif len(order) == 1 or np.max(np.diff(order)) == 1:
+        arr = np.arange(len(shape))
+        return np.argsort(
+            np.concatenate([arr[: order[0]], [len(shape)], arr[order[0] :]])
+        )
+    cond = np.asarray(shape) == length
+    return np.append(np.argsort(np.where([cond, ~cond])[1]) + 1, 0)
+
+
+def _get_einsum_str(shape, length, omit_dots=True):
+    s = [string.ascii_lowercase[i] for i in range(len(shape))]
+    s_rot = ""
+    s_mul = ""
+    for ii, ss in enumerate(s):
+        if shape[ii] == length:
+            s_rot += "z" + ss + ss.upper() + ","
+            s_mul += ss.upper()
+        else:
+            s_mul += ss
+    if not omit_dots:
+        s_mul += "z"
+    return s_rot + s_mul + "->" + "".join(s)

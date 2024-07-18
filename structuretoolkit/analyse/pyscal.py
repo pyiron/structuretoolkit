@@ -2,6 +2,8 @@
 # Copyright (c) Max-Planck-Institut für Eisenforschung GmbH - Computational Materials Design (CM) Department
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
+from typing import Optional
+
 import numpy as np
 from ase.atoms import Atoms
 
@@ -20,12 +22,12 @@ __date__ = "Nov 6, 2019"
 
 
 def get_steinhardt_parameters(
-    structure,
-    neighbor_method="cutoff",
-    cutoff=0,
-    n_clusters=2,
-    q=None,
-    averaged=False,
+    structure: Atoms,
+    neighbor_method: str = "cutoff",
+    cutoff: float = 0.0,
+    n_clusters: int = 2,
+    q: Optional[tuple] = None,
+    averaged: bool = False,
 ):
     """
     Calculate Steinhardts parameters
@@ -46,11 +48,8 @@ def get_steinhardt_parameters(
     sys = ase_to_pyscal(structure)
     q = (4, 6) if q is None else q
 
-    sys.find_neighbors(method=neighbor_method, cutoff=cutoff)
-
-    sys.calculate_q(q, averaged=averaged)
-
-    sysq = np.array(sys.get_qvals(q, averaged=averaged))
+    sys.find.neighbors(method=neighbor_method, cutoff=cutoff)
+    sysq = np.array(sys.calculate.steinhardt_parameter(q, averaged=averaged))
 
     if n_clusters is not None:
         from sklearn import cluster
@@ -63,7 +62,9 @@ def get_steinhardt_parameters(
         return sysq
 
 
-def get_centro_symmetry_descriptors(structure, num_neighbors=12):
+def get_centro_symmetry_descriptors(
+    structure: Atoms, num_neighbors: int = 12
+) -> np.ndarray:
     """
     Analyse centrosymmetry parameter
 
@@ -75,12 +76,12 @@ def get_centro_symmetry_descriptors(structure, num_neighbors=12):
         csm (list) : list of centrosymmetry parameter
     """
     sys = ase_to_pyscal(structure)
-    return np.array(sys.calculate_centrosymmetry(nmax=num_neighbors))
+    return np.array(sys.calculate.centrosymmetry(nmax=num_neighbors))
 
 
 def get_diamond_structure_descriptors(
-    structure, mode="total", ovito_compatibility=False
-):
+    structure: Atoms, mode: str = "total", ovito_compatibility: bool = False
+) -> np.ndarray:
     """
     Analyse diamond structure
 
@@ -98,23 +99,19 @@ def get_diamond_structure_descriptors(
         (depends on `mode`)
     """
     sys = ase_to_pyscal(structure)
-    diamond_dict = sys.identify_diamond()
+    diamond_dict = sys.analyze.diamond_structure()
 
     ovito_identifiers = [
+        "Other",
         "Cubic diamond",
         "Cubic diamond (1st neighbor)",
         "Cubic diamond (2nd neighbor)",
         "Hexagonal diamond",
         "Hexagonal diamond (1st neighbor)",
         "Hexagonal diamond (2nd neighbor)",
-        "Other",
     ]
     pyscal_identifiers = [
         "others",
-        "fcc",
-        "hcp",
-        "bcc",
-        "ico",
         "cubic diamond",
         "cubic diamond 1NN",
         "cubic diamond 2NN",
@@ -122,19 +119,6 @@ def get_diamond_structure_descriptors(
         "hex diamond 1NN",
         "hex diamond 2NN",
     ]
-    convert_to_ovito = {
-        0: 6,
-        1: 6,
-        2: 6,
-        3: 6,
-        4: 6,
-        5: 0,
-        6: 1,
-        7: 2,
-        8: 3,
-        9: 4,
-        10: 5,
-    }
 
     if mode == "total":
         if not ovito_compatibility:
@@ -155,26 +139,22 @@ def get_diamond_structure_descriptors(
                 "IdentifyDiamond.counts.HEX_DIAMOND_SECOND_NEIGHBOR": diamond_dict[
                     "hex diamond 2NN"
                 ],
-                "IdentifyDiamond.counts.OTHER": diamond_dict["others"]
-                + diamond_dict["fcc"]
-                + diamond_dict["hcp"]
-                + diamond_dict["bcc"]
-                + diamond_dict["ico"],
+                "IdentifyDiamond.counts.OTHER": diamond_dict["others"],
             }
     elif mode == "numeric":
         if not ovito_compatibility:
-            return np.array([atom.structure for atom in sys.atoms])
+            return np.array(sys.atoms.structure)
         else:
-            return np.array([convert_to_ovito[atom.structure] for atom in sys.atoms])
+            return np.array([6 if x == 0 else x - 1 for x in sys.atoms.structure])
+
     elif mode == "str":
         if not ovito_compatibility:
-            return np.array([pyscal_identifiers[atom.structure] for atom in sys.atoms])
+            return np.array(
+                [pyscal_identifiers[structure] for structure in sys.atoms.structure]
+            )
         else:
             return np.array(
-                [
-                    ovito_identifiers[convert_to_ovito[atom.structure]]
-                    for atom in sys.atoms
-                ]
+                [ovito_identifiers[structure] for structure in sys.atoms.structure]
             )
     else:
         raise ValueError(
@@ -182,7 +162,9 @@ def get_diamond_structure_descriptors(
         )
 
 
-def get_adaptive_cna_descriptors(structure, mode="total", ovito_compatibility=False):
+def get_adaptive_cna_descriptors(
+    structure: Atoms, mode: str = "total", ovito_compatibility: bool = False
+) -> np.ndarray:
     """
     Use common neighbor analysis
 
@@ -212,7 +194,7 @@ def get_adaptive_cna_descriptors(structure, mode="total", ovito_compatibility=Fa
         "CommonNeighborAnalysis.counts.ICO",
     ]
 
-    cna = sys.calculate_cna()
+    cna = sys.analyze.common_neighbor_analysis()
 
     if mode == "total":
         if not ovito_compatibility:
@@ -220,8 +202,7 @@ def get_adaptive_cna_descriptors(structure, mode="total", ovito_compatibility=Fa
         else:
             return {o: cna[p] for o, p in zip(ovito_parameter, pyscal_parameter)}
     else:
-        structure = sys.atoms
-        cnalist = np.array([atom.structure for atom in structure])
+        cnalist = np.array(sys.atoms.structure)
         if mode == "numeric":
             return cnalist
         elif mode == "str":
@@ -237,7 +218,7 @@ def get_adaptive_cna_descriptors(structure, mode="total", ovito_compatibility=Fa
             )
 
 
-def get_voronoi_volumes(structure):
+def get_voronoi_volumes(structure: Atoms) -> np.ndarray:
     """
     Calculate the Voronoi volume of atoms
 
@@ -245,22 +226,21 @@ def get_voronoi_volumes(structure):
         structure : (ase.atoms.Atoms): The structure to analyze.
     """
     sys = ase_to_pyscal(structure)
-    sys.find_neighbors(method="voronoi")
-    structure = sys.atoms
-    return np.array([atom.volume for atom in structure])
+    sys.find.neighbors(method="voronoi")
+    return np.array(sys.atoms.voronoi.volume)
 
 
 def find_solids(
-    structure,
-    neighbor_method="cutoff",
-    cutoff=0,
-    bonds=0.5,
-    threshold=0.5,
-    avgthreshold=0.6,
-    cluster=False,
-    q=6,
-    right=True,
-    return_sys=False,
+    structure: Atoms,
+    neighbor_method: str = "cutoff",
+    cutoff: float = 0.0,
+    bonds: float = 0.5,
+    threshold: float = 0.5,
+    avgthreshold: float = 0.6,
+    cluster: bool = False,
+    q: int = 6,
+    right: bool = True,
+    return_sys: bool = False,
 ):
     """
     Get the number of solids or the corresponding pyscal system.
@@ -282,8 +262,8 @@ def find_solids(
         pyscal system: pyscal system when return_sys=True
     """
     sys = ase_to_pyscal(structure)
-    sys.find_neighbors(method=neighbor_method, cutoff=cutoff)
-    sys.find_solids(
+    sys.find.neighbors(method=neighbor_method, cutoff=cutoff)
+    sys.find.solids(
         bonds=bonds,
         threshold=threshold,
         avgthreshold=avgthreshold,
@@ -294,6 +274,4 @@ def find_solids(
     )
     if return_sys:
         return sys
-    structure = sys.atoms
-    solids = [atom for atom in structure if atom.solid]
-    return len(solids)
+    return np.sum(sys.atoms.solid)
