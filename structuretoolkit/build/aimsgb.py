@@ -5,8 +5,9 @@
 from typing import Optional
 from warnings import warn
 
-from ase.atoms import Atoms
 import numpy as np
+from ase.atoms import Atoms
+
 from structuretoolkit.common.pymatgen import ase_to_pymatgen, pymatgen_to_ase
 
 __author__ = "Ujjal Saikia"
@@ -42,6 +43,7 @@ def get_grainboundary_info(axis: np.ndarray, max_sigma: int):
     GBBuilder.gb_build() function along with the rotational axis and initial bulk structure.
     """
     from aimsgb import GBInformation
+
     return GBInformation(axis=axis, max_sigma=max_sigma)
 
 
@@ -91,7 +93,7 @@ def grainboundary(
     Returns:
         :class:`ase.Atoms`: final grain boundary structure
     """
-    from aimsgb import GrainBoundary, Grain
+    from aimsgb import Grain, GrainBoundary
 
     if add_if_dist is not None:
         warn("`add_if_dist` is deprecated, please use `gap` instead.")

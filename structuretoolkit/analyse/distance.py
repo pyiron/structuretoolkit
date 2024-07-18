@@ -1,6 +1,7 @@
 from typing import Optional
-from ase.atoms import Atoms
+
 import numpy as np
+from ase.atoms import Atoms
 
 
 def get_distances_array(

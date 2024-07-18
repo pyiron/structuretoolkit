@@ -2,8 +2,8 @@
 # Copyright (c) Max-Planck-Institut für Eisenforschung GmbH - Computational Materials Design (CM) Department
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
-from typing import Union, List, Tuple
 import warnings
+from typing import List, Tuple, Union
 
 try:
     from tqdm.auto import tqdm
@@ -11,6 +11,7 @@ except ImportError:
     tqdm = lambda x: x
 
 from ase import Atoms
+
 from structuretoolkit.common.helper import center_coordinates_in_unit_cell
 
 
@@ -95,11 +96,7 @@ def pyxtal(
                 if s is None:
                     failed_groups.append(g)
                     continue
-                structures.append({
-                    "atoms": s,
-                    "symmetry": g,
-                    "repeat": i
-                })
+                structures.append({"atoms": s, "symmetry": g, "repeat": i})
         if len(failed_groups) > 0:
             warnings.warn(
                 f'Groups [{", ".join(map(str,failed_groups))}] could not be generated with stoichiometry {stoich}!'

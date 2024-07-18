@@ -1,20 +1,22 @@
 from __future__ import annotations
 
-import numpy as np
-import warnings
 import typing
+import warnings
+
+import numpy as np
+
 from structuretoolkit.common.helper import get_cell
 
 
 class MeshInputError(ValueError):
-    """ Raised when mesh input format is wrong """
+    """Raised when mesh input format is wrong"""
 
 
 def create_mesh(
     cell: typing.Union["ase.atoms.Atoms", np.ndarray, list, float],
     n_mesh: typing.Union[int, list[int, int, int]] = 10,
     density: typing.Optional[float] = None,
-    endpoint: bool = False
+    endpoint: bool = False,
 ):
     """
     Create a mesh based on a structure cell
@@ -48,6 +50,5 @@ def create_mesh(
     elif len(n_mesh) != 3:
         raise MeshInputError("n_mesh must be a 3-dim vector")
     linspace = [np.linspace(0, 1, nn, endpoint=endpoint) for nn in n_mesh]
-    x_mesh = np.meshgrid(*linspace, indexing='ij')
+    x_mesh = np.meshgrid(*linspace, indexing="ij")
     return np.einsum("ixyz,ij->jxyz", x_mesh, cell)
-

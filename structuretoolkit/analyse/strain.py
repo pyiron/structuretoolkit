@@ -1,7 +1,8 @@
-from ase.atoms import Atoms
-import numpy as np
-from scipy.spatial.transform import Rotation
 from typing import Optional
+
+import numpy as np
+from ase.atoms import Atoms
+from scipy.spatial.transform import Rotation
 
 from structuretoolkit.analyse.neighbors import get_neighbors
 from structuretoolkit.analyse.pyscal import get_adaptive_cna_descriptors

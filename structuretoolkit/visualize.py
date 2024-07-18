@@ -3,10 +3,10 @@
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import warnings
-
-from ase.atoms import Atoms
-import numpy as np
 from typing import Optional
+
+import numpy as np
+from ase.atoms import Atoms
 from scipy.interpolate import interp1d
 
 from structuretoolkit.common.helper import get_cell

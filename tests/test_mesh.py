@@ -3,7 +3,9 @@
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import unittest
+
 from ase.build import bulk
+
 import structuretoolkit as stk
 
 
@@ -14,9 +16,7 @@ class TestMesh(unittest.TestCase):
         with self.assertRaises(stk.build.mesh.MeshInputError):
             stk.create_mesh(structure, n_mesh=None, density=None)
         with self.assertRaises(stk.build.mesh.MeshInputError):
-            stk.create_mesh(
-                structure, n_mesh=10, density=structure.cell[0, 0] / 4
-            )
+            stk.create_mesh(structure, n_mesh=10, density=structure.cell[0, 0] / 4)
         self.assertEqual(
             stk.create_mesh(
                 structure, n_mesh=None, density=structure.cell[0, 0] / 4

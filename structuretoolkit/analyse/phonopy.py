@@ -2,8 +2,8 @@
 # Copyright (c) Max-Planck-Institut für Eisenforschung GmbH - Computational Materials Design (CM) Department
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
-from ase.atoms import Atoms
 import numpy as np
+from ase.atoms import Atoms
 
 __author__ = "Osamu Waseda"
 __copyright__ = (
