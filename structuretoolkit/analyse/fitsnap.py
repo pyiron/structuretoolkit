@@ -1,8 +1,10 @@
-from ase.atoms import Atoms
-from typing import Optional, Union
 import random
+from typing import Optional, Union
+
 import numpy as np
+from ase.atoms import Atoms
 from fitsnap3lib.fitsnap import FitSnap
+
 from structuretoolkit.analyse.snap import _get_lammps_compatible_cell
 
 

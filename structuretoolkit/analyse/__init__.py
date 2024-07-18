@@ -31,9 +31,13 @@ from structuretoolkit.analyse.strain import get_strain
 
 try:
     from structuretoolkit.analyse.fitsnap import (
-        get_snap_descriptor_derivatives as get_snap_descriptor_derivatives_fitsnap,
-        get_ace_descriptor_derivatives as get_ace_descriptor_derivatives_fitsnap,
         get_ace_descriptor_derivatives,
+    )
+    from structuretoolkit.analyse.fitsnap import (
+        get_ace_descriptor_derivatives as get_ace_descriptor_derivatives_fitsnap,
+    )
+    from structuretoolkit.analyse.fitsnap import (
+        get_snap_descriptor_derivatives as get_snap_descriptor_derivatives_fitsnap,
     )
 except ImportError:
     pass

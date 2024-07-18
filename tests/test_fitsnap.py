@@ -29,13 +29,11 @@ class TestSNAP(unittest.TestCase):
         cls.bzeroflag = False
         cls.quadraticflag = False
         cls.radelem = [4.0]
-        cls.type = ['Cu']
+        cls.type = ["Cu"]
         cls.wj = [1.0]
 
     def test_get_snap_descriptor_derivatives(self):
-        n_coeff = len(stk.analyse.get_snap_descriptor_names(
-            twojmax=self.twojmax
-        ))
+        n_coeff = len(stk.analyse.get_snap_descriptor_names(twojmax=self.twojmax))
         mat_a = get_snap_descriptor_derivatives(
             structure=self.structure,
             atom_types=self.type,
