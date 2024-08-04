@@ -817,7 +817,7 @@ class Mode:
         )
 
 
-class Neighbors:
+class Neighbors(Tree):
     def __init__(self, ref_structure: Atoms, tolerance: int = 2):
         """
         Neighbors class for analyzing neighboring atoms in a structure.
