@@ -826,7 +826,7 @@ class Neighbors(Tree):
             ref_structure (ase.Atoms): Reference structure.
             tolerance (int): Tolerance for rounding distances (default: 2).
         """
-        self._ref_structure = ref_structure
+        super().__init__(ref_structure=ref_structure)
         self._tolerance = tolerance
         self._cluster_vecs = None
         self._cluster_dist = None
