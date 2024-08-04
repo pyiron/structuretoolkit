@@ -23,6 +23,31 @@ def soap_descriptor_per_atom(
     only_physical_cores: bool = False,
     verbose: bool = False,
 ) -> np.ndarray:
+    """
+    Calculates the SOAP descriptor for each atom in the given structure.
+
+    Args:
+        structure (ase.atoms.Atoms): The atomic structure.
+        r_cut (float, optional): The cutoff radius. Defaults to None.
+        n_max (int, optional): The maximum number of radial basis functions. Defaults to None.
+        l_max (int, optional): The maximum degree of spherical harmonics. Defaults to None.
+        sigma (float, optional): The width parameter for the Gaussian-type orbital. Defaults to 1.0.
+        rbf (str, optional): The radial basis function. Defaults to "gto".
+        weighting (np.ndarray, optional): The weighting coefficients for the radial basis functions. Defaults to None.
+        average (str, optional): The type of averaging. Defaults to "off".
+        compression (dict, optional): The compression settings. Defaults to {"mode": "off", "species_weighting": None}.
+        species (list, optional): The list of chemical symbols. Defaults to None.
+        periodic (bool, optional): Whether the system is periodic. Defaults to True.
+        sparse (bool, optional): Whether to use sparse matrices. Defaults to False.
+        dtype (str, optional): The data type of the output. Defaults to "float64".
+        centers (np.ndarray, optional): The centers for the descriptor calculation. Defaults to None.
+        n_jobs (int, optional): The number of parallel jobs. Defaults to 1.
+        only_physical_cores (bool, optional): Whether to use only physical cores. Defaults to False.
+        verbose (bool, optional): Whether to print verbose output. Defaults to False.
+
+    Returns:
+        np.ndarray: The SOAP descriptor for each atom.
+    """
     from dscribe.descriptors import SOAP
 
     if species is None:
