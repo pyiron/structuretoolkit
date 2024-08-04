@@ -3,7 +3,7 @@
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import warnings
-from typing import Optional
+from typing import Any, Optional
 
 import numpy as np
 from ase.atoms import Atoms
@@ -38,7 +38,7 @@ def plot3d(
     scalar_field: Optional[np.ndarray] = None,
     scalar_start: Optional[float] = None,
     scalar_end: Optional[float] = None,
-    scalar_cmap: Optional = None,
+    scalar_cmap: Optional[Any] = None,
     vector_field: Optional[np.ndarray] = None,
     vector_color: Optional[np.ndarray] = None,
     magnetic_moments: bool = False,
@@ -156,7 +156,16 @@ def plot3d(
         raise ValueError("plot method not recognized")
 
 
-def _get_box_skeleton(cell: np.ndarray):
+def _get_box_skeleton(cell: np.ndarray) -> np.ndarray:
+    """
+    Generate the skeleton of a box defined by the unit cell.
+
+    Args:
+        cell (np.ndarray): The unit cell of the structure.
+
+    Returns:
+        np.ndarray: The skeleton of the box defined by the unit cell.
+    """
     lines_dz = np.stack(np.meshgrid(*3 * [[0, 1]], indexing="ij"), axis=-1)
     # eight corners of a unit cube, paired as four z-axis lines
 
@@ -167,7 +176,19 @@ def _get_box_skeleton(cell: np.ndarray):
     return all_lines @ cell
 
 
-def _draw_box_plotly(fig, structure, px, go):
+def _draw_box_plotly(fig: Any, structure: Atoms, px: Any, go: Any) -> Any:
+    """
+    Draw the box skeleton of the atomic structure using Plotly.
+
+    Args:
+        fig (go.Figure): The Plotly figure object.
+        structure (Atoms): The atomic structure.
+        px (Any): The Plotly express module.
+        go (Any): The Plotly graph objects module.
+
+    Returns:
+        go.Figure: The updated Plotly figure object.
+    """
     cell = get_cell(structure)
     data = fig.data
     for lines in _get_box_skeleton(cell):
@@ -267,7 +288,7 @@ def _plot3d(
     scalar_field: Optional[np.ndarray] = None,
     scalar_start: Optional[float] = None,
     scalar_end: Optional[float] = None,
-    scalar_cmap: Optional = None,
+    scalar_cmap: Optional[Any] = None,
     vector_field: Optional[np.ndarray] = None,
     vector_color: Optional[np.ndarray] = None,
     magnetic_moments: bool = False,

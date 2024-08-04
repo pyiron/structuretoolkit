@@ -2,7 +2,7 @@
 # Copyright (c) Max-Planck-Institut für Eisenforschung GmbH - Computational Materials Design (CM) Department
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
-from typing import Optional
+from typing import Any, Dict, Optional, Tuple, Union
 
 import numpy as np
 from ase.atoms import Atoms
@@ -25,10 +25,10 @@ def get_steinhardt_parameters(
     structure: Atoms,
     neighbor_method: str = "cutoff",
     cutoff: float = 0.0,
-    n_clusters: int = 2,
+    n_clusters: Optional[int] = 2,
     q: Optional[tuple] = None,
     averaged: bool = False,
-):
+) -> Union[Tuple[np.ndarray], Tuple[np.ndarray, np.ndarray]]:
     """
     Calculate Steinhardts parameters
 
@@ -42,8 +42,8 @@ def get_steinhardt_parameters(
         averaged (bool) : If True, calculates the averaged versions of the parameter. (Default is False.)
 
     Returns:
-        numpy.ndarray: (number of q's, number of atoms) shaped array of q parameters
-        numpy.ndarray: If `clustering=True`, an additional per-atom array of cluster ids is also returned
+        Tuple[numpy.ndarray]: (number of q's, number of atoms) shaped array of q parameters
+        Tuple[numpy.ndarray]: If `clustering=True`, an additional per-atom array of cluster ids is also returned
     """
     sys = ase_to_pyscal(structure)
     q = (4, 6) if q is None else q
@@ -69,11 +69,11 @@ def get_centro_symmetry_descriptors(
     Analyse centrosymmetry parameter
 
     Args:
-        structure: Atoms object
-        num_neighbors (int) : number of neighbors
+        structure (Atoms): The structure to analyze.
+        num_neighbors (int): Number of neighbors to consider. Default is 12.
 
     Returns:
-        csm (list) : list of centrosymmetry parameter
+        np.ndarray: Array of centrosymmetry parameters.
     """
     sys = ase_to_pyscal(structure)
     return np.array(sys.calculate.centrosymmetry(nmax=num_neighbors))
@@ -81,22 +81,21 @@ def get_centro_symmetry_descriptors(
 
 def get_diamond_structure_descriptors(
     structure: Atoms, mode: str = "total", ovito_compatibility: bool = False
-) -> np.ndarray:
+) -> Union[Dict[str, int], np.ndarray]:
     """
     Analyse diamond structure
 
     Args:
-        structure: Atoms object
-        mode ("total"/"numeric"/"str"): Controls the style and level
-        of detail of the output.
-            - total : return number of atoms belonging to each structure
-            - numeric : return a per atom list of numbers- 0 for unknown,
+        structure (Atoms): The structure to analyze.
+        mode (str): Controls the style and level of detail of the output.
+            - "total": return number of atoms belonging to each structure
+            - "numeric": return a per atom list of numbers- 0 for unknown,
                 1 fcc, 2 hcp, 3 bcc and 4 icosa
-            - str : return a per atom string of sructures
-        ovito_compatibility(bool): use ovito compatiblity mode
+            - "str": return a per atom string of structures
+        ovito_compatibility (bool): Use ovito compatibility mode.
 
     Returns:
-        (depends on `mode`)
+        Union[Dict[str, int], np.ndarray]: Depending on the `mode` parameter.
     """
     sys = ase_to_pyscal(structure)
     diamond_dict = sys.analyze.diamond_structure()
@@ -170,16 +169,15 @@ def get_adaptive_cna_descriptors(
 
     Args:
         structure (ase.atoms.Atoms): The structure to analyze.
-        mode ("total"/"numeric"/"str"): Controls the style and level
-            of detail of the output.
-            - total : return number of atoms belonging to each structure
-            - numeric : return a per atom list of numbers- 0 for unknown,
+        mode (str): Controls the style and level of detail of the output.
+            - "total": return number of atoms belonging to each structure
+            - "numeric": return a per atom list of numbers- 0 for unknown,
                 1 fcc, 2 hcp, 3 bcc and 4 icosa
-            - str : return a per atom string of sructures
-        ovito_compatibility(bool): use ovito compatiblity mode
+            - "str": return a per atom string of structures
+        ovito_compatibility (bool): Use ovito compatibility mode.
 
     Returns:
-        (depends on `mode`)
+        np.ndarray: Depending on the `mode` parameter.
     """
     sys = ase_to_pyscal(structure)
     if mode not in ["total", "numeric", "str"]:
@@ -223,7 +221,10 @@ def get_voronoi_volumes(structure: Atoms) -> np.ndarray:
     Calculate the Voronoi volume of atoms
 
     Args:
-        structure : (ase.atoms.Atoms): The structure to analyze.
+        structure (Atoms): The structure to analyze.
+
+    Returns:
+        np.ndarray: Array of Voronoi volumes for each atom.
     """
     sys = ase_to_pyscal(structure)
     sys.find.neighbors(method="voronoi")
@@ -241,14 +242,15 @@ def find_solids(
     q: int = 6,
     right: bool = True,
     return_sys: bool = False,
-):
+) -> Union[int, Any]:
     """
     Get the number of solids or the corresponding pyscal system.
     Calls necessary pyscal methods as described in https://pyscal.org/en/latest/methods/03_solidliquid.html.
 
     Args:
+        structure (Atoms): The structure to analyze.
         neighbor_method (str, optional): Method used to get neighborlist. See pyscal documentation. Defaults to "cutoff".
-        cutoff (int, optional): Adaptive if 0. Defaults to 0.
+        cutoff (float, optional): Adaptive if 0. Defaults to 0.
         bonds (float, optional): Number or fraction of bonds to consider atom as solid. Defaults to 0.5.
         threshold (float, optional): See pyscal documentation. Defaults to 0.5.
         avgthreshold (float, optional): See pyscal documentation. Defaults to 0.6.
@@ -258,8 +260,7 @@ def find_solids(
         return_sys (bool, optional): Whether to return number of solid atoms or pyscal system. Defaults to False.
 
     Returns:
-        int: number of solids,
-        pyscal system: pyscal system when return_sys=True
+        Union[int, pyscal.system.System]: Number of solids or pyscal system when return_sys=True.
     """
     sys = ase_to_pyscal(structure)
     sys.find.neighbors(method=neighbor_method, cutoff=cutoff)

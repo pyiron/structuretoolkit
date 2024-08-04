@@ -10,7 +10,7 @@ def get_distances_array(
     p2: Optional[np.ndarray] = None,
     mic: bool = True,
     vectors: bool = False,
-):
+) -> np.ndarray:
     """
     Return distance matrix of every position in p1 with every position in
     p2. If p2 is not set, it is assumed that distances between all
@@ -19,13 +19,14 @@ def get_distances_array(
     returned.
 
     Args:
-        p1 (numpy.ndarray/list): Nx3 array of positions
-        p2 (numpy.ndarray/list): Nx3 array of positions
-        mic (bool): minimum image convention
-        vectors (bool): return vectors instead of distances
+        structure (ase.atoms.Atoms): The structure object
+        p1 (numpy.ndarray/list, optional): Nx3 array of positions. Defaults to None.
+        p2 (numpy.ndarray/list, optional): Nx3 array of positions. Defaults to None.
+        mic (bool, optional): Minimum image convention. Defaults to True.
+        vectors (bool, optional): Return vectors instead of distances. Defaults to False.
+
     Returns:
         numpy.ndarray: NxN if vector=False and NxNx3 if vector=True
-
     """
     if p1 is None and p2 is not None:
         p1 = p2
@@ -48,16 +49,18 @@ def get_distances_array(
     return find_mic(structure=structure, v=diff_relative, vectors=vectors)
 
 
-def find_mic(structure: Atoms, v: np.ndarray, vectors: bool = True):
+def find_mic(structure: Atoms, v: np.ndarray, vectors: bool = True) -> np.ndarray:
     """
     Find vectors following minimum image convention (mic). In principle this
     function does the same as ase.geometry.find_mic
 
     Args:
-        v (list/numpy.ndarray): 3d vector or a list/array of 3d vectors
+        structure (ase.atoms.Atoms): The structure object
+        v (numpy.ndarray/list): 3d vector or a list/array of 3d vectors
         vectors (bool): Whether to return vectors (distances are returned if False)
 
-    Returns: numpy.ndarray of the same shape as input with mic
+    Returns:
+        numpy.ndarray: numpy.ndarray of the same shape as input with mic
     """
     if any(structure.pbc):
         v = np.einsum("ji,...j->...i", np.linalg.inv(structure.cell), v)

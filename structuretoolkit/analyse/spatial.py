@@ -63,6 +63,16 @@ def get_mean_positions(
 def create_gridpoints(
     structure: Atoms, n_gridpoints_per_angstrom: int = 5
 ) -> np.ndarray:
+    """
+    Create grid points within the structure.
+
+    Args:
+        structure (Atoms): The atomic structure.
+        n_gridpoints_per_angstrom (int): Number of grid points per angstrom.
+
+    Returns:
+        np.ndarray: The grid points.
+    """
     cell = get_vertical_length(structure=structure)
     n_points = (n_gridpoints_per_angstrom * cell).astype(int)
     positions = np.meshgrid(
@@ -75,6 +85,17 @@ def create_gridpoints(
 def remove_too_close(
     positions: np.ndarray, structure: Atoms, min_distance: float = 1
 ) -> np.ndarray:
+    """
+    Remove positions that are too close to the neighboring atoms.
+
+    Args:
+        positions (np.ndarray): The positions to be checked.
+        structure (Atoms): The atomic structure.
+        min_distance (float): The minimum distance allowed.
+
+    Returns:
+        np.ndarray: The filtered positions.
+    """
     neigh = get_neighborhood(structure=structure, positions=positions, num_neighbors=1)
     return positions[neigh.distances.flatten() > min_distance]
 
@@ -82,6 +103,21 @@ def remove_too_close(
 def set_to_high_symmetry_points(
     positions: np.ndarray, structure: Atoms, neigh, decimals: int = 4
 ) -> np.ndarray:
+    """
+    Adjusts the positions to the nearest high symmetry points in the structure.
+
+    Args:
+        positions (np.ndarray): The positions to be adjusted.
+        structure (Atoms): The atomic structure.
+        neigh: The neighborhood information.
+        decimals (int): The number of decimal places to round the positions.
+
+    Returns:
+        np.ndarray: The adjusted positions.
+
+    Raises:
+        ValueError: If high symmetry points could not be detected after 10 iterations.
+    """
     for _ in range(10):
         neigh = neigh.get_neighborhood(positions)
         dx = np.mean(neigh.vecs, axis=-2)
@@ -259,6 +295,19 @@ class Interstitials:
     def run_workflow(
         self, positions: Optional[np.ndarray] = None, steps: int = -1
     ) -> np.ndarray:
+        """
+        Run the workflow to obtain the interstitial positions.
+
+        Args:
+            positions (numpy.ndarray, optional): Initial positions of the interstitial candidates.
+                If not provided, the initial positions stored in `self.initial_positions` will be used.
+            steps (int, optional): Number of steps to run in the workflow. If set to -1 (default),
+                all steps will be run.
+
+        Returns:
+            numpy.ndarray: Final positions of the interstitial sites.
+
+        """
         if positions is None:
             positions = self.initial_positions.copy()
         for ii, ww in enumerate(self.workflow):
@@ -279,6 +328,12 @@ class Interstitials:
 
     @property
     def positions(self) -> np.ndarray:
+        """
+        Get the positions of the interstitial sites.
+
+        Returns:
+            np.ndarray: Positions of the interstitial sites.
+        """
         if self._positions is None:
             self._positions = self.run_workflow()
             self._neigh = self.neigh.get_neighborhood(self._positions)
@@ -354,7 +409,27 @@ def get_interstitials(
     min_samples: Optional[int] = None,
     neigh_args: dict = {},
     **kwargs,
-):
+) -> Interstitials:
+    """
+    Create an instance of the Interstitials class.
+
+    Args:
+        structure (Atoms): The atomic structure.
+        num_neighbors (int): The number of neighbors to consider.
+        n_gridpoints_per_angstrom (int, optional): The number of grid points per angstrom. Defaults to 5.
+        min_distance (float, optional): The minimum distance between interstitials. Defaults to 1.
+        use_voronoi (bool, optional): Whether to use Voronoi tessellation. Defaults to False.
+        x_eps (float, optional): The epsilon value for clustering. Defaults to 0.1.
+        l_values (np.ndarray, optional): The array of l values for Steinhardt parameter. Defaults to np.arange(2, 13).
+        q_eps (float, optional): The epsilon value for Steinhardt parameter. Defaults to 0.3.
+        var_ratio (float, optional): The variance ratio for clustering. Defaults to 5.0.
+        min_samples (Optional[int], optional): The minimum number of samples for clustering. Defaults to None.
+        neigh_args (dict, optional): Additional arguments for neighbor calculation. Defaults to {}.
+        **kwargs: Additional keyword arguments.
+
+    Returns:
+        Interstitials: An instance of the Interstitials class.
+    """
     return Interstitials(
         structure=structure,
         num_neighbors=num_neighbors,
@@ -541,10 +616,22 @@ def get_voronoi_vertices(
 
 def _get_neighbors(
     structure: Atoms,
-    position_interpreter: callable,
+    position_interpreter: Callable,
     data_field: str,
     width_buffer: float = 10,
 ) -> np.ndarray:
+    """
+    Get pairs of atom indices sharing the same Voronoi vertices/areas.
+
+    Args:
+        structure (Atoms): The atomic structure.
+        position_interpreter (callable): The position interpreter function.
+        data_field (str): The data field to extract from the position interpreter.
+        width_buffer (float): Width of the layer to be added to account for pbc.
+
+    Returns:
+        np.ndarray: Pair indices
+    """
     positions, indices = get_extended_positions(
         structure=structure, width=width_buffer, return_indices=True
     )
