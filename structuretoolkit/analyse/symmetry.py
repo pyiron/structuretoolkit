@@ -66,9 +66,9 @@ class Symmetry(dict):
         self._angle_tolerance = angle_tolerance
         self.epsilon = epsilon
         self._permutations = None
-        for k, v in dataclasses.asdict(self._get_symmetry(
-            symprec=symprec, angle_tolerance=angle_tolerance
-        )).items():
+        for k, v in dataclasses.asdict(
+            self._get_symmetry(symprec=symprec, angle_tolerance=angle_tolerance)
+        ).items():
             self[k] = v
 
     @property
