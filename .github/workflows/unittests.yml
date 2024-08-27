@@ -49,6 +49,7 @@ jobs:
       if:  matrix.operating-system != 'windows-latest'
       run: tail --lines=+4 .ci_support/environment-lammps.yml >> .ci_support/environment.yml
     - name: Conda config
+      shell: bash -l {0}
       run: echo -e "channels:\n  - conda-forge\n" > .condarc
     - name: Setup Mambaforge
       uses: conda-incubator/setup-miniconda@v3
