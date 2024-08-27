@@ -3,6 +3,7 @@
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import ast
+import dataclasses
 import string
 from functools import cached_property
 from typing import Optional
@@ -341,11 +342,11 @@ class Symmetry(dict):
 
         https://atztogo.github.io/spglib/python-spglib.html
         """
-        info = spglib.get_symmetry_dataset(
+        info = dataclasses.asdict(spglib.get_symmetry_dataset(
             cell=self._get_spglib_cell(use_magmoms=False),
             symprec=self._symprec,
             angle_tolerance=self._angle_tolerance,
-        )
+        ))
         if info is None:
             raise SymmetryError(spglib.spglib.spglib_error.message)
         return info
