@@ -3,6 +3,7 @@
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import ast
+import dataclasses
 import string
 from functools import cached_property
 from typing import Optional
@@ -65,9 +66,9 @@ class Symmetry(dict):
         self._angle_tolerance = angle_tolerance
         self.epsilon = epsilon
         self._permutations = None
-        for k, v in self._get_symmetry(
+        for k, v in dataclasses.asdict(self._get_symmetry(
             symprec=symprec, angle_tolerance=angle_tolerance
-        ).items():
+        )).items():
             self[k] = v
 
     @property
