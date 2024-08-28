@@ -342,14 +342,17 @@ class Symmetry(dict):
 
         https://atztogo.github.io/spglib/python-spglib.html
         """
-        info = dataclasses.asdict(spglib.get_symmetry_dataset(
+        info = spglib.get_symmetry_dataset(
             cell=self._get_spglib_cell(use_magmoms=False),
             symprec=self._symprec,
             angle_tolerance=self._angle_tolerance,
-        ))
+        )
         if info is None:
             raise SymmetryError(spglib.spglib.spglib_error.message)
+        if dataclasses.is_dataclass(info):
+            info = dataclasses.asdict(info)
         return info
+
 
     @property
     def spacegroup(self) -> dict:
