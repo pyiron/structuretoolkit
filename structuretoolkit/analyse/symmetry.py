@@ -3,6 +3,7 @@
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import ast
+import dataclasses
 import string
 from functools import cached_property
 from typing import Optional
@@ -348,6 +349,8 @@ class Symmetry(dict):
         )
         if info is None:
             raise SymmetryError(spglib.spglib.spglib_error.message)
+        if dataclasses.is_dataclass(info):
+            info = dataclasses.asdict(info)
         return info
 
     @property
