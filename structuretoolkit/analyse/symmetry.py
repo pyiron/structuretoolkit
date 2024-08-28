@@ -353,7 +353,6 @@ class Symmetry(dict):
             info = dataclasses.asdict(info)
         return info
 
-
     @property
     def spacegroup(self) -> dict:
         """
