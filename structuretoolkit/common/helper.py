@@ -111,11 +111,28 @@ def get_wrapped_coordinates(
 
 
 def get_species_indices_dict(structure: Atoms) -> dict:
-    # As of Python version 3.7, dictionaries are ordered.
+    """
+    Get a dictionary mapping element symbols to their corresponding indices in the structure.
+
+    Args:
+        structure (ase.atoms.Atoms): The atomic structure.
+
+    Returns:
+        dict: A dictionary mapping element symbols to their corresponding indices.
+    """
     return {el: i for i, el in enumerate(structure.symbols.indices().keys())}
 
 
 def get_structure_indices(structure: Atoms) -> np.ndarray:
+    """
+    Get the indices of the elements in the structure.
+
+    Args:
+        structure (ase.atoms.Atoms): The atomic structure.
+
+    Returns:
+        numpy.ndarray: The indices of the elements in the structure.
+    """
     element_indices_dict = get_species_indices_dict(structure=structure)
     elements = np.array(structure.get_chemical_symbols())
     indices = elements.copy()
@@ -125,10 +142,30 @@ def get_structure_indices(structure: Atoms) -> np.ndarray:
 
 
 def select_index(structure: Atoms, element: str) -> np.ndarray:
+    """
+    Select the indices of atoms in the structure that have a specific element.
+
+    Args:
+        structure (ase.atoms.Atoms): The atomic structure.
+        element (str): The element symbol.
+
+    Returns:
+        numpy.ndarray: The indices of atoms with the specified element.
+    """
     return structure.symbols.indices()[element]
 
 
 def set_indices(structure: Atoms, indices: np.ndarray) -> Atoms:
+    """
+    Set the indices of atoms in the structure to the specified values.
+
+    Args:
+        structure (ase.atoms.Atoms): The atomic structure.
+        indices (numpy.ndarray): The indices of atoms to be set.
+
+    Returns:
+        ase.atoms.Atoms: The modified atomic structure.
+    """
     indices_dict = {
         v: k for k, v in get_species_indices_dict(structure=structure).items()
     }

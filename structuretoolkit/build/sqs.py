@@ -2,7 +2,7 @@ import itertools
 import random
 import warnings
 from multiprocessing import cpu_count
-from typing import Dict, Iterable, Optional, Union
+from typing import Dict, Iterable, Optional, Tuple, Union
 
 import numpy as np
 from ase.atoms import Atoms
@@ -10,6 +10,17 @@ from ase.data import atomic_numbers
 
 
 def chemical_formula(atoms: Atoms) -> str:
+    """
+    Generate the chemical formula of an Atoms object.
+
+    Args:
+        atoms (Atoms): The Atoms object representing the structure.
+
+    Returns:
+        str: The chemical formula of the structure.
+
+    """
+
     def group_symbols():
         for species, same in itertools.groupby(atoms.get_chemical_symbols()):
             num_same = len(list(same))
@@ -19,13 +30,37 @@ def chemical_formula(atoms: Atoms) -> str:
 
 
 def map_dict(f, d: Dict) -> Dict:
+    """
+    Apply a function to each value in a dictionary.
+
+    Args:
+        f: The function to apply.
+        d (Dict): The dictionary to apply the function to.
+
+    Returns:
+        Dict: The dictionary with the function applied to each value.
+
+    """
     return {k: f(v) for k, v in d.items()}
 
 
 def mole_fractions_to_composition(
     mole_fractions: Dict[str, float], num_atoms: int
 ) -> Dict[str, int]:
-    # if the sum of x is less than 1 - 1/n then we are missing at least one atoms
+    """
+    Convert mole fractions to composition.
+
+    Args:
+        mole_fractions (Dict[str, float]): The mole fractions of each species.
+        num_atoms (int): The total number of atoms.
+
+    Returns:
+        Dict[str, int]: The composition of each species.
+
+    Raises:
+        ValueError: If the sum of mole fractions is not within the range (1 - 1/num_atoms, 1 + 1/num_atoms).
+
+    """
     if not (1.0 - 1 / num_atoms) < sum(mole_fractions.values()) < (1.0 + 1 / num_atoms):
         raise ValueError(
             "mole-fractions must sum up to one: {}".format(sum(mole_fractions.values()))
@@ -78,8 +113,18 @@ def mole_fractions_to_composition(
     return composition
 
 
-def remap_sro(species: Iterable[str], array: np.ndarray):
-    # remaps computed short-range order parameters to style of sqsgenerator=v0.0.5
+def remap_sro(species: Iterable[str], array: np.ndarray) -> Dict[str, list]:
+    """
+    Remap computed short-range order parameters to the style of sqsgenerator=v0.0.5.
+
+    Args:
+        species (Iterable[str]): The species in the structure.
+        array (np.ndarray): The computed short-range order parameters.
+
+    Returns:
+        Dict[str, list]: The remapped short-range order parameters.
+
+    """
     species = tuple(sorted(species, key=lambda abbr: atomic_numbers[abbr]))
     return {
         "{}-{}".format(si, sj): array[:, i, j].tolist()
@@ -90,14 +135,35 @@ def remap_sro(species: Iterable[str], array: np.ndarray):
     }
 
 
-def remap_sqs_results(result):
-    # makes new interface compatible with old one
+def remap_sqs_results(
+    result: Dict[str, Union[Atoms, np.ndarray]],
+) -> Tuple[Atoms, Dict[str, list]]:
+    """
+    Remap the results of SQS optimization.
+
+    Args:
+        result (Dict[str, Union[Atoms, np.ndarray]]): The result of SQS optimization.
+
+    Returns:
+        Tuple[Atoms, Dict[str, list]]: The remapped structure and short-range order parameters.
+
+    """
     return result["structure"], remap_sro(
         set(result["structure"].get_chemical_symbols()), result["parameters"]
     )
 
 
-def transpose(it):
+def transpose(it: Iterable[Iterable]) -> Iterable[tuple]:
+    """
+    Transpose an iterable of iterables.
+
+    Args:
+        it (Iterable[Iterable]): The iterable to transpose.
+
+    Returns:
+        Iterable[tuple]: The transposed iterable.
+
+    """
     return zip(*it)
 
 
@@ -119,7 +185,33 @@ def sqs_structures(
     minimal: Optional[bool] = True,
     similar: Optional[bool] = True,
     return_statistics: Optional[bool] = False,
-):
+) -> Union[Atoms, Tuple[Atoms, Dict[str, list], int, float]]:
+    """
+    Generate SQS structures.
+
+    Args:
+        structure (Atoms): The initial structure.
+        mole_fractions (Dict[str, Union[float, int]]): The mole fractions of each species.
+        weights (Optional[Dict[int, float]]): The weights for each shell.
+        objective (Union[float, np.ndarray]): The target objective value.
+        iterations (Union[float, int]): The number of iterations.
+        output_structures (int): The number of output structures.
+        mode (str): The mode for selecting configurations.
+        num_threads (Optional[int]): The number of threads to use.
+        prefactors (Optional[Union[float, np.ndarray]]): The prefactors for each shell.
+        pair_weights (Optional[np.ndarray]): The pair weights.
+        rtol (Optional[float]): The relative tolerance.
+        atol (Optional[float]): The absolute tolerance.
+        which (Optional[Iterable[int]]): The indices of the shells to optimize.
+        shell_distances (Optional[Iterable[int]]): The distances for each shell.
+        minimal (Optional[bool]): Whether to minimize the objective function.
+        similar (Optional[bool]): Whether to generate similar structures.
+        return_statistics (Optional[bool]): Whether to return additional statistics.
+
+    Returns:
+        Union[Atoms, Tuple[Atoms, Dict[str, list], int, float]]: The generated structures or a tuple containing the structures, short-range order parameters breakdown, number of iterations, and average cycle time.
+
+    """
     from sqsgenerator import sqs_optimize
 
     composition = mole_fractions_to_composition(mole_fractions, len(structure))

@@ -10,7 +10,7 @@ eV_div_A3_to_bar = 1e25 / physical_constants["joule-electron volt relationship"]
 
 def get_per_atom_quad(linear_per_atom: np.ndarray) -> np.ndarray:
     """
-    Calculate quadratic par-atom SNAP descriptors from the linear SNAP descriptors, by multiplying the individual
+    Calculate quadratic per-atom SNAP descriptors from the linear SNAP descriptors, by multiplying the individual
     components of the SNAP descriptors.
 
     Args:
@@ -204,6 +204,15 @@ def _get_lammps_compatible_cell(cell: np.ndarray) -> np.ndarray:
 
 
 def _convert_mat(mat: np.ndarray) -> np.ndarray:
+    """
+    Convert a matrix to a 1D array by taking the upper triangular elements.
+
+    Args:
+        mat (np.ndarray): Input matrix
+
+    Returns:
+        np.ndarray: 1D array containing the upper triangular elements of the matrix
+    """
     mat[np.diag_indices_from(mat)] /= 2
     return mat[np.triu_indices(len(mat))]
 

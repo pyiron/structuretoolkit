@@ -72,6 +72,14 @@ class Strain:
 
     @property
     def _nullify_non_bulk(self) -> np.ndarray:
+        """
+        Get a boolean array indicating which atoms have a different crystal structure
+        than the bulk.
+
+        Returns:
+            np.ndarray: Boolean array indicating which atoms have a different crystal structure
+                than the bulk.
+        """
         return np.array(
             self.structure.analyse.pyscal_cna_adaptive(mode="str") != self.crystal_phase
         )
@@ -79,6 +87,17 @@ class Strain:
     def _get_perpendicular_unit_vectors(
         self, vec: np.ndarray, vec_axis: Optional[np.ndarray] = None
     ) -> np.ndarray:
+        """
+        Get the perpendicular unit vectors of the given vectors.
+
+        Args:
+            vec (np.ndarray): The input vectors.
+            vec_axis (Optional[np.ndarray]): The axis vectors. If provided, the perpendicular
+                vectors will be calculated with respect to this axis. Defaults to None.
+
+        Returns:
+            np.ndarray: The perpendicular unit vectors.
+        """
         if vec_axis is not None:
             vec_axis = self._get_safe_unit_vectors(vec_axis)
             vec = np.array(
@@ -90,11 +109,31 @@ class Strain:
     def _get_safe_unit_vectors(
         vectors: np.ndarray, minimum_value: float = 1.0e-8
     ) -> np.ndarray:
+        """
+        Get the unit vectors of the given vectors, ensuring their magnitude is above a minimum value.
+
+        Args:
+            vectors (np.ndarray): The input vectors.
+            minimum_value (float): The minimum magnitude value. Defaults to 1.0e-8.
+
+        Returns:
+            np.ndarray: The unit vectors.
+        """
         v = np.linalg.norm(vectors, axis=-1)
         v += (v < minimum_value) * minimum_value
         return np.einsum("...i,...->...i", vectors, 1 / v)
 
     def _get_angle(self, v: np.ndarray, w: np.ndarray) -> np.ndarray:
+        """
+        Calculate the angle between two vectors.
+
+        Args:
+            v (np.ndarray): The first vector.
+            w (np.ndarray): The second vector.
+
+        Returns:
+            np.ndarray: The angle between the two vectors.
+        """
         v = self._get_safe_unit_vectors(v)
         w = self._get_safe_unit_vectors(w)
         prod = np.sum(v * w, axis=-1)
@@ -109,6 +148,18 @@ class Strain:
         vec_after: np.ndarray,
         vec_axis: Optional[np.ndarray] = None,
     ) -> np.ndarray:
+        """
+        Calculate the rotation matrix that transforms the `vec_before` vectors to the `vec_after` vectors.
+
+        Args:
+            vec_before (np.ndarray): The vectors before transformation.
+            vec_after (np.ndarray): The vectors after transformation.
+            vec_axis (Optional[np.ndarray]): The axis vectors. If provided, the perpendicular
+                vectors will be calculated with respect to this axis. Defaults to None.
+
+        Returns:
+            np.ndarray: The rotation matrix.
+        """
         v = self._get_perpendicular_unit_vectors(vec_before, vec_axis)
         w = self._get_perpendicular_unit_vectors(vec_after, vec_axis)
         if vec_axis is None:
@@ -122,7 +173,12 @@ class Strain:
 
     @property
     def rotations(self) -> np.ndarray:
-        """Rotation for each atom to find the correct pairs of coordinates."""
+        """
+        Rotation for each atom to find the correct pairs of coordinates.
+
+        Returns:
+            np.ndarray: The rotation matrix for each atom.
+        """
         if self._rotations is None:
             v = self.coords.copy()[:, 0, :]
             w_first = self.ref_coord[
@@ -149,6 +205,16 @@ class Strain:
     def _get_best_match_indices(
         coords: np.ndarray, ref_coord: np.ndarray
     ) -> np.ndarray:
+        """
+        Get the indices of the best matching coordinates in the reference coordinates.
+
+        Args:
+            coords (np.ndarray): The local coordinates.
+            ref_coord (np.ndarray): The reference local coordinates.
+
+        Returns:
+            np.ndarray: The indices of the best matching coordinates.
+        """
         distances = np.linalg.norm(
             coords[:, :, None, :] - ref_coord[None, None, :, :], axis=-1
         )
@@ -156,11 +222,32 @@ class Strain:
 
     @staticmethod
     def _get_majority_phase(structure: Atoms) -> np.ndarray:
+        """
+        Get the majority crystal phase in the structure based on the common neighbor analysis (CNA) descriptors.
+
+        Args:
+            structure (ase.atoms.Atoms): The structure to analyze.
+
+        Returns:
+            np.ndarray: The crystal phase with the highest count.
+        """
         cna = get_adaptive_cna_descriptors(structure=structure)
         return np.asarray([k for k in cna.keys()])[np.argmax([v for v in cna.values()])]
 
     @staticmethod
     def _get_number_of_neighbors(crystal_phase: str) -> int:
+        """
+        Get the number of neighbors based on the crystal phase.
+
+        Args:
+            crystal_phase (str): The crystal phase.
+
+        Returns:
+            int: The number of neighbors.
+
+        Raises:
+            ValueError: If the crystal structure is not recognized.
+        """
         if crystal_phase == "bcc":
             return 8
         elif crystal_phase == "fcc" or crystal_phase == "hcp":
@@ -170,7 +257,12 @@ class Strain:
 
     @property
     def ref_coord(self) -> np.ndarray:
-        """Reference local coordinates."""
+        """
+        Reference local coordinates.
+
+        Returns:
+            np.ndarray: The reference local coordinates.
+        """
         if self._ref_coord is None:
             self._ref_coord = get_neighbors(
                 structure=self.ref_structure, num_neighbors=self.num_neighbors
@@ -179,7 +271,12 @@ class Strain:
 
     @property
     def coords(self) -> np.ndarray:
-        """Local coordinates of each atom."""
+        """
+        Local coordinates of each atom.
+
+        Returns:
+            np.ndarray: The local coordinates of each atom.
+        """
         if self._coords is None:
             self._coords = get_neighbors(
                 structure=self.structure, num_neighbors=self.num_neighbors
@@ -188,12 +285,23 @@ class Strain:
 
     @property
     def _indices(self) -> np.ndarray:
+        """
+        Get the indices of the best matching coordinates in the reference coordinates.
+
+        Returns:
+            np.ndarray: The indices of the best matching coordinates.
+        """
         all_vecs = np.einsum("nij,nkj->nki", self.rotations, self.coords)
         return self._get_best_match_indices(all_vecs, self.ref_coord)
 
     @property
     def strain(self) -> np.ndarray:
-        """Strain value of each atom"""
+        """
+        Calculate the strain value of each atom.
+
+        Returns:
+            np.ndarray: The strain value of each atom.
+        """
         Dinverse = np.einsum("ij,ik->jk", self.ref_coord, self.ref_coord)
         D = np.linalg.inv(Dinverse)
         J = np.einsum(

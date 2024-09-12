@@ -3,6 +3,7 @@
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import ast
+import dataclasses
 import string
 from functools import cached_property
 from typing import Optional
@@ -266,6 +267,17 @@ class Symmetry(dict):
     def _get_spglib_cell(
         self, use_elements: Optional[bool] = None, use_magmoms: Optional[bool] = None
     ) -> tuple:
+        """
+        Get the cell information in the format required by spglib.
+
+        Args:
+            use_elements (bool, optional): Whether to consider chemical elements. Defaults to None.
+            use_magmoms (bool, optional): Whether to consider magnetic moments. Defaults to None.
+
+        Returns:
+            tuple: Tuple containing the lattice, positions, numbers, and magnetic moments (if applicable).
+
+        """
         lattice = np.array(self._structure.get_cell(), dtype="double", order="C")
         positions = np.array(
             self._structure.get_scaled_positions(wrap=False), dtype="double", order="C"
@@ -297,15 +309,21 @@ class Symmetry(dict):
             )
         return lattice, positions, numbers
 
-    def _get_symmetry(self, symprec: float = 1e-5, angle_tolerance: float = -1.0):
+    def _get_symmetry(
+        self, symprec: float = 1e-5, angle_tolerance: float = -1.0
+    ) -> dict:
         """
+        Get the symmetry information of the structure.
 
         Args:
-            symprec (float): Symmetry search precision
-            angle_tolerance (float): Angle search tolerance
+            symprec (float): Symmetry search precision.
+            angle_tolerance (float): Angle search tolerance.
 
         Returns:
+            dict: Dictionary containing the symmetry information.
 
+        Raises:
+            SymmetryError: If the symmetry information cannot be obtained.
 
         """
         sym = spglib.get_symmetry(
@@ -331,19 +349,20 @@ class Symmetry(dict):
         )
         if info is None:
             raise SymmetryError(spglib.spglib.spglib_error.message)
+        if dataclasses.is_dataclass(info):
+            info = dataclasses.asdict(info)
         return info
 
     @property
     def spacegroup(self) -> dict:
         """
-
-        Args:
-            symprec:
-            angle_tolerance:
+        Get the space group information of the structure.
 
         Returns:
+            dict: Dictionary containing the space group information.
 
-        https://atztogo.github.io/spglib/python-spglib.html
+        Raises:
+            SymmetryError: If the space group information cannot be obtained.
         """
         space_group = spglib.get_spacegroup(
             cell=self._get_spglib_cell(use_magmoms=False),
@@ -412,6 +431,20 @@ class Symmetry(dict):
         is_shift: np.ndarray = np.zeros(3, dtype="intc"),
         is_time_reversal: bool = True,
     ) -> np.ndarray:
+        """
+        Get the irreducible reciprocal mesh points.
+
+        Args:
+            mesh (ndarray): The mesh grid.
+            is_shift (ndarray, optional): The shift of the mesh grid. Defaults to np.zeros(3, dtype="intc").
+            is_time_reversal (bool, optional): Whether to consider time reversal symmetry. Defaults to True.
+
+        Returns:
+            ndarray: The irreducible reciprocal mesh points.
+
+        Raises:
+            SymmetryError: If the irreducible reciprocal mesh points cannot be obtained.
+        """
         mesh = spglib.get_ir_reciprocal_mesh(
             mesh=mesh,
             cell=self._get_spglib_cell(),
@@ -424,14 +457,36 @@ class Symmetry(dict):
         return mesh
 
 
-def _get_inner_slicer(n, i):
-    s = [None for nn in range(n)]
+def _get_inner_slicer(n: int, i: int) -> tuple:
+    """
+    Get the inner slicer for the given dimensions.
+
+    Args:
+        n (int): Total number of dimensions.
+        i (int): Index of the dimension to slice.
+
+    Returns:
+        tuple: Inner slicer tuple.
+
+    """
+    s = [None for _ in range(n)]
     s[0] = slice(None)
     s[i] = slice(None)
     return tuple(s)
 
 
-def _get_outer_slicer(shape, perm):
+def _get_outer_slicer(shape: tuple, perm: np.ndarray) -> tuple:
+    """
+    Get the outer slicer for the given shape and permutation.
+
+    Args:
+        shape (tuple): Shape of the tensor.
+        perm (np.ndarray): Permutation array.
+
+    Returns:
+        tuple: Outer slicer tuple.
+
+    """
     length = perm.shape[-1]
     s = []
     n_3 = np.sum(np.asarray(shape) == length) + 1
@@ -445,7 +500,18 @@ def _get_outer_slicer(shape, perm):
     return tuple(s)
 
 
-def _back_order(shape, length):
+def _back_order(shape: tuple, length: int) -> np.ndarray:
+    """
+    Get the back order of the shape.
+
+    Args:
+        shape (tuple): Shape of the tensor.
+        length (int): Length of the tensor.
+
+    Returns:
+        np.ndarray: Back order of the shape.
+
+    """
     order = [ii for ii, ss in enumerate(shape) if ss == length]
     if len(order) < 1:
         return np.arange(len(shape))
@@ -458,7 +524,19 @@ def _back_order(shape, length):
     return np.append(np.argsort(np.where([cond, ~cond])[1]) + 1, 0)
 
 
-def _get_einsum_str(shape, length, omit_dots=True):
+def _get_einsum_str(shape: tuple, length: int, omit_dots: bool = True) -> str:
+    """
+    Get the einsum string for the given shape and length.
+
+    Args:
+        shape (tuple): Shape of the tensor.
+        length (int): Length of the tensor.
+        omit_dots (bool, optional): Whether to omit dots in the einsum string. Defaults to True.
+
+    Returns:
+        str: Einsum string.
+
+    """
     s = [string.ascii_lowercase[i] for i in range(len(shape))]
     s_rot = ""
     s_mul = ""
