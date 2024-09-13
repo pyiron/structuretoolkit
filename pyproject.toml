@@ -44,7 +44,7 @@ grainboundary = [
 pyscal = ["pyscal3==3.2.7"]
 nglview = ["nglview==3.1.2"]
 matplotlib = ["matplotlib==3.9.2"]
-plotly = ["plotly==5.24.0"]
+plotly = ["plotly==5.24.1"]
 clusters = ["scikit-learn==1.5.2"]
 symmetry = ["spglib==2.5.0"]
 surface = [
