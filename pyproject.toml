@@ -55,7 +55,7 @@ phonopy = [
     "phonopy==2.26.6",
     "spglib==2.5.0",
 ]
-pyxtal = ["pyxtal==1.0.5"]
+pyxtal = ["pyxtal==1.0.6"]
 
 [tool.setuptools.packages.find]
 include = ["structuretoolkit*"]
