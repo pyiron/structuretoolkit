@@ -45,7 +45,7 @@ pyscal = ["pyscal3==3.2.7"]
 nglview = ["nglview==3.1.4"]
 matplotlib = ["matplotlib==3.9.3"]
 plotly = ["plotly==5.24.1"]
-clusters = ["scikit-learn==1.5.2"]
+clusters = ["scikit-learn==1.6.0"]
 symmetry = ["spglib==2.5.0"]
 surface = [
     "spglib==2.5.0",
