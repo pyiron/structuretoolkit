@@ -5,3 +5,4 @@ dependencies:
 - coverage
 - numpy =1.26.4
 - scipy =1.14.1
+- setuptools
