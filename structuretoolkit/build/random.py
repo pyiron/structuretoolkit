@@ -99,6 +99,6 @@ def pyxtal(
                 structures.append({"atoms": s, "symmetry": g, "repeat": i})
         if len(failed_groups) > 0:
             warnings.warn(
-                f'Groups [{", ".join(map(str,failed_groups))}] could not be generated with stoichiometry {stoich}!'
+                f"Groups [{', '.join(map(str, failed_groups))}] could not be generated with stoichiometry {stoich}!"
             )
         return structures
