@@ -41,8 +41,7 @@ def create_mesh(
         n_mesh = np.rint(np.linalg.norm(cell, axis=-1) / density).astype(int)
     elif density is not None:
         raise MeshInputError(
-            "You cannot set n_mesh at density at the same time. Set one of"
-            " them to None"
+            "You cannot set n_mesh at density at the same time. Set one of them to None"
         )
     n_mesh = np.atleast_1d(n_mesh).astype(int)
     if len(n_mesh) == 1:
