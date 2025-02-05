@@ -1,4 +1,3 @@
-# coding: utf-8
 # Copyright (c) Max-Planck-Institut für Eisenforschung GmbH - Computational Materials Design (CM) Department
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
@@ -227,7 +226,7 @@ class Interstitials:
         q_eps: float = 0.3,
         var_ratio: float = 5.0,
         min_samples: Optional[int] = None,
-        neigh_args: dict = {},
+        neigh_args: dict = None,
         **kwargs,
     ):
         """
@@ -256,6 +255,8 @@ class Interstitials:
             min_samples (int/None): `min_sample` in the point clustering.
             neigh_args (dict): arguments to be added to `get_neighbors`
         """
+        if neigh_args is None:
+            neigh_args = {}
         if use_voronoi:
             self.initial_positions = get_voronoi_vertices(structure)
         else:
@@ -407,7 +408,7 @@ def get_interstitials(
     q_eps: float = 0.3,
     var_ratio: float = 5.0,
     min_samples: Optional[int] = None,
-    neigh_args: dict = {},
+    neigh_args: dict = None,
     **kwargs,
 ) -> Interstitials:
     """
@@ -430,6 +431,8 @@ def get_interstitials(
     Returns:
         Interstitials: An instance of the Interstitials class.
     """
+    if neigh_args is None:
+        neigh_args = {}
     return Interstitials(
         structure=structure,
         num_neighbors=num_neighbors,

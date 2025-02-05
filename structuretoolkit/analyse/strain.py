@@ -232,7 +232,7 @@ class Strain:
             np.ndarray: The crystal phase with the highest count.
         """
         cna = get_adaptive_cna_descriptors(structure=structure)
-        return np.asarray([k for k in cna.keys()])[np.argmax([v for v in cna.values()])]
+        return np.asarray(list(cna.keys()))[np.argmax(list(cna.values()))]
 
     @staticmethod
     def _get_number_of_neighbors(crystal_phase: str) -> int:
@@ -250,7 +250,7 @@ class Strain:
         """
         if crystal_phase == "bcc":
             return 8
-        elif crystal_phase == "fcc" or crystal_phase == "hcp":
+        elif crystal_phase in ("fcc", "hcp"):
             return 12
         else:
             raise ValueError(f'Crystal structure "{crystal_phase}" not recognized')

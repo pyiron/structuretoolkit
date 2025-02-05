@@ -2,7 +2,6 @@ from typing import Optional, Union
 
 import numpy as np
 from ase.atoms import Atoms
-from ase.data import atomic_numbers
 from scipy.sparse import coo_matrix
 
 
@@ -246,10 +245,7 @@ def apply_strain(
     epsilon = epsilon.reshape(3, 3)
     if epsilon.min() < -1.0:
         raise ValueError("Strain value too negative")
-    if return_box:
-        structure_copy = structure.copy()
-    else:
-        structure_copy = structure
+    structure_copy = structure.copy() if return_box else structure
     cell = structure_copy.cell.copy()
     if mode == "linear":
         F = epsilon + np.eye(3)

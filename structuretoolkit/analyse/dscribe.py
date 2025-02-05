@@ -13,7 +13,7 @@ def soap_descriptor_per_atom(
     rbf: str = "gto",
     weighting: Optional[np.ndarray] = None,
     average: str = "off",
-    compression: dict = {"mode": "off", "species_weighting": None},
+    compression: dict = None,
     species: Optional[list] = None,
     periodic: bool = True,
     sparse: bool = False,
@@ -50,6 +50,8 @@ def soap_descriptor_per_atom(
     """
     from dscribe.descriptors import SOAP
 
+    if compression is None:
+        compression = {"mode": "off", "species_weighting": None}
     if species is None:
         species = list(set(structure.get_chemical_symbols()))
     periodic_soap = SOAP(

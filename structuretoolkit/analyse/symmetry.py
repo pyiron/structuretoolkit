@@ -1,11 +1,9 @@
-# coding: utf-8
 # Copyright (c) Max-Planck-Institut für Eisenforschung GmbH - Computational Materials Design (CM) Department
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import ast
 import dataclasses
 import string
-from functools import cached_property
 from typing import Optional
 
 import numpy as np

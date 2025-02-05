@@ -1,4 +1,3 @@
-# coding: utf-8
 # Copyright (c) Max-Planck-Institut für Eisenforschung GmbH - Computational Materials Design (CM) Department
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
@@ -104,7 +103,9 @@ def plot3d(
     """
     if mode == "NGLview":
         if height is not None:
-            warnings.warn("`height` is not implemented in NGLview", SyntaxWarning)
+            warnings.warn(
+                "`height` is not implemented in NGLview", SyntaxWarning, stacklevel=2
+            )
         return _plot3d(
             structure=structure,
             show_cell=show_cell,
@@ -141,7 +142,9 @@ def plot3d(
         )
     elif mode == "ase":
         if height is not None:
-            warnings.warn("`height` is not implemented in ase", SyntaxWarning)
+            warnings.warn(
+                "`height` is not implemented in ase", SyntaxWarning, stacklevel=2
+            )
         return _plot3d_ase(
             structure=structure,
             show_cell=show_cell,
@@ -192,7 +195,7 @@ def _draw_box_plotly(fig: Any, structure: Atoms, px: Any, go: Any) -> Any:
     cell = get_cell(structure)
     data = fig.data
     for lines in _get_box_skeleton(cell):
-        fig = px.line_3d(**{xx: vv for xx, vv in zip(["x", "y", "z"], lines.T)})
+        fig = px.line_3d(**dict(zip(["x", "y", "z"], lines.T)))
         fig.update_traces(line_color="#000000")
         data = fig.data + data
     return go.Figure(data=data)
@@ -260,12 +263,12 @@ def _plot3d_plotly(
     fig.layout.scene.camera.projection.type = camera
     rot = _get_orientation(view_plane).T
     rot[0, :] *= distance_from_camera * 1.25
-    angle = dict(
-        up=dict(x=rot[2, 0], y=rot[2, 1], z=rot[2, 2]),
-        eye=dict(x=rot[0, 0], y=rot[0, 1], z=rot[0, 2]),
-    )
+    angle = {
+        "up": {"x": rot[2, 0], "y": rot[2, 1], "z": rot[2, 2]},
+        "eye": {"x": rot[0, 0], "y": rot[0, 1], "z": rot[0, 2]},
+    }
     fig.update_layout(scene_camera=angle)
-    fig.update_traces(marker=dict(line=dict(width=0.1, color="DarkSlateGrey")))
+    fig.update_traces(marker={"line": {"width": 0.1, "color": "DarkSlateGrey"}})
     fig.update_scenes(aspectmode="data")
     if height is None:
         height = 600
@@ -400,16 +403,18 @@ def _plot3d(
         # Color by scheme
         if color_scheme is not None:
             if colors is not None:
-                warnings.warn("`color_scheme` is overriding `colors`")
+                warnings.warn("`color_scheme` is overriding `colors`", stacklevel=2)
             if scalar_field is not None:
-                warnings.warn("`color_scheme` is overriding `scalar_field`")
+                warnings.warn(
+                    "`color_scheme` is overriding `scalar_field`", stacklevel=2
+                )
             view = _add_colorscheme_spacefill(
                 view, elements, atomic_numbers, particle_size, color_scheme
             )
         # Color by per-atom colors
         elif colors is not None:
             if scalar_field is not None:
-                warnings.warn("`colors` is overriding `scalar_field`")
+                warnings.warn("`colors` is overriding `scalar_field`", stacklevel=2)
             view = _add_custom_color_spacefill(
                 view, atomic_numbers, particle_size, colors
             )
@@ -430,10 +435,12 @@ def _plot3d(
     else:
         view.add_ball_and_stick()
 
-    if show_cell:
-        if structure.cell is not None:
-            if all(np.max(structure.cell, axis=0) > 1e-2):
-                view.add_unitcell()
+    if (
+        show_cell
+        and structure.cell is not None
+        and all(np.max(structure.cell, axis=0) > 1e-2)
+    ):
+        view.add_unitcell()
 
     if vector_color is None and vector_field is not None:
         vector_color = (
@@ -475,9 +482,10 @@ def _plot3d(
             view.shape.add_arrow(start, end, color, arrow_radius)
             view.shape.add_text(end, text_color, text_size, arrow_names[n])
 
-    if camera != "perspective" and camera != "orthographic":
+    if camera not in ("perspective", "orthographic"):
         warnings.warn(
-            "Only perspective or orthographic is (likely to be) permitted for camera"
+            "Only perspective or orthographic is (likely to be) permitted for camera",
+            stacklevel=2,
         )
 
     view.camera = camera
@@ -520,19 +528,20 @@ def _plot3d_ase(
         view.add_spacefill(
             radius_type="vdw", color_scheme=color_scheme, radius=particle_size
         )
-        # view.add_spacefill(radius=1.0)
         view.remove_ball_and_stick()
     else:
         view.add_ball_and_stick()
-    if show_cell:
-        if structure.cell is not None:
-            if all(np.max(structure.cell, axis=0) > 1e-2):
-                view.add_unitcell()
+    if (
+        show_cell
+        and structure.cell is not None
+        and all(np.max(structure.cell, axis=0) > 1e-2)
+    ):
+        view.add_unitcell()
     if show_axes:
         view.shape.add_arrow([-2, -2, -2], [2, -2, -2], [1, 0, 0], 0.5)
         view.shape.add_arrow([-2, -2, -2], [-2, 2, -2], [0, 1, 0], 0.5)
         view.shape.add_arrow([-2, -2, -2], [-2, -2, 2], [0, 0, 1], 0.5)
-    if camera != "perspective" and camera != "orthographic":
+    if camera not in ("perspective", "orthographic"):
         print("Only perspective or orthographic is permitted")
         return None
     view.camera = camera
@@ -558,9 +567,7 @@ def _ngl_write_cell(
     Returns:
         (str): The line defining the cell in PDB format.
     """
-    return "CRYST1 {:8.3f} {:8.3f} {:8.3f} {:6.2f} {:6.2f} {:6.2f} P 1\n".format(
-        a1, a2, a3, f1, f2, f3
-    )
+    return f"CRYST1 {a1:8.3f} {a2:8.3f} {a3:8.3f} {f1:6.2f} {f2:6.2f} {f3:6.2f} P 1\n"
 
 
 def _ngl_write_atom(
@@ -598,9 +605,7 @@ def _ngl_write_atom(
         group = species
     if num2 is None:
         num2 = num
-    return "ATOM {:>6} {:>4} {:>4} {:>5} {:10.3f} {:7.3f} {:7.3f} {:5.2f} {:5.2f} {:>11} \n".format(
-        num, species, group, num2, x, y, z, occupancy, temperature_factor, species
-    )
+    return f"ATOM {num:>6} {species:>4} {group:>4} {num2:>5} {x:10.3f} {y:7.3f} {z:7.3f} {occupancy:5.2f} {temperature_factor:5.2f} {species:>11} \n"
 
 
 def _ngl_write_structure(
@@ -684,7 +689,7 @@ def _add_colorscheme_spacefill(
     Returns:
         (nglview.NGLWidget): The modified widget.
     """
-    for elem, num in set(list(zip(elements, atomic_numbers))):
+    for elem, num in set(zip(elements, atomic_numbers)):
         view.add_spacefill(
             selection="#" + elem,
             radius_type="vdw",

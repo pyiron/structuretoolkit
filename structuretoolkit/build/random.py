@@ -1,14 +1,16 @@
-# coding: utf-8
 # Copyright (c) Max-Planck-Institut für Eisenforschung GmbH - Computational Materials Design (CM) Department
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import warnings
-from typing import List, Tuple, Union
+from typing import Union
 
 try:
     from tqdm.auto import tqdm
 except ImportError:
-    tqdm = lambda x: x
+
+    def tqdm(x):
+        return x
+
 
 from ase import Atoms
 
@@ -16,14 +18,14 @@ from structuretoolkit.common.helper import center_coordinates_in_unit_cell
 
 
 def pyxtal(
-    group: Union[int, List[int]],
-    species: Tuple[str],
-    num_ions: Tuple[int],
+    group: Union[int, list[int]],
+    species: tuple[str],
+    num_ions: tuple[int],
     dim=3,
     repeat=1,
     allow_exceptions=True,
     **kwargs,
-) -> Union[Atoms, List[dict]]:
+) -> Union[Atoms, list[dict]]:
     """
     Generate random crystal structures with PyXtal.
 
@@ -70,7 +72,7 @@ def pyxtal(
             s.from_random(
                 dim=dim, group=group, species=species, numIons=num_ions, **kwargs
             )
-        except Comp_CompatibilityError as e:
+        except Comp_CompatibilityError:
             if not allow_exceptions:
                 raise ValueError(
                     f"Symmetry group {group} incompatible with stoichiometry {stoich}!"
@@ -99,6 +101,7 @@ def pyxtal(
                 structures.append({"atoms": s, "symmetry": g, "repeat": i})
         if len(failed_groups) > 0:
             warnings.warn(
-                f"Groups [{', '.join(map(str, failed_groups))}] could not be generated with stoichiometry {stoich}!"
+                f"Groups [{', '.join(map(str, failed_groups))}] could not be generated with stoichiometry {stoich}!",
+                stacklevel=2,
             )
         return structures
