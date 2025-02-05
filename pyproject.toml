@@ -94,6 +94,8 @@ ignore = [
     "B904",
     # ignore line-length violations
     "E501",
+    # ignore equality comparisons for numpy arrays
+    "E712",
     # ignore bare except
     "E722",
     # ignore ambiguous variable name

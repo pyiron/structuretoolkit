@@ -536,7 +536,7 @@ class Tree:
         """
         if num_neighbors is None and cutoff_radius == np.inf:
             raise ValueError("Define either num_neighbors or cutoff_radius")
-        if all(self._ref_structure.pbc is False):
+        if all(self._ref_structure.pbc == False):
             return 0
         elif cutoff_radius != np.inf:
             return cutoff_radius
