@@ -63,6 +63,53 @@ include = ["structuretoolkit*"]
 [tool.setuptools.dynamic]
 version = {attr = "structuretoolkit.__version__"}
 
+[tool.ruff]
+exclude = [".ci_support", "tests", "setup.py", "_version.py"]
+
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+    # flake8-comprehensions
+    "C4",
+    # eradicate
+    "ERA",
+    # pylint
+    "PL",
+]
+ignore = [
+    # ignore functions in argument defaults
+    "B008",
+    # ignore exception naming
+    "B904",
+    # ignore line-length violations
+    "E501",
+    # ignore equality comparisons for numpy arrays
+    "E712",
+    # ignore bare except
+    "E722",
+    # ignore ambiguous variable name
+    "E741",
+    # Too many arguments in function definition
+    "PLR0913",
+    # Magic value used in comparison
+    "PLR2004",
+    # Too many branches
+    "PLR0912",
+    # Too many statements
+    "PLR0915",
+]
+
 [tool.versioneer]
 VCS = "git"
 style = "pep440-pre"

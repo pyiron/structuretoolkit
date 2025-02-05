@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import typing
-import warnings
-
+import ase
 import numpy as np
 
 from structuretoolkit.common.helper import get_cell
@@ -13,9 +11,9 @@ class MeshInputError(ValueError):
 
 
 def create_mesh(
-    cell: typing.Union["ase.atoms.Atoms", np.ndarray, list, float],
-    n_mesh: typing.Union[int, list[int, int, int]] = 10,
-    density: typing.Optional[float] = None,
+    cell: ase.atoms.Atoms | np.ndarray | list | float,
+    n_mesh: int | list[int, int, int] = 10,
+    density: float | None = None,
     endpoint: bool = False,
 ):
     """

@@ -1,10 +1,9 @@
-# coding: utf-8
 # Copyright (c) Max-Planck-Institut für Eisenforschung GmbH - Computational Materials Design (CM) Department
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import itertools
 import warnings
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Optional, Union
 
 import numpy as np
 from ase.atoms import Atoms
@@ -104,11 +103,11 @@ class Tree:
         Raises:
             KeyError: If the new mode is not found in the available modes.
         """
-        if new_mode not in self._mode.keys():
+        if new_mode not in self._mode:
             raise KeyError(
                 f"{new_mode} not found. Available modes: {', '.join(self._mode.keys())}"
             )
-        self._mode = {key: False for key in self._mode.keys()}
+        self._mode = {key: False for key in self._mode}
         self._mode[new_mode] = True
 
     def __repr__(self) -> str:
@@ -366,7 +365,7 @@ class Tree:
         num_neighbors: Optional[int] = None,
         cutoff_radius: float = np.inf,
         width_buffer: float = 1.2,
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    ) -> tuple[np.ndarray, np.ndarray]:
         """
         Get the distances and indices of the neighbors for the given positions.
 
@@ -406,7 +405,8 @@ class Tree:
             warnings.warn(
                 "Number of neighbors found within the cutoff_radius is equal to (estimated) "
                 + "num_neighbors. Increase num_neighbors (or set it to None) or "
-                + "width_buffer to find all neighbors within cutoff_radius."
+                + "width_buffer to find all neighbors within cutoff_radius.",
+                stacklevel=2,
             )
         self._extended_indices = indices.copy()
         indices[distances < np.inf] = self._get_wrapped_indices()[
@@ -508,7 +508,8 @@ class Tree:
         if num_neighbors > self.num_neighbors:
             warnings.warn(
                 "Taking a larger search area after initialization has the risk of "
-                + "missing neighborhood atoms"
+                + "missing neighborhood atoms",
+                stacklevel=2,
             )
         return num_neighbors
 
@@ -632,15 +633,14 @@ class Tree:
             bool: True if the width exceeds the specified value, False otherwise.
 
         """
-        if any(pbc) and np.prod(self.filled.distances.shape) > 0:
-            if (
-                np.linalg.norm(
-                    self.flattened.vecs[..., pbc], axis=-1, ord=self.norm_order
-                ).max()
-                > width
-            ):
-                return True
-        return False
+        return bool(
+            any(pbc)
+            and np.prod(self.filled.distances.shape) > 0
+            and np.linalg.norm(
+                self.flattened.vecs[..., pbc], axis=-1, ord=self.norm_order
+            ).max()
+            > width
+        )
 
     def get_spherical_harmonics(
         self,
@@ -811,9 +811,9 @@ class Mode:
     def __dir__(self):
         """Show value names which are available for different filling modes."""
         return list(
-            set(
-                ["distances", "vecs", "indices", "shells", "atom_numbers"]
-            ).intersection(self.ref_neigh.__dir__())
+            {"distances", "vecs", "indices", "shells", "atom_numbers"}.intersection(
+                self.ref_neigh.__dir__()
+            )
         )
 
 
@@ -1008,7 +1008,7 @@ class Neighbors(Tree):
 
     def get_shell_matrix(
         self,
-        chemical_pair: Optional[List[str]] = None,
+        chemical_pair: Optional[list[str]] = None,
         cluster_by_distances: bool = False,
         cluster_by_vecs: bool = False,
     ):
@@ -1225,7 +1225,7 @@ class Neighbors(Tree):
 
     def cluster_analysis(
         self, id_list: list, return_cluster_sizes: bool = False
-    ) -> Union[Dict[int, List[int]], Tuple[Dict[int, List[int]], List[int]]]:
+    ) -> Union[dict[int, list[int]], tuple[dict[int, list[int]], list[int]]]:
         """
         Perform cluster analysis on a list of atom IDs.
 
@@ -1240,11 +1240,8 @@ class Neighbors(Tree):
         """
         self._cluster = [0] * len(self._ref_structure)
         c_count = 1
-        # element_list = self.get_atomic_numbers()
         for ia in id_list:
-            # el0 = element_list[ia]
             nbrs = self.ragged.indices[ia]
-            # print ("nbrs: ", ia, nbrs)
             if self._cluster[ia] == 0:
                 self._cluster[ia] = c_count
                 self.__probe_cluster(c_count, nbrs, id_list)
@@ -1261,7 +1258,7 @@ class Neighbors(Tree):
         return cluster_dict  # sizes
 
     def __probe_cluster(
-        self, c_count: int, neighbors: List[int], id_list: List[int]
+        self, c_count: int, neighbors: list[int], id_list: list[int]
     ) -> None:
         """
         Recursively probe the cluster and assign cluster IDs to neighbors.
@@ -1275,11 +1272,12 @@ class Neighbors(Tree):
             None
         """
         for nbr_id in neighbors:
-            if self._cluster[nbr_id] == 0:
-                if nbr_id in id_list:  # TODO: check also for ordered structures
-                    self._cluster[nbr_id] = c_count
-                    nbrs = self.ragged.indices[nbr_id]
-                    self.__probe_cluster(c_count, nbrs, id_list)
+            if (
+                self._cluster[nbr_id] == 0 and nbr_id in id_list
+            ):  # TODO: check also for ordered structures
+                self._cluster[nbr_id] = c_count
+                nbrs = self.ragged.indices[nbr_id]
+                self.__probe_cluster(c_count, nbrs, id_list)
 
     # TODO: combine with corresponding routine in plot3d
     def get_bonds(
@@ -1287,7 +1285,7 @@ class Neighbors(Tree):
         radius: float = np.inf,
         max_shells: Optional[int] = None,
         prec: float = 0.1,
-    ) -> List[Dict[str, List[List[int]]]]:
+    ) -> list[dict[str, list[list[int]]]]:
         """
         Get the bonds in the structure.
 
@@ -1303,7 +1301,7 @@ class Neighbors(Tree):
 
         def get_cluster(
             dist_vec: np.ndarray, ind_vec: np.ndarray, prec: float = prec
-        ) -> List[np.ndarray]:
+        ) -> list[np.ndarray]:
             """
             Get clusters from a distance vector and index vector.
 
@@ -1326,7 +1324,6 @@ class Neighbors(Tree):
         ind_shell = []
         for d, i in zip(dist, ind):
             id_list = get_cluster(d[d < radius], i[d < radius])
-            # print ("id: ", d[d<radius], id_list, dist_lst)
             ia_shells_dict = {}
             for i_shell_list in id_list:
                 ia_shell_dict = {}
@@ -1338,9 +1335,11 @@ class Neighbors(Tree):
                 for el, ia_lst in ia_shell_dict.items():
                     if el not in ia_shells_dict:
                         ia_shells_dict[el] = []
-                    if max_shells is not None:
-                        if len(ia_shells_dict[el]) + 1 > max_shells:
-                            continue
+                    if (
+                        max_shells is not None
+                        and len(ia_shells_dict[el]) + 1 > max_shells
+                    ):
+                        continue
                     ia_shells_dict[el].append(ia_lst)
             ind_shell.append(ia_shells_dict)
         return ind_shell
@@ -1457,7 +1456,8 @@ def _get_neighbors(
     if neigh._check_width(width=width, pbc=structure.pbc):
         warnings.warn(
             "width_buffer may have been too small - "
-            "most likely not all neighbors properly assigned"
+            "most likely not all neighbors properly assigned",
+            stacklevel=2,
         )
     return neigh
 

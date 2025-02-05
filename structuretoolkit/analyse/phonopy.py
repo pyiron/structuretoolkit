@@ -1,8 +1,6 @@
-# coding: utf-8
 # Copyright (c) Max-Planck-Institut für Eisenforschung GmbH - Computational Materials Design (CM) Department
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
-from typing import List
 
 import numpy as np
 from ase.atoms import Atoms
@@ -21,7 +19,7 @@ __date__ = "Sep 1, 2018"
 
 def get_equivalent_atoms(
     structure: Atoms, symprec: float = 1e-5, angle_tolerance: float = -1.0
-) -> List[int]:
+) -> list[int]:
     """
     Get the indices of atoms that are equivalent under symmetry operations.
 

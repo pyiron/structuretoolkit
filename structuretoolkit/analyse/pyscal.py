@@ -1,8 +1,7 @@
-# coding: utf-8
 # Copyright (c) Max-Planck-Institut für Eisenforschung GmbH - Computational Materials Design (CM) Department
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 import numpy as np
 from ase.atoms import Atoms
@@ -28,7 +27,7 @@ def get_steinhardt_parameters(
     n_clusters: Optional[int] = 2,
     q: Optional[tuple] = None,
     averaged: bool = False,
-) -> Union[Tuple[np.ndarray], Tuple[np.ndarray, np.ndarray]]:
+) -> Union[tuple[np.ndarray], tuple[np.ndarray, np.ndarray]]:
     """
     Calculate Steinhardts parameters
 
@@ -81,7 +80,7 @@ def get_centro_symmetry_descriptors(
 
 def get_diamond_structure_descriptors(
     structure: Atoms, mode: str = "total", ovito_compatibility: bool = False
-) -> Union[Dict[str, int], np.ndarray]:
+) -> Union[dict[str, int], np.ndarray]:
     """
     Analyse diamond structure
 

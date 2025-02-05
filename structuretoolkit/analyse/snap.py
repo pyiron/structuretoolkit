@@ -64,7 +64,7 @@ def get_snap_descriptors_per_atom(
     structure: Atoms,
     atom_types: list[str],
     twojmax: int = 6,
-    element_radius: list[int] = [4.0],
+    element_radius: list[int] = None,
     rcutfac: float = 1.0,
     rfac0: float = 0.99363,
     rmin0: float = 0.0,
@@ -92,6 +92,8 @@ def get_snap_descriptors_per_atom(
     Returns:
         np.ndarray: Numpy array with the calculated descriptor derivatives
     """
+    if element_radius is None:
+        element_radius = [4.0]
     lmp, bispec_options, cutoff = _get_default_parameters(
         atom_types=atom_types,
         twojmax=twojmax,
@@ -113,7 +115,7 @@ def get_snap_descriptor_derivatives(
     structure: Atoms,
     atom_types: list[str],
     twojmax: int = 6,
-    element_radius: list[int] = [4.0],
+    element_radius: list[int] = None,
     rcutfac: float = 1.0,
     rfac0: float = 0.99363,
     rmin0: float = 0.0,
@@ -141,6 +143,8 @@ def get_snap_descriptor_derivatives(
     Returns:
         np.ndarray: Numpy array with the calculated descriptor derivatives
     """
+    if element_radius is None:
+        element_radius = [4.0]
     lmp, bispec_options, cutoff = _get_default_parameters(
         atom_types=atom_types,
         twojmax=twojmax,
@@ -420,7 +424,7 @@ def _calc_snap_per_atom(
         return np.array([])
     else:
         if (
-            "quadraticflag" in bispec_options.keys()
+            "quadraticflag" in bispec_options
             and int(bispec_options["quadraticflag"]) == 1
         ):
             return _extract_compute_np(
@@ -521,7 +525,7 @@ def _set_computes_snap(lmp, bispec_options: dict):
     kw_substrings = [f"{k} {v}" for k, v in kw_options.items()]
     kwargs = " ".join(kw_substrings)
 
-    for op, base in zip(("b", "db", "vb"), (base_b, base_db, base_vb)):
+    for _op, base in zip(("b", "db", "vb"), (base_b, base_db, base_vb)):
         command = f"{base} {radelem} {wj} {kwargs}"
         lmp.command(command)
 
@@ -553,7 +557,7 @@ def _extract_computes_snap(
     lmp_volume = lmp.get_thermo("vol")
 
     # Extract Bsum
-    lmp_bsum = _extract_compute_np(lmp, "b_sum", 0, 1, (n_coeff))
+    _extract_compute_np(lmp, "b_sum", 0, 1, (n_coeff))
 
     # Extract B
     lmp_barr = _extract_compute_np(lmp, "b", 1, 2, (num_atoms, n_coeff))
@@ -628,7 +632,7 @@ def _calc_snap_derivatives(
         return np.array([])
     else:
         if (
-            "quadraticflag" in bispec_options.keys()
+            "quadraticflag" in bispec_options
             and int(bispec_options["quadraticflag"]) == 1
         ):
             return _extract_computes_snap(
@@ -678,10 +682,7 @@ def _get_default_parameters(
     """
     from lammps import lammps
 
-    if weights is None:
-        wj = [1.0] * len(atom_types)
-    else:
-        wj = weights
+    wj = [1.0] * len(atom_types) if weights is None else weights
     if isinstance(element_radius, float):
         radelem = [element_radius] * len(atom_types)
     else:

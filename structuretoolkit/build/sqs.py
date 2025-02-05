@@ -1,8 +1,9 @@
 import itertools
 import random
 import warnings
+from collections.abc import Iterable
 from multiprocessing import cpu_count
-from typing import Dict, Iterable, Optional, Tuple, Union
+from typing import Optional, Union
 
 import numpy as np
 from ase.atoms import Atoms
@@ -29,7 +30,7 @@ def chemical_formula(atoms: Atoms) -> str:
     return "".join(group_symbols())
 
 
-def map_dict(f, d: Dict) -> Dict:
+def map_dict(f, d: dict) -> dict:
     """
     Apply a function to each value in a dictionary.
 
@@ -45,8 +46,8 @@ def map_dict(f, d: Dict) -> Dict:
 
 
 def mole_fractions_to_composition(
-    mole_fractions: Dict[str, float], num_atoms: int
-) -> Dict[str, int]:
+    mole_fractions: dict[str, float], num_atoms: int
+) -> dict[str, int]:
     """
     Convert mole fractions to composition.
 
@@ -63,27 +64,22 @@ def mole_fractions_to_composition(
     """
     if not (1.0 - 1 / num_atoms) < sum(mole_fractions.values()) < (1.0 + 1 / num_atoms):
         raise ValueError(
-            "mole-fractions must sum up to one: {}".format(sum(mole_fractions.values()))
+            f"mole-fractions must sum up to one: {sum(mole_fractions.values())}"
         )
 
     composition = map_dict(lambda x: x * num_atoms, mole_fractions)
     # check to avoid partial occupation -> x_i * num_atoms is not an integer number
     if any(
-        map(
-            lambda occupation: not float.is_integer(round(occupation, 1)),
-            composition.values(),
-        )
+        not float.is_integer(round(occupation, 1))
+        for occupation in composition.values()
     ):
         # at least one of the specified species exhibits fractional occupation, we try to fix it by rounding
         composition_ = map_dict(lambda occ: int(round(occ)), composition)
         warnings.warn(
-            "The current mole-fraction specification cannot be applied to {} atoms, "
+            f"The current mole-fraction specification cannot be applied to {num_atoms} atoms, "
             "as it would lead to fractional occupation. Hence, I have changed it from "
-            '"{}" -> "{}"'.format(
-                num_atoms,
-                mole_fractions,
-                map_dict(lambda n: n / num_atoms, composition_),
-            )
+            f'"{mole_fractions}" -> "{map_dict(lambda n: n / num_atoms, composition_)}"',
+            stacklevel=2,
         )
         composition = composition_
 
@@ -96,24 +92,19 @@ def mole_fractions_to_composition(
         removed_species = random.choice(tuple(composition))
         composition[removed_species] -= 1
         warnings.warn(
-            'It is not possible to distribute the species properly. Therefore one "{}" atom was removed. '
+            f'It is not possible to distribute the species properly. Therefore one "{removed_species}" atom was removed. '
             "This changes the input mole-fraction specification. "
-            '"{}" -> "{}"'.format(
-                removed_species,
-                mole_fractions,
-                map_dict(lambda n: n / num_atoms, composition),
-            )
+            f'"{mole_fractions}" -> "{map_dict(lambda n: n / num_atoms, composition)}"',
+            stacklevel=2,
         )
     elif abs(diff) > 1:
         # something else is wrong with the mole-fractions input
-        raise ValueError(
-            "Cannot interpret mole-fraction dict {}".format(mole_fractions)
-        )
+        raise ValueError(f"Cannot interpret mole-fraction dict {mole_fractions}")
 
     return composition
 
 
-def remap_sro(species: Iterable[str], array: np.ndarray) -> Dict[str, list]:
+def remap_sro(species: Iterable[str], array: np.ndarray) -> dict[str, list]:
     """
     Remap computed short-range order parameters to the style of sqsgenerator=v0.0.5.
 
@@ -127,7 +118,7 @@ def remap_sro(species: Iterable[str], array: np.ndarray) -> Dict[str, list]:
     """
     species = tuple(sorted(species, key=lambda abbr: atomic_numbers[abbr]))
     return {
-        "{}-{}".format(si, sj): array[:, i, j].tolist()
+        f"{si}-{sj}": array[:, i, j].tolist()
         for (i, si), (j, sj) in itertools.product(
             enumerate(species), enumerate(species)
         )
@@ -136,8 +127,8 @@ def remap_sro(species: Iterable[str], array: np.ndarray) -> Dict[str, list]:
 
 
 def remap_sqs_results(
-    result: Dict[str, Union[Atoms, np.ndarray]],
-) -> Tuple[Atoms, Dict[str, list]]:
+    result: dict[str, Union[Atoms, np.ndarray]],
+) -> tuple[Atoms, dict[str, list]]:
     """
     Remap the results of SQS optimization.
 
@@ -169,8 +160,8 @@ def transpose(it: Iterable[Iterable]) -> Iterable[tuple]:
 
 def sqs_structures(
     structure: Atoms,
-    mole_fractions: Dict[str, Union[float, int]],
-    weights: Optional[Dict[int, float]] = None,
+    mole_fractions: dict[str, Union[float, int]],
+    weights: Optional[dict[int, float]] = None,
     objective: Union[float, np.ndarray] = 0.0,
     iterations: Union[float, int] = 1e6,
     output_structures: int = 10,
@@ -185,7 +176,7 @@ def sqs_structures(
     minimal: Optional[bool] = True,
     similar: Optional[bool] = True,
     return_statistics: Optional[bool] = False,
-) -> Union[Atoms, Tuple[Atoms, Dict[str, list], int, float]]:
+) -> Union[Atoms, tuple[Atoms, dict[str, list], int, float]]:
     """
     Generate SQS structures.
 
@@ -216,22 +207,22 @@ def sqs_structures(
 
     composition = mole_fractions_to_composition(mole_fractions, len(structure))
 
-    settings = dict(
-        atol=atol,
-        rtol=rtol,
-        mode=mode,
-        which=which,
-        structure=structure,
-        prefactors=prefactors,
-        shell_weights=weights,
-        iterations=iterations,
-        composition=composition,
-        pair_weights=pair_weights,
-        target_objective=objective,
-        shell_distances=shell_distances,
-        threads_per_rank=num_threads or cpu_count(),
-        max_output_configurations=output_structures,
-    )
+    settings = {
+        "atol": atol,
+        "rtol": rtol,
+        "mode": mode,
+        "which": which,
+        "structure": structure,
+        "prefactors": prefactors,
+        "shell_weights": weights,
+        "iterations": iterations,
+        "composition": composition,
+        "pair_weights": pair_weights,
+        "target_objective": objective,
+        "shell_distances": shell_distances,
+        "threads_per_rank": num_threads or cpu_count(),
+        "max_output_configurations": output_structures,
+    }
     # not specifying a parameter in settings causes sqsgenerator to choose a "sensible" default,
     # hence we remove all entries with a None value
 
