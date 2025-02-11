@@ -1,7 +1,7 @@
 # structuretoolkit 
 
 [![Pipeline](https://github.com/pyiron/structuretoolkit/actions/workflows/pipeline.yml/badge.svg)](https://github.com/pyiron/structuretoolkit/actions/workflows/pipeline.yml)
-[![Coverage Status](https://coveralls.io/repos/github/pyiron/structuretoolkit/badge.svg?branch=main)](https://coveralls.io/github/pyiron/structuretoolkit?branch=main)
+[![codecov](https://codecov.io/gh/pyiron/structuretoolkit/graph/badge.svg?token=B6I4OACKND)](https://codecov.io/gh/pyiron/structuretoolkit)
 
 Originally developed as part of the `pyiron_atomistics` module the `structuretoolkit` was release as standalone library
 for analysing, building and visualising atomistic structures. Internally it uses the `ase.atoms.Atoms` class to 
