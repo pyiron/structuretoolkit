@@ -52,7 +52,7 @@ surface = [
     "pymatgen==2025.2.18",
 ]
 phonopy = [
-    "phonopy==2.37.1",
+    "phonopy==2.38.0",
     "spglib==2.5.0",
 ]
 pyxtal = ["pyxtal==1.0.6"]
