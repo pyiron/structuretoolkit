@@ -14,7 +14,7 @@ dependencies:
 - plotly =6.0.1
 - pymatgen =2025.3.10
 - pyscal3 =3.2.7
-- pyxtal =1.0.7
+- pyxtal =1.0.8
 - scikit-learn =1.6.1
 - scipy =1.15.2
 - spglib =2.6.0
