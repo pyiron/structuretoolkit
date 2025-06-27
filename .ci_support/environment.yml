@@ -11,7 +11,7 @@ dependencies:
 - notebook
 - numpy =1.26.4
 - phonopy =2.40.0
-- plotly =6.1.2
+- plotly =6.2.0
 - pymatgen =2025.3.10
 - pyscal3 =3.2.7
 - pyxtal =1.0.9
