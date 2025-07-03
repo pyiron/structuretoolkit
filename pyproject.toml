@@ -52,7 +52,7 @@ surface = [
     "pymatgen==2025.3.10",
 ]
 phonopy = [
-    "phonopy==2.40.0",
+    "phonopy==2.41.1",
     "spglib==2.6.0",
 ]
 pyxtal = ["pyxtal==1.0.9"]
@@ -100,6 +100,8 @@ ignore = [
     "E722",
     # ignore ambiguous variable name
     "E741",
+    # ignore imports which are not at the top of a module
+    "PLC0415",
     # Too many arguments in function definition
     "PLR0913",
     # Magic value used in comparison
