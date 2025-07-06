@@ -19,3 +19,4 @@ dependencies:
 - scipy =1.15.2
 - spglib =2.6.0
 - sqsgenerator =0.3
+- sparse =0.17.0
