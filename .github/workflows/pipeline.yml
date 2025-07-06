@@ -111,7 +111,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Merge conda environment
-      if:  matrix.operating-system != 'windows-latest'
+      if:  matrix.operating-system == 'ubuntu-latest'
       run: tail --lines=+4 .ci_support/environment-lammps.yml >> .ci_support/environment.yml
     - name: Conda config
       shell: bash -l {0}
