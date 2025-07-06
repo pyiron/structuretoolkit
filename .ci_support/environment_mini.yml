@@ -3,6 +3,6 @@ channels:
 dependencies:
 - ase =3.25.0
 - coverage
-- numpy =2.2.4
+- numpy =2.3.1
 - scipy =1.15.2
 - setuptools
