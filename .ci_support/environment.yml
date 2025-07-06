@@ -9,7 +9,7 @@ dependencies:
 - matplotlib-base =3.10.1
 - nglview =3.1.4
 - notebook
-- numpy =1.26.4
+- numpy =2.3.1
 - phonopy =2.41.1
 - plotly =6.2.0
 - pymatgen =2025.3.10
@@ -19,3 +19,4 @@ dependencies:
 - scipy =1.15.2
 - spglib =2.6.0
 - sqsgenerator =0.3
+- sparse =0.17.0
