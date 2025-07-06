@@ -136,10 +136,10 @@ class TestSymmetry(unittest.TestCase):
         ).repeat(2)
         structure.symbols[0] = "Ni"
         symmetry = stk.analyse.get_symmetry(structure=structure)
-        self.assertLess(symmetry.symmetrize_tensor(np.random.randn(3)).ptp(), 1.0e-8)
+        self.assertLess(np.ptp(symmetry.symmetrize_tensor(np.random.randn(3))), 1.0e-8)
         sym_tensor = symmetry.symmetrize_tensor(np.random.randn(3, 3))
-        self.assertLess(sym_tensor.diagonal().ptp(), 1.0e-8)
-        self.assertLess(sym_tensor[np.triu_indices(3, k=1)].ptp(), 1.0e-8)
+        self.assertLess(np.ptp(sym_tensor.diagonal()), 1.0e-8)
+        self.assertLess(np.ptp(sym_tensor[np.triu_indices(3, k=1)]), 1.0e-8)
         i = np.all(structure.positions == [0.5, 0, 0.5], axis=-1)
         j = np.all(structure.positions == [0, 0.5, 0.5], axis=-1)
         s_tensor = symmetry.symmetrize_tensor(np.random.randn(len(structure)))
