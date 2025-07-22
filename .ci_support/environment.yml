@@ -13,7 +13,7 @@ dependencies:
 - phonopy =2.41.3
 - plotly =6.2.0
 - pymatgen =2025.3.10
-- pyscal3 =3.2.7
+- pyscal3 =3.3.0
 - pyxtal =1.1.0
 - scikit-learn =1.6.1
 - scipy =1.15.2
