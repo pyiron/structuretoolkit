@@ -41,7 +41,7 @@ grainboundary = [
     "aimsgb==1.1.1",
     "pymatgen==2025.3.10",
 ]
-pyscal = ["pyscal3==3.2.7"]
+pyscal = ["pyscal3==3.3.0"]
 nglview = ["nglview==3.1.4"]
 matplotlib = ["matplotlib==3.10.1"]
 plotly = ["plotly==6.2.0"]
