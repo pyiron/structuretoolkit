@@ -152,6 +152,12 @@ class TestSymmetry(unittest.TestCase):
             np.random.randn(4, len(structure), 3, 3, len(structure))
         )
         self.assertEqual(s_tensor.shape, (4, len(structure), 3, 3, len(structure)))
+        structure_displaced = structure.copy()
+        structure_displaced.positions[0, 0] += 0.01
+        sym = stk.analyse.get_symmetry(structure=structure_displaced)
+        tensor = np.zeros((len(structure_displaced), 3, len(structure_displaced), 3))
+        tensor[0, 0, 0, 0] = 1
+        self.assertAlmostEqual(sym.symmetrize_tensor(tensor)[0, 0, 0, 0], 1)
 
     def test_get_symmetry_dataset(self):
         cell = 2.2 * np.identity(3)
