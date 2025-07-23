@@ -126,6 +126,10 @@ class TestSymmetry(unittest.TestCase):
         self.assertAlmostEqual(
             np.linalg.norm(sym.symmetrize_vectors(v) - sym.symmetrize_tensor(v)), 0
         )
+        sym = stk.analyse.get_symmetry(structure=Al)
+        tensor = np.zeros((len(Al), 3, len(Al), 3))
+        tensor[0, 0, 0, 0] = 1
+        self.assertAlmostEqual(sym.symmetrize_vectors(tensor), 1)
 
     def test_symmetrize_tensor(self):
         structure = Atoms(
