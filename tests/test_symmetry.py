@@ -129,7 +129,7 @@ class TestSymmetry(unittest.TestCase):
         sym = stk.analyse.get_symmetry(structure=Al)
         tensor = np.zeros((len(Al), 3, len(Al), 3))
         tensor[0, 0, 0, 0] = 1
-        self.assertAlmostEqual(sym.symmetrize_vectors(tensor), 1)
+        self.assertAlmostEqual(sym.symmetrize_vectors(tensor)[0, 0, 0, 0], 1)
 
     def test_symmetrize_tensor(self):
         structure = Atoms(
