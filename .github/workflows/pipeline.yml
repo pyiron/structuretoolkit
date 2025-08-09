@@ -133,7 +133,7 @@ jobs:
       run: |
         pip install versioneer[toml]==0.29
         pip install . --no-deps --no-build-isolation
-        coverage run  --omit="structuretoolkit/_version.py,tests/*" -m unittest discover tests
+        coverage run
         coverage xml
     - name: Upload coverage reports to Codecov
       if: matrix.label == 'linux-64-py-3-12'

@@ -118,3 +118,7 @@ style = "pep440-pre"
 versionfile_source = "structuretoolkit/_version.py"
 parentdir_prefix = "structuretoolkit"
 tag_prefix = "structuretoolkit-"
+
+[tool.coverage.run]
+omit = ["structuretoolkit/_version.py", "tests/*"]
+command_line = "-m unittest discover tests"
