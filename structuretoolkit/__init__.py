@@ -96,7 +96,7 @@ from structuretoolkit.common import (
 # Visualize
 from structuretoolkit.visualize import plot3d
 
-from . import _version
+import structuretoolkit._version
 
 __all__ = [
     "find_mic",
@@ -156,4 +156,5 @@ __all__ = [
     "select_index",
     "plot3d",
 ]
-__version__ = _version.get_versions()["version"]
+
+__version__ = structuretoolkit._version.__version__
