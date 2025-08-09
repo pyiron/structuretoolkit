@@ -1,6 +1,6 @@
 [build-system]
-requires = ["ase", "numpy", "setuptools", "scipy", "versioneer[toml]==0.29"]
-build-backend = "setuptools.build_meta"
+requires = ["ase", "numpy", "scipy", "hatchling==1.27.0", "hatch-vcs==0.5.0"]
+build-backend = "hatchling.build"
 
 [project]
 name = "structuretoolkit"
@@ -57,12 +57,6 @@ phonopy = [
 ]
 pyxtal = ["pyxtal==1.1.0"]
 
-[tool.setuptools.packages.find]
-include = ["structuretoolkit*"]
-
-[tool.setuptools.dynamic]
-version = {attr = "structuretoolkit.__version__"}
-
 [tool.ruff]
 exclude = [".ci_support", "tests", "setup.py", "_version.py"]
 
@@ -112,12 +106,22 @@ ignore = [
     "PLR0915",
 ]
 
-[tool.versioneer]
-VCS = "git"
-style = "pep440-pre"
-versionfile_source = "structuretoolkit/_version.py"
-parentdir_prefix = "structuretoolkit"
-tag_prefix = "structuretoolkit-"
+[tool.hatch.build.hooks.vcs]
+version-file = "structuretoolkit/_version.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "structuretoolkit"
+]
+
+[tool.hatch.build.targets.wheel]
+packages = [
+    "structuretoolkit"
+]
+
+[tool.hatch.version]
+source = "vcs"
+path = "structuretoolkit/_version.py"
 
 [tool.coverage.run]
 omit = ["structuretoolkit/_version.py", "tests/*"]

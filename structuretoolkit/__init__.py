@@ -1,4 +1,5 @@
 # Analyse
+import structuretoolkit._version
 from structuretoolkit.analyse import (
     find_mic,
     find_solids,
@@ -96,8 +97,6 @@ from structuretoolkit.common import (
 # Visualize
 from structuretoolkit.visualize import plot3d
 
-from . import _version
-
 __all__ = [
     "find_mic",
     "find_solids",
@@ -156,4 +155,5 @@ __all__ = [
     "select_index",
     "plot3d",
 ]
-__version__ = _version.get_versions()["version"]
+
+__version__ = structuretoolkit._version.__version__

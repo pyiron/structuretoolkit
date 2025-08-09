@@ -57,9 +57,8 @@ jobs:
         environment-file: .ci_support/environment_mini.yml
     - name: Test
       shell: bash -l {0}
-      timeout-minutes: 30
+      timeout-minutes: 5
       run: |
-        pip install versioneer[toml]==0.29
         pip install . --no-deps --no-build-isolation
         python -m unittest discover tests
 
@@ -80,7 +79,7 @@ jobs:
     - name: Pip check
       shell: bash -l {0}
       run: |
-        pip install versioneer[toml]==0.29 tomlkit
+        pip install tomlkit
         python .ci_support/check.py
         cat pyproject.toml
         pip install . --no-deps --no-build-isolation
@@ -129,9 +128,8 @@ jobs:
         environment-file: .ci_support/environment.yml
     - name: Test
       shell: bash -l {0}
-      timeout-minutes: 30
+      timeout-minutes: 5
       run: |
-        pip install versioneer[toml]==0.29
         pip install . --no-deps --no-build-isolation
         coverage run
         coverage xml
@@ -157,9 +155,8 @@ jobs:
         environment-file: .ci_support/environment-old.yml
     - name: Test
       shell: bash -l {0}
-      timeout-minutes: 30
+      timeout-minutes: 5
       run: |
-        pip install versioneer[toml]==0.29
         pip install . --no-deps --no-build-isolation
         python -m unittest discover tests
 
