@@ -15,10 +15,8 @@ def get_number_species_atoms(structure: Atoms):
         dict: A dictionary with the species and the corresponding count
 
     """
-    species_dict = {}
-    for i in structure.get_chemical_symbols():
-        species_dict[i] = species_dict.get(i, 0) + 1
-    return species_dict
+    elements_lst = structure.get_chemical_symbols()
+    return {species: elements_lst.count(species) for species in set(elements_lst)}
 
 
 def get_extended_positions(
