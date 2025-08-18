@@ -4,6 +4,7 @@ from structuretoolkit.common.helper import (
     center_coordinates_in_unit_cell,
     get_cell,
     get_extended_positions,
+    get_number_species_atoms,
     get_vertical_length,
     get_wrapped_coordinates,
     select_index,
