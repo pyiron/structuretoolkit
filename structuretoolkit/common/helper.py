@@ -5,7 +5,7 @@ from ase.atoms import Atoms
 from scipy.sparse import coo_matrix
 
 
-def get_number_species_atoms(structure:Atoms):
+def get_number_species_atoms(structure: Atoms):
     """Returns a dictionary with the species in the structure and the corresponding count in the structure
 
     Args:
@@ -17,7 +17,7 @@ def get_number_species_atoms(structure:Atoms):
     """
     species_dict = dict()
     for i in structure.get_chemical_symbols():
-         species_dict[i] = species_dict.get(i, 0) + 1
+        species_dict[i] = species_dict.get(i, 0) + 1
     return specied_dict
 
 
