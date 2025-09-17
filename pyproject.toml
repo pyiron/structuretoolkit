@@ -55,7 +55,7 @@ phonopy = [
     "phonopy==2.43.2",
     "spglib==2.6.0",
 ]
-pyxtal = ["pyxtal==1.1.0"]
+pyxtal = ["pyxtal==1.1.1"]
 
 [tool.ruff]
 exclude = [".ci_support", "tests", "setup.py", "_version.py"]
