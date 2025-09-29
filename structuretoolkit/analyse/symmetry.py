@@ -260,7 +260,7 @@ class Symmetry(dict):
             *sum([s == 3 for s in tensor.shape]) * [self.rotations],
             v,
             optimize=True,
-        )
+        ) / len(self.rotations)
 
     def _get_spglib_cell(
         self, use_elements: Optional[bool] = None, use_magmoms: Optional[bool] = None

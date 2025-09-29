@@ -1,6 +1,6 @@
 [build-system]
-requires = ["ase", "numpy", "setuptools", "scipy", "versioneer[toml]==0.29"]
-build-backend = "setuptools.build_meta"
+requires = ["ase", "numpy", "scipy", "hatchling==1.27.0", "hatch-vcs==0.5.0"]
+build-backend = "hatchling.build"
 
 [project]
 name = "structuretoolkit"
@@ -24,9 +24,9 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
-    "ase==3.25.0",
-    "numpy==1.26.4",
-    "scipy==1.15.2",
+    "ase==3.26.0",
+    "numpy==2.3.3",
+    "scipy==1.16.2",
 ]
 dynamic = ["version"]
 
@@ -36,32 +36,26 @@ Documentation = "https://github.com/pyiron/structuretoolkit"
 Repository = "https://github.com/pyiron/structuretoolkit"
 
 [project.optional-dependencies]
-dscribe = ["dscribe==2.1.1"]
+dscribe = ["dscribe==2.1.2"]
 grainboundary = [
     "aimsgb==1.1.1",
     "pymatgen==2025.3.10",
 ]
-pyscal = ["pyscal3==3.2.7"]
+pyscal = ["pyscal3==3.3.0"]
 nglview = ["nglview==3.1.4"]
-matplotlib = ["matplotlib==3.10.1"]
-plotly = ["plotly==6.2.0"]
-clusters = ["scikit-learn==1.7.1"]
+matplotlib = ["matplotlib==3.10.3"]
+plotly = ["plotly==6.3.0"]
+clusters = ["scikit-learn==1.7.2"]
 symmetry = ["spglib==2.6.0"]
 surface = [
     "spglib==2.6.0",
     "pymatgen==2025.3.10",
 ]
 phonopy = [
-    "phonopy==2.41.3",
+    "phonopy==2.43.2",
     "spglib==2.6.0",
 ]
-pyxtal = ["pyxtal==1.1.0"]
-
-[tool.setuptools.packages.find]
-include = ["structuretoolkit*"]
-
-[tool.setuptools.dynamic]
-version = {attr = "structuretoolkit.__version__"}
+pyxtal = ["pyxtal==1.1.1"]
 
 [tool.ruff]
 exclude = [".ci_support", "tests", "setup.py", "_version.py"]
@@ -112,9 +106,23 @@ ignore = [
     "PLR0915",
 ]
 
-[tool.versioneer]
-VCS = "git"
-style = "pep440-pre"
-versionfile_source = "structuretoolkit/_version.py"
-parentdir_prefix = "structuretoolkit"
-tag_prefix = "structuretoolkit-"
+[tool.hatch.build.hooks.vcs]
+version-file = "structuretoolkit/_version.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "structuretoolkit"
+]
+
+[tool.hatch.build.targets.wheel]
+packages = [
+    "structuretoolkit"
+]
+
+[tool.hatch.version]
+source = "vcs"
+path = "structuretoolkit/_version.py"
+
+[tool.coverage.run]
+omit = ["structuretoolkit/_version.py", "tests/*"]
+command_line = "-m unittest discover tests"

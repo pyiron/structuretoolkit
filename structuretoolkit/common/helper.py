@@ -5,6 +5,20 @@ from ase.atoms import Atoms
 from scipy.sparse import coo_matrix
 
 
+def get_number_species_atoms(structure: Atoms):
+    """Returns a dictionary with the species in the structure and the corresponding count in the structure
+
+    Args:
+        structure
+
+    Returns:
+        dict: A dictionary with the species and the corresponding count
+
+    """
+    elements_lst = structure.get_chemical_symbols()
+    return {species: elements_lst.count(species) for species in set(elements_lst)}
+
+
 def get_extended_positions(
     structure: Atoms,
     width: float,

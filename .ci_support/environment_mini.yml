@@ -1,8 +1,9 @@
 channels:
 - conda-forge
 dependencies:
-- ase =3.25.0
+- ase =3.26.0
 - coverage
-- numpy =1.26.4
-- scipy =1.15.2
-- setuptools
+- numpy =2.3.3
+- scipy =1.16.2
+- hatchling =1.27.0
+- hatch-vcs =0.4.0
