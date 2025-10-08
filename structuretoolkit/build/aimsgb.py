@@ -1,4 +1,3 @@
-# coding: utf-8
 # Copyright (c) Max-Planck-Institut für Eisenforschung GmbH - Computational Materials Design (CM) Department
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
@@ -96,7 +95,7 @@ def grainboundary(
     from aimsgb import Grain, GrainBoundary
 
     if add_if_dist is not None:
-        warn("`add_if_dist` is deprecated, please use `gap` instead.")
+        warn("`add_if_dist` is deprecated, please use `gap` instead.", stacklevel=2)
         gap = add_if_dist
 
     basis_pymatgen = ase_to_pymatgen(structure=initial_struct)

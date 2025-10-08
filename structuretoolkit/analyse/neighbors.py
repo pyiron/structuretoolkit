@@ -1,10 +1,9 @@
-# coding: utf-8
 # Copyright (c) Max-Planck-Institut für Eisenforschung GmbH - Computational Materials Design (CM) Department
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import itertools
 import warnings
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
 from ase.atoms import Atoms
@@ -56,8 +55,7 @@ class Tree:
     def __init__(self, ref_structure: Atoms):
         """
         Args:
-            ref_structure (ase.atoms.Atoms): Reference
-                structure.
+            ref_structure (ase.atoms.Atoms): Reference structure.
         """
         self._distances = None
         self._vectors = None
@@ -95,17 +93,29 @@ class Tree:
             if v:
                 return k
 
-    def _set_mode(self, new_mode: str):
-        if new_mode not in self._mode.keys():
+    def _set_mode(self, new_mode: str) -> None:
+        """
+        Set the mode of representing attributes.
+
+        Args:
+            new_mode (str): The new mode to set.
+
+        Raises:
+            KeyError: If the new mode is not found in the available modes.
+        """
+        if new_mode not in self._mode:
             raise KeyError(
                 f"{new_mode} not found. Available modes: {', '.join(self._mode.keys())}"
             )
-        self._mode = {key: False for key in self._mode.keys()}
+        self._mode = dict.fromkeys(self._mode, False)
         self._mode[new_mode] = True
 
     def __repr__(self) -> str:
         """
-        Returns: __repr__
+        Return a string representation of the Tree object.
+
+        Returns:
+            str: A string representation of the Tree object.
         """
         to_return = (
             "Main attributes:\n"
@@ -115,7 +125,13 @@ class Tree:
         )
         return to_return
 
-    def copy(self):
+    def copy(self) -> "Tree":
+        """
+        Create a copy of the Tree object.
+
+        Returns:
+            Tree: A copy of the Tree object.
+        """
         new_neigh = Tree(self._ref_structure)
         new_neigh._distances = self._distances.copy()
         new_neigh._indices = self._indices.copy()
@@ -135,7 +151,18 @@ class Tree:
         value: np.ndarray,
         key: Optional[str] = None,
         ref_vector: Optional[np.ndarray] = None,
-    ):
+    ) -> np.ndarray:
+        """
+        Reshape the given value based on the specified key and reference vector.
+
+        Args:
+            value (np.ndarray): The value to reshape.
+            key (Optional[str]): The representation mode key. Defaults to None.
+            ref_vector (Optional[np.ndarray]): The reference vector. Defaults to None.
+
+        Returns:
+            np.ndarray: The reshaped value.
+        """
         if value is None:
             raise ValueError("Neighbors not initialized yet")
         if key is None:
@@ -149,11 +176,22 @@ class Tree:
 
     @property
     def distances(self) -> np.ndarray:
-        """Distances to neighboring atoms."""
+        """
+        Get the distances to neighboring atoms.
+
+        Returns:
+            np.ndarray: The distances to neighboring atoms.
+        """
         return self._reshape(self._distances)
 
     @property
     def _vecs(self) -> np.ndarray:
+        """
+        Get the vectors to neighboring atoms.
+
+        Returns:
+            np.ndarray: The vectors to neighboring atoms.
+        """
         if self._vectors is None:
             self._vectors = self._get_vectors(
                 positions=self._positions,
@@ -164,17 +202,32 @@ class Tree:
 
     @property
     def vecs(self) -> np.ndarray:
-        """Vectors to neighboring atoms."""
+        """
+        Get the vectors to neighboring atoms.
+
+        Returns:
+            np.ndarray: The vectors to neighboring atoms.
+        """
         return self._reshape(self._vecs)
 
     @property
     def indices(self) -> np.ndarray:
-        """Indices of neighboring atoms."""
+        """
+        Get the indices of neighboring atoms.
+
+        Returns:
+            np.ndarray: The indices of neighboring atoms.
+        """
         return self._reshape(self._indices)
 
     @property
     def atom_numbers(self) -> np.ndarray:
-        """Indices of atoms."""
+        """
+        Get the indices of atoms.
+
+        Returns:
+            np.ndarray: The indices of atoms.
+        """
         n = np.zeros_like(self.filled.indices)
         n.T[:, :] = np.arange(len(n))
         return self._reshape(n)
@@ -190,13 +243,31 @@ class Tree:
         return self._norm_order
 
     @norm_order.setter
-    def norm_order(self, value: int):
+    def norm_order(self, value: int) -> None:
+        """
+        Set the norm order for the neighborhood search and shell recognition.
+
+        Args:
+            value (int): The norm order value.
+
+        Raises:
+            ValueError: If trying to change the norm_order after initialization.
+        """
         raise ValueError(
             "norm_order cannot be changed after initialization. Re-initialize the Neighbor class"
             + " with the correct norm_order value"
         )
 
     def _get_max_length(self, ref_vector: Optional[np.ndarray] = None) -> int:
+        """
+        Get the maximum length of the reference vector.
+
+        Args:
+            ref_vector (Optional[np.ndarray]): The reference vector. Defaults to None.
+
+        Returns:
+            int: The maximum length of the reference vector.
+        """
         if ref_vector is None:
             ref_vector = self.filled.distances
         if (
@@ -207,7 +278,19 @@ class Tree:
             return None
         return max(len(dd[dd < np.inf]) for dd in ref_vector)
 
-    def _contract(self, value: np.ndarray, ref_vector: Optional[np.ndarray] = None):
+    def _contract(
+        self, value: np.ndarray, ref_vector: Optional[np.ndarray] = None
+    ) -> np.ndarray:
+        """
+        Contract the given value based on the specified reference vector.
+
+        Args:
+            value (np.ndarray): The value to contract.
+            ref_vector (Optional[np.ndarray]): The reference vector. Defaults to None.
+
+        Returns:
+            np.ndarray: The contracted value.
+        """
         if self._get_max_length(ref_vector=ref_vector) is None:
             return value
         return [
@@ -215,7 +298,16 @@ class Tree:
             for vv, dist in zip(value, self.filled.distances)
         ]
 
-    def _allow_ragged_to_mode(self, new_bool: bool):
+    def _allow_ragged_to_mode(self, new_bool: bool) -> str:
+        """
+        Set the representation mode based on the value of new_bool.
+
+        Args:
+            new_bool (bool): The new value for the representation mode.
+
+        Returns:
+            str: The updated representation mode.
+        """
         if new_bool is None:
             return self.mode
         elif new_bool:
@@ -223,18 +315,40 @@ class Tree:
         return "filled"
 
     def _get_extended_positions(self) -> np.ndarray:
+        """
+        Get the extended positions.
+
+        Returns:
+            np.ndarray: The extended positions.
+        """
         if self._extended_positions is None:
             return self._ref_structure.positions
         return self._extended_positions
 
     def _get_wrapped_indices(self) -> np.ndarray:
+        """
+        Get the wrapped indices.
+
+        Returns:
+            np.ndarray: The wrapped indices.
+        """
         if self._wrapped_indices is None:
             return np.arange(len(self._ref_structure.positions))
         return self._wrapped_indices
 
     def _get_wrapped_positions(
         self, positions: np.ndarray, distance_buffer: float = 1.0e-12
-    ):
+    ) -> np.ndarray:
+        """
+        Get the wrapped positions based on the given positions.
+
+        Args:
+            positions (np.ndarray): The positions to wrap.
+            distance_buffer (float): The distance buffer. Defaults to 1.0e-12.
+
+        Returns:
+            np.ndarray: The wrapped positions.
+        """
         if not self.wrap_positions:
             return np.asarray(positions)
         x = np.array(positions).copy()
@@ -251,7 +365,19 @@ class Tree:
         num_neighbors: Optional[int] = None,
         cutoff_radius: float = np.inf,
         width_buffer: float = 1.2,
-    ):
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """
+        Get the distances and indices of the neighbors for the given positions.
+
+        Args:
+            positions (np.ndarray): The positions to get the neighbors for.
+            num_neighbors (Optional[int]): The number of neighbors to consider. Defaults to None.
+            cutoff_radius (float): The cutoff radius for neighbor search. Defaults to np.inf.
+            width_buffer (float): The width buffer for neighbor search. Defaults to 1.2.
+
+        Returns:
+            Tuple[np.ndarray, np.ndarray]: The distances and indices of the neighbors.
+        """
         num_neighbors = self._estimate_num_neighbors(
             num_neighbors=num_neighbors,
             cutoff_radius=cutoff_radius,
@@ -279,7 +405,8 @@ class Tree:
             warnings.warn(
                 "Number of neighbors found within the cutoff_radius is equal to (estimated) "
                 + "num_neighbors. Increase num_neighbors (or set it to None) or "
-                + "width_buffer to find all neighbors within cutoff_radius."
+                + "width_buffer to find all neighbors within cutoff_radius.",
+                stacklevel=2,
             )
         self._extended_indices = indices.copy()
         indices[distances < np.inf] = self._get_wrapped_indices()[
@@ -294,8 +421,10 @@ class Tree:
     @property
     def numbers_of_neighbors(self) -> int:
         """
-        Get number of neighbors for each atom. Same number is returned if `cutoff_radius` was not
-        given in the initialization.
+        Get the number of neighbors for each atom.
+
+        Returns:
+            int: The number of neighbors for each atom. Same number is returned if `cutoff_radius` was not given in the initialization.
         """
         return np.sum(self.filled.distances < np.inf, axis=-1)
 
@@ -307,7 +436,21 @@ class Tree:
         distances: Optional[np.ndarray] = None,
         indices: Optional[np.ndarray] = None,
         width_buffer: float = 1.2,
-    ):
+    ) -> np.ndarray:
+        """
+        Get the vectors of the neighbors for the given positions.
+
+        Args:
+            positions (np.ndarray): The positions to get the neighbors for.
+            num_neighbors (Optional[int]): The number of neighbors to consider. Defaults to None.
+            cutoff_radius (float): The cutoff radius for neighbor search. Defaults to np.inf.
+            distances (Optional[np.ndarray]): The distances of the neighbors. Defaults to None.
+            indices (Optional[np.ndarray]): The indices of the neighbors. Defaults to None.
+            width_buffer (float): The width buffer for neighbor search. Defaults to 1.2.
+
+        Returns:
+            np.ndarray: The vectors of the neighbors.
+        """
         if distances is None or indices is None:
             distances, indices = self._get_distances_and_indices(
                 positions=positions,
@@ -330,16 +473,20 @@ class Tree:
         num_neighbors: Optional[int] = None,
         cutoff_radius: float = np.inf,
         width_buffer: float = 1.2,
-    ):
+    ) -> int:
         """
+        Estimate the number of neighbors required for a given cutoff radius.
 
         Args:
-            num_neighbors (int): number of neighbors
-            width_buffer (float): width of the layer to be added to account for pbc.
-            cutoff_radius (float): self-explanatory
+            num_neighbors (Optional[int]): Number of neighbors. Defaults to None.
+            cutoff_radius (float): Cutoff radius. Defaults to np.inf.
+            width_buffer (float): Width of the layer to be added to account for PBC. Defaults to 1.2.
 
         Returns:
-            Number of atoms required for a given cutoff
+            int: Number of atoms required for the given cutoff.
+
+        Raises:
+            ValueError: If num_neighbors or cutoff_radius is not specified.
 
         """
         if (
@@ -361,7 +508,8 @@ class Tree:
         if num_neighbors > self.num_neighbors:
             warnings.warn(
                 "Taking a larger search area after initialization has the risk of "
-                + "missing neighborhood atoms"
+                + "missing neighborhood atoms",
+                stacklevel=2,
             )
         return num_neighbors
 
@@ -370,16 +518,20 @@ class Tree:
         num_neighbors: Optional[int] = None,
         cutoff_radius: float = np.inf,
         width_buffer: float = 1.2,
-    ):
+    ) -> float:
         """
+        Estimate the width of the layer required for the given number of atoms.
 
         Args:
-            num_neighbors (int): number of neighbors
-            width_buffer (float): width of the layer to be added to account for pbc.
-            cutoff_radius (float): cutoff radius
+            num_neighbors (Optional[int]): Number of neighbors. Defaults to None.
+            cutoff_radius (float): Cutoff radius. Defaults to np.inf.
+            width_buffer (float): Width of the layer to be added to account for PBC. Defaults to 1.2.
 
         Returns:
-            Width of layer required for the given number of atoms
+            float: Width of layer required for the given number of atoms.
+
+        Raises:
+            ValueError: If num_neighbors or cutoff_radius is not specified.
 
         """
         if num_neighbors is None and cutoff_radius == np.inf:
@@ -402,7 +554,7 @@ class Tree:
         num_neighbors: Optional[int] = None,
         cutoff_radius: float = np.inf,
         width_buffer: float = 1.2,
-    ):
+    ) -> "Tree":
         """
         Get neighborhood information of `positions`. What it returns is in principle the same as
         `get_neighborhood` in `Atoms`. The only one difference is the reuse of the same Tree
@@ -410,15 +562,13 @@ class Tree:
         structure changed in the meantime.
 
         Args:
-            position: Position in a box whose neighborhood information is analysed
-            num_neighbors (int): Number of nearest neighbors
-            cutoff_radius (float): Upper bound of the distance to which the search is to be done
-            width_buffer (float): Width of the layer to be added to account for pbc.
+            positions (np.ndarray): Positions in a box whose neighborhood information is analyzed.
+            num_neighbors (Optional[int]): Number of nearest neighbors. Defaults to None.
+            cutoff_radius (float): Upper bound of the distance to which the search is to be done. Defaults to np.inf.
+            width_buffer (float): Width of the layer to be added to account for pbc. Defaults to 1.2.
 
         Returns:
-
-            structuretoolkit.analyse.neighbors.Tree: Neighbors instances with the neighbor indices,
-                distances and vectors
+            Tree: Neighbors instance with the neighbor indices, distances, and vectors.
 
         """
         new_neigh = self.copy()
@@ -437,7 +587,20 @@ class Tree:
         cutoff_radius: float = np.inf,
         exclude_self: bool = False,
         width_buffer: float = 1.2,
-    ):
+    ) -> "Tree":
+        """
+        Get the neighborhood information for the given positions.
+
+        Args:
+            positions (np.ndarray): The positions to get the neighborhood for.
+            num_neighbors (int): The number of neighbors to consider. Defaults to 12.
+            cutoff_radius (float): The cutoff radius for neighbor search. Defaults to np.inf.
+            exclude_self (bool): Whether to exclude the position itself from the neighbors. Defaults to False.
+            width_buffer (float): The width buffer for neighbor search. Defaults to 1.2.
+
+        Returns:
+            Tree: The Tree instance with the neighbor indices, distances, and vectors.
+        """
         start_column = 0
         if exclude_self:
             start_column = 1
@@ -458,16 +621,26 @@ class Tree:
         self._positions = positions
         return self
 
-    def _check_width(self, width: float, pbc: list[bool, bool, bool]):
-        if any(pbc) and np.prod(self.filled.distances.shape) > 0:
-            if (
-                np.linalg.norm(
-                    self.flattened.vecs[..., pbc], axis=-1, ord=self.norm_order
-                ).max()
-                > width
-            ):
-                return True
-        return False
+    def _check_width(self, width: float, pbc: list[bool, bool, bool]) -> bool:
+        """
+        Check if the width of the layer exceeds the specified value.
+
+        Args:
+            width (float): The width of the layer.
+            pbc (list[bool, bool, bool]): The periodic boundary conditions.
+
+        Returns:
+            bool: True if the width exceeds the specified value, False otherwise.
+
+        """
+        return bool(
+            any(pbc)
+            and np.prod(self.filled.distances.shape) > 0
+            and np.linalg.norm(
+                self.flattened.vecs[..., pbc], axis=-1, ord=self.norm_order
+            ).max()
+            > width
+        )
 
     def get_spherical_harmonics(
         self,
@@ -556,7 +729,20 @@ class Tree:
         )
 
     @staticmethod
-    def _get_all_possible_pairs(l: int):
+    def _get_all_possible_pairs(l: int) -> np.ndarray:
+        """
+        Get all possible pairs of indices for a given number of groups.
+
+        Args:
+            l (int): Number of groups.
+
+        Returns:
+            np.ndarray: Array of all possible pairs of indices.
+
+        Raises:
+            ValueError: If the number of groups is odd.
+
+        """
         if l % 2 != 0:
             raise ValueError("Pairs cannot be formed for an uneven number of groups.")
         all_arr = np.array(list(itertools.permutations(np.arange(l), l)))
@@ -625,14 +811,21 @@ class Mode:
     def __dir__(self):
         """Show value names which are available for different filling modes."""
         return list(
-            set(
-                ["distances", "vecs", "indices", "shells", "atom_numbers"]
-            ).intersection(self.ref_neigh.__dir__())
+            {"distances", "vecs", "indices", "shells", "atom_numbers"}.intersection(
+                self.ref_neigh.__dir__()
+            )
         )
 
 
 class Neighbors(Tree):
     def __init__(self, ref_structure: Atoms, tolerance: int = 2):
+        """
+        Neighbors class for analyzing neighboring atoms in a structure.
+
+        Args:
+            ref_structure (ase.Atoms): Reference structure.
+            tolerance (int): Tolerance for rounding distances (default: 2).
+        """
         super().__init__(ref_structure=ref_structure)
         self._tolerance = tolerance
         self._cluster_vecs = None
@@ -640,7 +833,7 @@ class Neighbors(Tree):
 
     def __repr__(self):
         """
-        Returns: __repr__
+        Returns a string representation of the Neighbors object.
         """
         to_return = super().__repr__()
         return to_return.replace("given positions", "each atom")
@@ -651,7 +844,10 @@ class Neighbors(Tree):
         Returns chemical symbols of the neighboring atoms.
 
         Undefined neighbors (i.e. if the neighbor distance is beyond the cutoff radius) are
-        considered as vacancies and are marked by 'v'
+        considered as vacancies and are marked by 'v'.
+
+        Returns:
+            np.ndarray: Chemical symbols of neighboring atoms.
         """
         chemical_symbols = np.tile(["v"], self.filled.indices.shape).astype("<U2")
         cond = self.filled.indices < len(self._ref_structure)
@@ -663,7 +859,10 @@ class Neighbors(Tree):
     @property
     def shells(self) -> np.ndarray:
         """
-        Returns the cell numbers of each atom according to the distances
+        Returns the cell numbers of each atom according to the distances.
+
+        Returns:
+            np.ndarray: Shell indices.
         """
         return self.get_local_shells(mode=self.mode)
 
@@ -673,7 +872,7 @@ class Neighbors(Tree):
         tolerance: Optional[int] = None,
         cluster_by_distances: bool = False,
         cluster_by_vecs: bool = False,
-    ):
+    ) -> np.ndarray:
         """
         Set shell indices based on distances available to each atom. Clustering methods can be used
         at the same time, which will be useful at finite temperature results, but depending on how
@@ -682,18 +881,16 @@ class Neighbors(Tree):
         and does not execute the clustering method(-s) again.
 
         Args:
-            mode (str): Representation of the variable. Choose from 'filled', 'ragged' and
-                'flattened'.
-            tolerance (int): decimals in np.round for rounding up distances
+            mode (str): Representation of the variable. Choose from 'filled', 'ragged' and 'flattened'.
+            tolerance (int): Decimals in np.round for rounding up distances.
             cluster_by_distances (bool): If True, `cluster_by_distances` is called first and the distances obtained
                 from the clustered distances are used to calculate the shells. If cluster_by_vecs is True at the same
-                time, `cluster_by_distances` will use the clustered vectors for its clustering algorithm. For more,
-                see the DocString of `cluster_by_distances`. (default: False)
+                time, `cluster_by_distances` will use the clustered vectors for its clustering algorithm.
             cluster_by_vecs (bool): If True, `cluster_by_vectors` is called first and the distances obtained from
-                the clustered vectors are used to calculate the shells. (default: False)
+                the clustered vectors are used to calculate the shells.
 
         Returns:
-            shells (numpy.ndarray): shell indices
+            np.ndarray: Shell indices.
         """
         if tolerance is None:
             tolerance = self._tolerance
@@ -754,7 +951,7 @@ class Neighbors(Tree):
         tolerance: Optional[int] = None,
         cluster_by_distances: bool = False,
         cluster_by_vecs: bool = False,
-    ):
+    ) -> np.ndarray:
         """
         Set shell indices based on all distances available in the system instead of
         setting them according to the local distances (in contrast to shells defined
@@ -767,16 +964,15 @@ class Neighbors(Tree):
         Args:
             mode (str): Representation of the variable. Choose from 'filled', 'ragged' and
                 'flattened'.
-            tolerance (int): decimals in np.round for rounding up distances (default: 2)
+            tolerance (int): Decimals in np.round for rounding up distances.
             cluster_by_distances (bool): If True, `cluster_by_distances` is called first and the distances obtained
                 from the clustered distances are used to calculate the shells. If cluster_by_vecs is True at the same
-                time, `cluster_by_distances` will use the clustered vectors for its clustering algorithm. For more,
-                see the DocString of `cluster_by_distances`. (default: False)
+                time, `cluster_by_distances` will use the clustered vectors for its clustering algorithm.
             cluster_by_vecs (bool): If True, `cluster_by_vectors` is called first and the distances obtained from
-                the clustered vectors are used to calculate the shells. (default: False)
+                the clustered vectors are used to calculate the shells.
 
-        Returns:
-            shells (numpy.ndarray): shell indices (cf. shells)
+        Returns:self.cluster_by_distances(use_vecs=cluster_by_vecs)
+            np.ndarray: Shell indices.
         """
         if tolerance is None:
             tolerance = self._tolerance
@@ -812,7 +1008,7 @@ class Neighbors(Tree):
 
     def get_shell_matrix(
         self,
-        chemical_pair: Optional[list] = None,
+        chemical_pair: Optional[list[str]] = None,
         cluster_by_distances: bool = False,
         cluster_by_vecs: bool = False,
     ):
@@ -1027,23 +1223,25 @@ class Neighbors(Tree):
         if distances:
             self._cluster_distances = None
 
-    def cluster_analysis(self, id_list: list, return_cluster_sizes: bool = False):
+    def cluster_analysis(
+        self, id_list: list, return_cluster_sizes: bool = False
+    ) -> Union[dict[int, list[int]], tuple[dict[int, list[int]], list[int]]]:
         """
+        Perform cluster analysis on a list of atom IDs.
 
         Args:
-            id_list:
-            return_cluster_sizes:
+            id_list (list): List of atom IDs to perform cluster analysis on.
+            return_cluster_sizes (bool): Whether to return the sizes of each cluster.
 
         Returns:
+            Union[Dict[int, List[int]], Tuple[Dict[int, List[int]], List[int]]]: Dictionary mapping cluster IDs to a list of atom IDs in each cluster.
+                If return_cluster_sizes is True, also returns a list of cluster sizes.
 
         """
         self._cluster = [0] * len(self._ref_structure)
         c_count = 1
-        # element_list = self.get_atomic_numbers()
         for ia in id_list:
-            # el0 = element_list[ia]
             nbrs = self.ragged.indices[ia]
-            # print ("nbrs: ", ia, nbrs)
             if self._cluster[ia] == 0:
                 self._cluster[ia] = c_count
                 self.__probe_cluster(c_count, nbrs, id_list)
@@ -1059,23 +1257,27 @@ class Neighbors(Tree):
 
         return cluster_dict  # sizes
 
-    def __probe_cluster(self, c_count: int, neighbors: list, id_list: list):
+    def __probe_cluster(
+        self, c_count: int, neighbors: list[int], id_list: list[int]
+    ) -> None:
         """
+        Recursively probe the cluster and assign cluster IDs to neighbors.
 
         Args:
-            c_count:
-            neighbors:
-            id_list:
+            c_count (int): Cluster count.
+            neighbors (List[int]): List of neighbor IDs.
+            id_list (List[int]): List of atom IDs.
 
         Returns:
-
+            None
         """
         for nbr_id in neighbors:
-            if self._cluster[nbr_id] == 0:
-                if nbr_id in id_list:  # TODO: check also for ordered structures
-                    self._cluster[nbr_id] = c_count
-                    nbrs = self.ragged.indices[nbr_id]
-                    self.__probe_cluster(c_count, nbrs, id_list)
+            if (
+                self._cluster[nbr_id] == 0 and nbr_id in id_list
+            ):  # TODO: check also for ordered structures
+                self._cluster[nbr_id] = c_count
+                nbrs = self.ragged.indices[nbr_id]
+                self.__probe_cluster(c_count, nbrs, id_list)
 
     # TODO: combine with corresponding routine in plot3d
     def get_bonds(
@@ -1083,19 +1285,34 @@ class Neighbors(Tree):
         radius: float = np.inf,
         max_shells: Optional[int] = None,
         prec: float = 0.1,
-    ):
+    ) -> list[dict[str, list[list[int]]]]:
         """
+        Get the bonds in the structure.
 
         Args:
-            radius:
-            max_shells:
-            prec: minimum distance between any two clusters (if smaller considered to be single cluster)
+            radius (float): The maximum distance for a bond to be considered.
+            max_shells (int, optional): The maximum number of shells to consider for each atom.
+            prec (float): The minimum distance between any two clusters. If smaller, they are considered as a single cluster.
 
         Returns:
-
+            List[Dict[str, List[List[int]]]]: A list of dictionaries, where each dictionary represents the shells around an atom.
+                The keys of the dictionary are the element symbols, and the values are lists of atom indices for each shell.
         """
 
-        def get_cluster(dist_vec, ind_vec, prec=prec):
+        def get_cluster(
+            dist_vec: np.ndarray, ind_vec: np.ndarray, prec: float = prec
+        ) -> list[np.ndarray]:
+            """
+            Get clusters from a distance vector and index vector.
+
+            Args:
+                dist_vec (np.ndarray): The distance vector.
+                ind_vec (np.ndarray): The index vector.
+                prec (float): The minimum distance between any two clusters.
+
+            Returns:
+                List[np.ndarray]: A list of arrays, where each array represents a cluster of indices.
+            """
             ind_where = np.where(np.diff(dist_vec) > prec)[0] + 1
             ind_vec_cl = [np.sort(group) for group in np.split(ind_vec, ind_where)]
             return ind_vec_cl
@@ -1107,7 +1324,6 @@ class Neighbors(Tree):
         ind_shell = []
         for d, i in zip(dist, ind):
             id_list = get_cluster(d[d < radius], i[d < radius])
-            # print ("id: ", d[d<radius], id_list, dist_lst)
             ia_shells_dict = {}
             for i_shell_list in id_list:
                 ia_shell_dict = {}
@@ -1119,9 +1335,11 @@ class Neighbors(Tree):
                 for el, ia_lst in ia_shell_dict.items():
                     if el not in ia_shells_dict:
                         ia_shells_dict[el] = []
-                    if max_shells is not None:
-                        if len(ia_shells_dict[el]) + 1 > max_shells:
-                            continue
+                    if (
+                        max_shells is not None
+                        and len(ia_shells_dict[el]) + 1 > max_shells
+                    ):
+                        continue
                     ia_shells_dict[el].append(ia_lst)
             ind_shell.append(ia_shells_dict)
         return ind_shell
@@ -1148,27 +1366,22 @@ def get_neighbors(
     width_buffer: float = 1.2,
     mode: str = "filled",
     norm_order: int = 2,
-):
+) -> Neighbors:
     """
+    Get the neighbors of atoms in a structure.
 
     Args:
-        num_neighbors (int): number of neighbors
-        tolerance (int): tolerance (round decimal points) used for computing neighbor shells
-        id_list (list): list of atoms the neighbors are to be looked for
-        cutoff_radius (float): Upper bound of the distance to which the search must be done
-        width_buffer (float): width of the layer to be added to account for pbc.
-        mode (str): Representation of per-atom quantities (distances etc.). Choose from
-            'filled', 'ragged' and 'flattened'.
-        norm_order (int): Norm to use for the neighborhood search and shell recognition. The
-            definition follows the conventional Lp norm (cf.
-            https://en.wikipedia.org/wiki/Lp_space). This is an feature and for anything
-            other than norm_order=2, there is no guarantee that this works flawlessly.
+        structure (Atoms): The structure to analyze.
+        num_neighbors (int): The number of neighbors to find for each atom.
+        tolerance (int): The tolerance (round decimal points) used for computing neighbor shells.
+        id_list (list): The list of atoms for which neighbors are to be found.
+        cutoff_radius (float): The upper bound of the distance to which the search must be done.
+        width_buffer (float): The width of the layer to be added to account for periodic boundary conditions.
+        mode (str): The representation of per-atom quantities (distances etc.). Choose from 'filled', 'ragged', and 'flattened'.
+        norm_order (int): The norm to use for the neighborhood search and shell recognition.
 
     Returns:
-
-        structuretoolkit.analyse.neighbors.Neighbors: Neighbors instances with the neighbor
-            indices, distances and vectors
-
+        Neighbors: An instance of the Neighbors class with the neighbor indices, distances, and vectors.
     """
     neigh = _get_neighbors(
         structure=structure,
@@ -1192,7 +1405,23 @@ def _get_neighbors(
     width_buffer: float = 1.2,
     get_tree: bool = False,
     norm_order: int = 2,
-):
+) -> Union[Neighbors, Tree]:
+    """
+    Get the neighbors of atoms in a structure.
+
+    Args:
+        structure (Atoms): The structure to analyze.
+        num_neighbors (int): The number of neighbors to find for each atom.
+        tolerance (int): The tolerance (round decimal points) used for computing neighbor shells.
+        id_list (list): The list of atoms for which neighbors are to be found.
+        cutoff_radius (float): The upper bound of the distance to which the search must be done.
+        width_buffer (float): The width of the layer to be added to account for periodic boundary conditions.
+        get_tree (bool): Whether to return a Tree instance instead of Neighbors.
+        norm_order (int): The norm to use for the neighborhood search and shell recognition.
+
+    Returns:
+        Union[Neighbors, Tree]: An instance of the Neighbors class or Tree class with the neighbor indices, distances, and vectors.
+    """
     if num_neighbors is not None and num_neighbors <= 0:
         raise ValueError("invalid number of neighbors")
     if width_buffer < 0:
@@ -1227,7 +1456,8 @@ def _get_neighbors(
     if neigh._check_width(width=width, pbc=structure.pbc):
         warnings.warn(
             "width_buffer may have been too small - "
-            "most likely not all neighbors properly assigned"
+            "most likely not all neighbors properly assigned",
+            stacklevel=2,
         )
     return neigh
 

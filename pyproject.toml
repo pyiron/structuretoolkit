@@ -1,6 +1,6 @@
 [build-system]
-requires = ["ase", "numpy", "setuptools", "scipy", "versioneer[toml]==0.29"]
-build-backend = "setuptools.build_meta"
+requires = ["ase", "numpy", "scipy", "hatchling==1.27.0", "hatch-vcs==0.5.0"]
+build-backend = "hatchling.build"
 
 [project]
 name = "structuretoolkit"
@@ -11,7 +11,7 @@ authors = [
 readme = "README.md"
 license = { file = "LICENSE" }
 keywords = ["pyiron"]
-requires-python = ">=3.9, <3.13"
+requires-python = ">=3.9, <3.14"
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Topic :: Scientific/Engineering :: Physics",
@@ -22,11 +22,12 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
-    "ase==3.23.0",
-    "numpy==1.26.4",
-    "scipy==1.14.0",
+    "ase==3.26.0",
+    "numpy==2.3.3",
+    "scipy==1.16.2",
 ]
 dynamic = ["version"]
 
@@ -36,37 +37,94 @@ Documentation = "https://github.com/pyiron/structuretoolkit"
 Repository = "https://github.com/pyiron/structuretoolkit"
 
 [project.optional-dependencies]
-dscribe = ["dscribe==2.1.1"]
+dscribe = ["dscribe==2.1.2"]
 grainboundary = [
     "aimsgb==1.1.1",
-    "pymatgen==2024.6.10",
+    "pymatgen==2025.6.14",
 ]
-pyscal = ["pyscal3==3.2.6"]
-nglview = ["nglview==3.1.2"]
-matplotlib = ["matplotlib==3.9.1"]
-plotly = ["plotly==5.22.0"]
-clusters = ["scikit-learn==1.5.1"]
-symmetry = ["spglib==2.5.0"]
+pyscal = ["pyscal3==3.3.0"]
+nglview = ["nglview==3.1.4"]
+matplotlib = ["matplotlib==3.10.6"]
+plotly = ["plotly==6.3.1"]
+clusters = ["scikit-learn==1.7.2"]
+symmetry = ["spglib==2.6.0"]
 surface = [
-    "spglib==2.5.0",
-    "pymatgen==2024.6.10",
+    "spglib==2.6.0",
+    "pymatgen==2025.6.14",
 ]
 phonopy = [
-    "phonopy==2.26.5",
-    "spglib==2.5.0",
+    "phonopy==2.43.2",
+    "spglib==2.6.0",
 ]
-pyxtal = ["pyxtal==0.6.7"]
+pyxtal = ["pyxtal==1.1.1"]
 fitsnap3 = ["fitsnap3==3.1.0.2"]
 
-[tool.setuptools.packages.find]
-include = ["structuretoolkit*"]
+[tool.ruff]
+exclude = [".ci_support", "tests", "setup.py", "_version.py"]
 
-[tool.setuptools.dynamic]
-version = {attr = "structuretoolkit.__version__"}
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+    # flake8-comprehensions
+    "C4",
+    # eradicate
+    "ERA",
+    # pylint
+    "PL",
+]
+ignore = [
+    # ignore functions in argument defaults
+    "B008",
+    # ignore exception naming
+    "B904",
+    # ignore line-length violations
+    "E501",
+    # ignore equality comparisons for numpy arrays
+    "E712",
+    # ignore bare except
+    "E722",
+    # ignore ambiguous variable name
+    "E741",
+    # ignore imports which are not at the top of a module
+    "PLC0415",
+    # Too many arguments in function definition
+    "PLR0913",
+    # Magic value used in comparison
+    "PLR2004",
+    # Too many branches
+    "PLR0912",
+    # Too many statements
+    "PLR0915",
+]
 
-[tool.versioneer]
-VCS = "git"
-style = "pep440-pre"
-versionfile_source = "structuretoolkit/_version.py"
-parentdir_prefix = "structuretoolkit"
-tag_prefix = "structuretoolkit-"
+[tool.hatch.build.hooks.vcs]
+version-file = "structuretoolkit/_version.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "structuretoolkit"
+]
+
+[tool.hatch.build.targets.wheel]
+packages = [
+    "structuretoolkit"
+]
+
+[tool.hatch.version]
+source = "vcs"
+path = "structuretoolkit/_version.py"
+
+[tool.coverage.run]
+omit = ["structuretoolkit/_version.py", "tests/*"]
+command_line = "-m unittest discover tests"

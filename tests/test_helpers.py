@@ -22,6 +22,14 @@ class TestHelpers(unittest.TestCase):
             stk.get_cell(np.arange(4))
         with self.assertRaises(ValueError):
             stk.get_cell(np.ones((4, 3)))
+    
+    def test_get_number_species_atoms(self):
+        with self.subTest("Fe8"):
+            atoms = bulk("Fe").repeat(2) 
+            self.assertEqual(stk.get_number_species_atoms(atoms), {'Fe': 8})
+        with self.subTest('Al2Fe8'):
+            atoms = bulk('Fe').repeat(2) + bulk('Al').repeat((2,1,1))
+            self.assertEqual(stk.get_number_species_atoms(atoms), {'Fe': 8, 'Al':2})
 
 
 if __name__ == "__main__":

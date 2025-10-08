@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import typing
-import warnings
-
+import ase
 import numpy as np
 
 from structuretoolkit.common.helper import get_cell
@@ -13,9 +11,9 @@ class MeshInputError(ValueError):
 
 
 def create_mesh(
-    cell: typing.Union["ase.atoms.Atoms", np.ndarray, list, float],
-    n_mesh: typing.Union[int, list[int, int, int]] = 10,
-    density: typing.Optional[float] = None,
+    cell: ase.atoms.Atoms | np.ndarray | list | float,
+    n_mesh: int | list[int, int, int] = 10,
+    density: float | None = None,
     endpoint: bool = False,
 ):
     """
@@ -41,8 +39,7 @@ def create_mesh(
         n_mesh = np.rint(np.linalg.norm(cell, axis=-1) / density).astype(int)
     elif density is not None:
         raise MeshInputError(
-            "You cannot set n_mesh at density at the same time. Set one of"
-            " them to None"
+            "You cannot set n_mesh at density at the same time. Set one of them to None"
         )
     n_mesh = np.atleast_1d(n_mesh).astype(int)
     if len(n_mesh) == 1:

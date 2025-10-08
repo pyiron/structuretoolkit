@@ -10,7 +10,7 @@ eV_div_A3_to_bar = 1e25 / physical_constants["joule-electron volt relationship"]
 
 def get_per_atom_quad(linear_per_atom: np.ndarray) -> np.ndarray:
     """
-    Calculate quadratic par-atom SNAP descriptors from the linear SNAP descriptors, by multiplying the individual
+    Calculate quadratic per-atom SNAP descriptors from the linear SNAP descriptors, by multiplying the individual
     components of the SNAP descriptors.
 
     Args:
@@ -64,7 +64,7 @@ def get_snap_descriptors_per_atom(
     structure: Atoms,
     atom_types: list[str],
     twojmax: int = 6,
-    element_radius: list[int] = [4.0],
+    element_radius: list[int] = None,
     rcutfac: float = 1.0,
     rfac0: float = 0.99363,
     rmin0: float = 0.0,
@@ -92,6 +92,8 @@ def get_snap_descriptors_per_atom(
     Returns:
         np.ndarray: Numpy array with the calculated descriptor derivatives
     """
+    if element_radius is None:
+        element_radius = [4.0]
     lmp, bispec_options, cutoff = _get_default_parameters(
         atom_types=atom_types,
         twojmax=twojmax,
@@ -113,7 +115,7 @@ def get_snap_descriptor_derivatives(
     structure: Atoms,
     atom_types: list[str],
     twojmax: int = 6,
-    element_radius: list[int] = [4.0],
+    element_radius: list[int] = None,
     rcutfac: float = 1.0,
     rfac0: float = 0.99363,
     rmin0: float = 0.0,
@@ -141,6 +143,8 @@ def get_snap_descriptor_derivatives(
     Returns:
         np.ndarray: Numpy array with the calculated descriptor derivatives
     """
+    if element_radius is None:
+        element_radius = [4.0]
     lmp, bispec_options, cutoff = _get_default_parameters(
         atom_types=atom_types,
         twojmax=twojmax,
@@ -204,6 +208,15 @@ def _get_lammps_compatible_cell(cell: np.ndarray) -> np.ndarray:
 
 
 def _convert_mat(mat: np.ndarray) -> np.ndarray:
+    """
+    Convert a matrix to a 1D array by taking the upper triangular elements.
+
+    Args:
+        mat (np.ndarray): Input matrix
+
+    Returns:
+        np.ndarray: 1D array containing the upper triangular elements of the matrix
+    """
     mat[np.diag_indices_from(mat)] /= 2
     return mat[np.triu_indices(len(mat))]
 
@@ -411,7 +424,7 @@ def _calc_snap_per_atom(
         return np.array([])
     else:
         if (
-            "quadraticflag" in bispec_options.keys()
+            "quadraticflag" in bispec_options
             and int(bispec_options["quadraticflag"]) == 1
         ):
             return _extract_compute_np(
@@ -512,7 +525,7 @@ def _set_computes_snap(lmp, bispec_options: dict):
     kw_substrings = [f"{k} {v}" for k, v in kw_options.items()]
     kwargs = " ".join(kw_substrings)
 
-    for op, base in zip(("b", "db", "vb"), (base_b, base_db, base_vb)):
+    for _op, base in zip(("b", "db", "vb"), (base_b, base_db, base_vb)):
         command = f"{base} {radelem} {wj} {kwargs}"
         lmp.command(command)
 
@@ -536,16 +549,15 @@ def _extract_computes_snap(
         np.ndarray: Output of the LAMMPS compute command
     """
     lmp_atom_ids = lmp.numpy.extract_atom_iarray("id", num_atoms).flatten()
-    assert np.all(
-        lmp_atom_ids == 1 + np.arange(num_atoms)
-    ), "LAMMPS seems to have lost atoms"
+    cond = np.all(lmp_atom_ids == 1 + np.arange(num_atoms))
+    assert cond, "LAMMPS seems to have lost atoms"
 
     # Extract types
     lmp_types = lmp.numpy.extract_atom_iarray(name="type", nelem=num_atoms).flatten()
     lmp_volume = lmp.get_thermo("vol")
 
     # Extract Bsum
-    lmp_bsum = _extract_compute_np(lmp, "b_sum", 0, 1, (n_coeff))
+    _extract_compute_np(lmp, "b_sum", 0, 1, (n_coeff))
 
     # Extract B
     lmp_barr = _extract_compute_np(lmp, "b", 1, 2, (num_atoms, n_coeff))
@@ -560,16 +572,14 @@ def _extract_computes_snap(
 
     lmp_dbarr = _extract_compute_np(lmp, "db", 1, 2, (num_atoms, num_types, 3, n_coeff))
     lmp_dbsum = _extract_compute_np(lmp, "db_sum", 0, 1, (num_types, 3, n_coeff))
-    assert np.allclose(
-        lmp_dbsum, lmp_dbarr.sum(axis=0), rtol=1e-12, atol=1e-12
-    ), "db_sum doesn't match sum of db"
+    cond = np.allclose(lmp_dbsum, lmp_dbarr.sum(axis=0), rtol=1e-12, atol=1e-12)
+    assert cond, "db_sum doesn't match sum of db"
     db_atom = np.transpose(lmp_dbarr, (0, 2, 1, 3))
 
     lmp_vbarr = _extract_compute_np(lmp, "vb", 1, 2, (num_atoms, num_types, 6, n_coeff))
     lmp_vbsum = _extract_compute_np(lmp, "vb_sum", 0, 1, (num_types, 6, n_coeff))
-    assert np.allclose(
-        lmp_vbsum, lmp_vbarr.sum(axis=0), rtol=1e-12, atol=1e-12
-    ), "vb_sum doesn't match sum of vb"
+    cond = np.allclose(lmp_vbsum, lmp_vbarr.sum(axis=0), rtol=1e-12, atol=1e-12)
+    assert cond, "vb_sum doesn't match sum of vb"
     vb_sum = np.transpose(lmp_vbsum, (1, 0, 2)) / lmp_volume * eV_div_A3_to_bar
 
     dbatom_shape = db_atom.shape
@@ -622,7 +632,7 @@ def _calc_snap_derivatives(
         return np.array([])
     else:
         if (
-            "quadraticflag" in bispec_options.keys()
+            "quadraticflag" in bispec_options
             and int(bispec_options["quadraticflag"]) == 1
         ):
             return _extract_computes_snap(
@@ -672,10 +682,7 @@ def _get_default_parameters(
     """
     from lammps import lammps
 
-    if weights is None:
-        wj = [1.0] * len(atom_types)
-    else:
-        wj = weights
+    wj = [1.0] * len(atom_types) if weights is None else weights
     if isinstance(element_radius, float):
         radelem = [element_radius] * len(atom_types)
     else:
