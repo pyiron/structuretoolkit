@@ -29,6 +29,19 @@ from structuretoolkit.analyse.spatial import (
 )
 from structuretoolkit.analyse.strain import get_strain
 
+try:
+    from structuretoolkit.analyse.fitsnap import (
+        get_ace_descriptor_derivatives,
+    )
+    from structuretoolkit.analyse.fitsnap import (
+        get_ace_descriptor_derivatives as get_ace_descriptor_derivatives_fitsnap,
+    )
+    from structuretoolkit.analyse.fitsnap import (
+        get_snap_descriptor_derivatives as get_snap_descriptor_derivatives_fitsnap,
+    )
+except ImportError:
+    pass
+
 
 def get_symmetry(
     structure, use_magmoms=False, use_elements=True, symprec=1e-5, angle_tolerance=-1.0

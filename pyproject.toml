@@ -57,6 +57,7 @@ phonopy = [
     "spglib==2.6.0",
 ]
 pyxtal = ["pyxtal==1.1.1"]
+fitsnap3 = ["fitsnap3==3.1.0.2"]
 
 [tool.ruff]
 exclude = [".ci_support", "tests", "setup.py", "_version.py"]
