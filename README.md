@@ -48,7 +48,6 @@ stk.plot3d(structure)
 * `stk.build.high_index_surface()`
 * `stk.build.get_high_index_surface_info()`
 * `stk.build.sqs_structures()`
-* `stk.build.pyxtal()`
 * `stk.build.B2()`
 * `stk.build.C14()`
 * `stk.build.C15()`
