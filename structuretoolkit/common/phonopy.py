@@ -13,7 +13,7 @@ def phonopy_to_atoms(ph_atoms) -> Atoms:
     return Atoms(
         symbols=list(ph_atoms.get_chemical_symbols()),
         positions=list(ph_atoms.get_positions()),
-        cell=list(ph_atoms.get_cell()),
+        cell=list(ph_atoms.cell),
         pbc=True,
     )
 
