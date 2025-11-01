@@ -155,7 +155,7 @@ def transpose(it: Iterable[Iterable]) -> Iterable[tuple]:
         Iterable[tuple]: The transposed iterable.
 
     """
-    return zip(*it)
+    return zip(*it, strict=True)
 
 
 def sqs_structures(

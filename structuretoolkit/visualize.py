@@ -195,7 +195,7 @@ def _draw_box_plotly(fig: Any, structure: Atoms, px: Any, go: Any) -> Any:
     cell = get_cell(structure)
     data = fig.data
     for lines in _get_box_skeleton(cell):
-        fig = px.line_3d(**dict(zip(["x", "y", "z"], lines.T)))
+        fig = px.line_3d(**dict(zip(["x", "y", "z"], lines.T, strict=True)))
         fig.update_traces(line_color="#000000")
         data = fig.data + data
     return go.Figure(data=data)

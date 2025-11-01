@@ -295,7 +295,7 @@ class Tree:
             return value
         return [
             vv[: np.sum(dist < np.inf)]
-            for vv, dist in zip(value, self.filled.distances)
+            for vv, dist in zip(value, self.filled.distances, strict=True)
         ]
 
     def _allow_ragged_to_mode(self, new_bool: bool) -> str:
@@ -1322,7 +1322,7 @@ class Neighbors(Tree):
         el_list = self._ref_structure.get_chemical_symbols()
 
         ind_shell = []
-        for d, i in zip(dist, ind):
+        for d, i in zip(dist, ind, strict=True):
             id_list = get_cluster(d[d < radius], i[d < radius])
             ia_shells_dict = {}
             for i_shell_list in id_list:
