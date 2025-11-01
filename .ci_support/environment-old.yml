@@ -11,7 +11,7 @@ dependencies:
 - pymatgen =2022.2.1
 - pyscal3 =3.2.5
 - scikit-learn =1.2.1
-- scipy =1.9.3
+- scipy =1.15.0
 - spglib =1.16.5
 - sqsgenerator =0.2
 - hatchling =1.27.0
