@@ -685,7 +685,7 @@ class Tree:
         phi[within_cutoff] = np.arctan2(
             np.linalg.norm(vecs[within_cutoff, :2], axis=-1), vecs[within_cutoff, 2]
         )
-        return np.sum(sph_harm_y(m, l, theta, phi) * within_cutoff, axis=-1) / np.sum(
+        return np.sum(sph_harm_y(l, m, theta, phi) * within_cutoff, axis=-1) / np.sum(
             within_cutoff, axis=-1
         )
 
