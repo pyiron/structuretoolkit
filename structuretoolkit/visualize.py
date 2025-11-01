@@ -195,7 +195,7 @@ def _draw_box_plotly(fig: Any, structure: Atoms, px: Any, go: Any) -> Any:
     cell = get_cell(structure)
     data = fig.data
     for lines in _get_box_skeleton(cell):
-        fig = px.line_3d(**dict(zip(["x", "y", "z"], lines.T)))
+        fig = px.line_3d(**dict(zip(["x", "y", "z"], lines.T, strict=True)))
         fig.update_traces(line_color="#000000")
         data = fig.data + data
     return go.Figure(data=data)
@@ -462,7 +462,7 @@ def _plot3d(
             vector_color = np.ones((len(structure), 3)) * vector_color
 
     if vector_field is not None:
-        for arr, pos, col in zip(vector_field, positions, vector_color):
+        for arr, pos, col in zip(vector_field, positions, vector_color, strict=True):
             view.shape.add_arrow(list(pos), list(pos + arr), list(col), 0.2)
 
     if show_axes:  # Add axes
@@ -689,7 +689,7 @@ def _add_colorscheme_spacefill(
     Returns:
         (nglview.NGLWidget): The modified widget.
     """
-    for elem, num in set(zip(elements, atomic_numbers)):
+    for elem, num in set(zip(elements, atomic_numbers, strict=True)):
         view.add_spacefill(
             selection="#" + elem,
             radius_type="vdw",

@@ -396,7 +396,7 @@ class TestAtoms(unittest.TestCase):
         neigh = stk.analyse.get_neighbors(
             structure=structure, cutoff_radius=r, num_neighbors=None, mode="ragged"
         )
-        for i, (a, d) in enumerate(zip(neigh.atom_numbers, neigh.distances)):
+        for i, (a, d) in enumerate(zip(neigh.atom_numbers, neigh.distances, strict=True)):
             self.assertEqual(np.sum(a - len(d) * [i]), 0)
         neigh = stk.analyse.get_neighbors(
             structure=structure, cutoff_radius=r, num_neighbors=None, mode="flattened"

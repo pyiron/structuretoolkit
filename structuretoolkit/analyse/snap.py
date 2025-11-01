@@ -524,7 +524,7 @@ def _set_computes_snap(lmp, bispec_options: dict):
     kw_substrings = [f"{k} {v}" for k, v in kw_options.items()]
     kwargs = " ".join(kw_substrings)
 
-    for _op, base in zip(("b", "db", "vb"), (base_b, base_db, base_vb)):
+    for _op, base in zip(("b", "db", "vb"), (base_b, base_db, base_vb), strict=True):
         command = f"{base} {radelem} {wj} {kwargs}"
         lmp.command(command)
 

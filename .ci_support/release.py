@@ -15,7 +15,7 @@ def get_setup_version_and_pattern(setup_content):
                     version_lst.append(dep.split("==")[1])
                     depend_lst.append(dep.split("==")[0])
 
-    version_high_dict = {d: v for d, v in zip(depend_lst, version_lst)}
+    version_high_dict = {d: v for d, v in zip(depend_lst, version_lst, strict=True)}
     return version_high_dict
 
 
@@ -30,7 +30,7 @@ def get_env_version(env_content):
             if len(lst) == 2:
                 depend_lst.append(lst[0])
                 version_lst.append(lst[1])
-    return {d: v for d, v in zip(depend_lst, version_lst)}
+    return {d: v for d, v in zip(depend_lst, version_lst, strict=True)}
 
 
 def update_dependencies(setup_content, version_low_dict, version_high_dict):

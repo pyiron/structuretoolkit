@@ -55,7 +55,7 @@ def get_steinhardt_parameters(
 
         cl = cluster.KMeans(n_clusters=n_clusters)
 
-        ind = cl.fit(list(zip(*sysq))).labels_
+        ind = cl.fit(list(zip(*sysq, strict=True))).labels_
         return sysq, ind
     else:
         return sysq
@@ -197,7 +197,10 @@ def get_adaptive_cna_descriptors(
         if not ovito_compatibility:
             return cna
         else:
-            return {o: cna[p] for o, p in zip(ovito_parameter, pyscal_parameter)}
+            return {
+                o: cna[p]
+                for o, p in zip(ovito_parameter, pyscal_parameter, strict=True)
+            }
     else:
         cnalist = np.array(sys.atoms.structure)
         if mode == "numeric":

@@ -285,7 +285,7 @@ class TestSymmetry(unittest.TestCase):
         vec[neigh.indices[0]] = neigh.vecs[0]
         sym = stk.analyse.get_symmetry(structure=structure)
         all_vectors = np.einsum("ijk,ink->inj", sym.rotations, vec[sym.permutations])
-        for i, v in zip(neigh.indices, neigh.vecs):
+        for i, v in zip(neigh.indices, neigh.vecs, strict=True):
             vec = np.zeros_like(structure.positions)
             vec[i] = v
             self.assertAlmostEqual(
