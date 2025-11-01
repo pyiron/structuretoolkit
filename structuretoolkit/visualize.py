@@ -462,7 +462,7 @@ def _plot3d(
             vector_color = np.ones((len(structure), 3)) * vector_color
 
     if vector_field is not None:
-        for arr, pos, col in zip(vector_field, positions, vector_color):
+        for arr, pos, col in zip(vector_field, positions, vector_color, strict=True):
             view.shape.add_arrow(list(pos), list(pos + arr), list(col), 0.2)
 
     if show_axes:  # Add axes
@@ -689,7 +689,7 @@ def _add_colorscheme_spacefill(
     Returns:
         (nglview.NGLWidget): The modified widget.
     """
-    for elem, num in set(zip(elements, atomic_numbers)):
+    for elem, num in set(zip(elements, atomic_numbers, strict=True)):
         view.add_spacefill(
             selection="#" + elem,
             radius_type="vdw",
