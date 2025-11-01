@@ -1,5 +1,3 @@
-from typing import Optional
-
 import numpy as np
 from ase.atoms import Atoms
 from ase.build import bulk, surface
@@ -12,10 +10,10 @@ def get_high_index_surface_info(
     element: str,
     crystal_structure: str,
     lattice_constant: float,
-    terrace_orientation: Optional[list] = None,
-    step_orientation: Optional[list] = None,
-    kink_orientation: Optional[list] = None,
-    step_down_vector: Optional[list] = None,
+    terrace_orientation: list | None = None,
+    step_orientation: list | None = None,
+    kink_orientation: list | None = None,
+    step_down_vector: list | None = None,
     length_step: int = 3,
     length_terrace: int = 3,
     length_kink: int = 1,
@@ -99,10 +97,10 @@ def high_index_surface(
     element: str,
     crystal_structure: str,
     lattice_constant: float,
-    terrace_orientation: Optional[list] = None,
-    step_orientation: Optional[list] = None,
-    kink_orientation: Optional[list] = None,
-    step_down_vector: Optional[list] = None,
+    terrace_orientation: list | None = None,
+    step_orientation: list | None = None,
+    kink_orientation: list | None = None,
+    step_down_vector: list | None = None,
     length_step: int = 3,
     length_terrace: int = 3,
     length_kink: int = 1,

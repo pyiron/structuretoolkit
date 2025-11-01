@@ -1,5 +1,3 @@
-from typing import Optional, Union
-
 import numpy as np
 from ase.atoms import Atoms
 from scipy.sparse import coo_matrix
@@ -24,7 +22,7 @@ def get_extended_positions(
     width: float,
     return_indices: bool = False,
     norm_order: int = 2,
-    positions: Optional[np.ndarray] = None,
+    positions: np.ndarray | None = None,
 ):
     """
     Get all atoms in the boundary around the supercell which have a distance
@@ -276,7 +274,7 @@ def apply_strain(
         return structure_copy
 
 
-def get_cell(cell: Union[Atoms, list, tuple, np.ndarray, float]):
+def get_cell(cell: Atoms | list | tuple | np.ndarray | float):
     """
     Get cell of an ase structure, or convert a float or a (3,)-array into a
     orthogonal cell.

@@ -2,7 +2,7 @@
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import warnings
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
 from ase.atoms import Atoms
@@ -30,21 +30,21 @@ def plot3d(
     camera: str = "orthographic",
     spacefill: bool = True,
     particle_size: float = 1.0,
-    select_atoms: Optional[np.ndarray] = None,
+    select_atoms: np.ndarray | None = None,
     background: str = "white",
-    color_scheme: Optional[str] = None,
-    colors: Optional[np.ndarray] = None,
-    scalar_field: Optional[np.ndarray] = None,
-    scalar_start: Optional[float] = None,
-    scalar_end: Optional[float] = None,
-    scalar_cmap: Optional[Any] = None,
-    vector_field: Optional[np.ndarray] = None,
-    vector_color: Optional[np.ndarray] = None,
+    color_scheme: str | None = None,
+    colors: np.ndarray | None = None,
+    scalar_field: np.ndarray | None = None,
+    scalar_start: float | None = None,
+    scalar_end: float | None = None,
+    scalar_cmap: Any | None = None,
+    vector_field: np.ndarray | None = None,
+    vector_color: np.ndarray | None = None,
     magnetic_moments: bool = False,
     view_plane: np.ndarray = np.array([0, 0, 1]),
     distance_from_camera: float = 1.0,
     opacity: float = 1.0,
-    height: Optional[float] = None,
+    height: float | None = None,
 ):
     """
     Plot3d relies on NGLView or plotly to visualize atomic structures. Here, we construct a string in the "protein database"
@@ -204,14 +204,14 @@ def _draw_box_plotly(fig: Any, structure: Atoms, px: Any, go: Any) -> Any:
 def _plot3d_plotly(
     structure: Atoms,
     show_cell: bool = True,
-    scalar_field: Optional[np.ndarray] = None,
-    select_atoms: Optional[np.ndarray] = None,
+    scalar_field: np.ndarray | None = None,
+    select_atoms: np.ndarray | None = None,
     particle_size: float = 1.0,
     camera: str = "orthographic",
     view_plane: np.ndarray = np.array([1, 1, 1]),
     distance_from_camera: float = 1.0,
     opacity: float = 1.0,
-    height: Optional[float] = None,
+    height: float | None = None,
 ):
     """
     Make a 3D plot of the atomic structure.
@@ -284,16 +284,16 @@ def _plot3d(
     camera: str = "orthographic",
     spacefill: bool = True,
     particle_size: float = 1.0,
-    select_atoms: Optional[np.ndarray] = None,
+    select_atoms: np.ndarray | None = None,
     background: str = "white",
-    color_scheme: Optional[str] = None,
-    colors: Optional[np.ndarray] = None,
-    scalar_field: Optional[np.ndarray] = None,
-    scalar_start: Optional[float] = None,
-    scalar_end: Optional[float] = None,
-    scalar_cmap: Optional[Any] = None,
-    vector_field: Optional[np.ndarray] = None,
-    vector_color: Optional[np.ndarray] = None,
+    color_scheme: str | None = None,
+    colors: np.ndarray | None = None,
+    scalar_field: np.ndarray | None = None,
+    scalar_start: float | None = None,
+    scalar_end: float | None = None,
+    scalar_cmap: Any | None = None,
+    vector_field: np.ndarray | None = None,
+    vector_color: np.ndarray | None = None,
     magnetic_moments: bool = False,
     view_plane: np.ndarray = np.array([0, 0, 1]),
     distance_from_camera: float = 1.0,
@@ -576,8 +576,8 @@ def _ngl_write_atom(
     x: float,
     y: float,
     z: float,
-    group: Optional[str] = None,
-    num2: Optional[int] = None,
+    group: str | None = None,
+    num2: int | None = None,
     occupancy: float = 1.0,
     temperature_factor: float = 0.0,
 ) -> str:
@@ -726,8 +726,8 @@ def _add_custom_color_spacefill(
 
 def _scalars_to_hex_colors(
     scalar_field: np.ndarray,
-    start: Optional[float] = None,
-    end: Optional[float] = None,
+    start: float | None = None,
+    end: float | None = None,
     cmap=None,
 ):
     """
