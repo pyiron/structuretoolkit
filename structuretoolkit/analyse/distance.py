@@ -1,13 +1,11 @@
-from typing import Optional
-
 import numpy as np
 from ase.atoms import Atoms
 
 
 def get_distances_array(
     structure: Atoms,
-    p1: Optional[np.ndarray] = None,
-    p2: Optional[np.ndarray] = None,
+    p1: np.ndarray | None = None,
+    p2: np.ndarray | None = None,
     mic: bool = True,
     vectors: bool = False,
 ) -> np.ndarray:

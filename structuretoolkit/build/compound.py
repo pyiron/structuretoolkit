@@ -1,5 +1,3 @@
-from typing import Optional
-
 import numpy as np
 from ase.atoms import Atoms
 from ase.build import bulk
@@ -8,7 +6,7 @@ from ase.spacegroup import crystal
 from structuretoolkit.analyse.neighbors import get_neighbors
 
 
-def B2(element_a: str, element_b: str, a: Optional[float] = None):
+def B2(element_a: str, element_b: str, a: float | None = None):
     """
     Builds a cubic $AB$ B2 structure of interpenetrating simple cubic lattices.
 
@@ -33,7 +31,7 @@ def B2(element_a: str, element_b: str, a: Optional[float] = None):
 def C14(
     element_a: str,
     element_b: str,
-    a: Optional[float] = None,
+    a: float | None = None,
     c_over_a: float = 1.626,
     x1: float = 0.1697,
     z1: float = 0.5629,
@@ -83,7 +81,7 @@ def C14(
     return s
 
 
-def C15(element_a: str, element_b: str, a: Optional[float] = None) -> Atoms:
+def C15(element_a: str, element_b: str, a: float | None = None) -> Atoms:
     """
     Builds a cubic $A B_2$ C15 Laves phase cell.
 
@@ -125,7 +123,7 @@ def C15(element_a: str, element_b: str, a: Optional[float] = None) -> Atoms:
 def C36(
     element_a: str,
     element_b: str,
-    a: Optional[float] = None,
+    a: float | None = None,
     c_over_a: float = 3.252,
     x1: float = 0.16429,
     z1: float = 0.09400,
@@ -186,7 +184,7 @@ def C36(
     return s
 
 
-def D03(element_a: str, element_b: str, a: Optional[float] = None) -> Atoms:
+def D03(element_a: str, element_b: str, a: float | None = None) -> Atoms:
     """
     Builds a cubic $A B_3$ D03 cubic cell.
 

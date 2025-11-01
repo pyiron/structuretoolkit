@@ -1,5 +1,4 @@
 from ctypes import POINTER, c_double, c_int, cast
-from typing import Optional, Union
 
 import numpy as np
 from ase.atoms import Atoms
@@ -70,7 +69,7 @@ def get_snap_descriptors_per_atom(
     rmin0: float = 0.0,
     bzeroflag: bool = False,
     quadraticflag: bool = False,
-    weights: Optional[Union[list, np.ndarray]] = None,
+    weights: list | np.ndarray | None = None,
     cutoff: float = 10.0,
 ) -> np.ndarray:
     """
@@ -121,7 +120,7 @@ def get_snap_descriptor_derivatives(
     rmin0: float = 0.0,
     bzeroflag: bool = False,
     quadraticflag: bool = False,
-    weights: Optional[Union[list, np.ndarray]] = None,
+    weights: list | np.ndarray | None = None,
     cutoff: float = 10.0,
 ):
     """
@@ -525,7 +524,7 @@ def _set_computes_snap(lmp, bispec_options: dict):
     kw_substrings = [f"{k} {v}" for k, v in kw_options.items()]
     kwargs = " ".join(kw_substrings)
 
-    for _op, base in zip(("b", "db", "vb"), (base_b, base_db, base_vb)):
+    for _op, base in zip(("b", "db", "vb"), (base_b, base_db, base_vb), strict=True):
         command = f"{base} {radelem} {wj} {kwargs}"
         lmp.command(command)
 
@@ -659,7 +658,7 @@ def _get_default_parameters(
     rmin0: float = 0.0,
     bzeroflag: bool = False,
     quadraticflag: bool = False,
-    weights: Optional[Union[list, np.ndarray]] = None,
+    weights: list | np.ndarray | None = None,
     cutoff: float = 10.0,
 ):
     """

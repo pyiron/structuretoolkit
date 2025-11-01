@@ -1,7 +1,7 @@
 # Copyright (c) Max-Planck-Institut für Eisenforschung GmbH - Computational Materials Design (CM) Department
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
-from typing import Any, Optional, Union
+from typing import Any
 
 import numpy as np
 from ase.atoms import Atoms
@@ -24,10 +24,10 @@ def get_steinhardt_parameters(
     structure: Atoms,
     neighbor_method: str = "cutoff",
     cutoff: float = 0.0,
-    n_clusters: Optional[int] = 2,
-    q: Optional[tuple] = None,
+    n_clusters: int | None = 2,
+    q: tuple | None = None,
     averaged: bool = False,
-) -> Union[tuple[np.ndarray], tuple[np.ndarray, np.ndarray]]:
+) -> tuple[np.ndarray] | tuple[np.ndarray, np.ndarray]:
     """
     Calculate Steinhardts parameters
 
@@ -55,7 +55,7 @@ def get_steinhardt_parameters(
 
         cl = cluster.KMeans(n_clusters=n_clusters)
 
-        ind = cl.fit(list(zip(*sysq))).labels_
+        ind = cl.fit(list(zip(*sysq, strict=True))).labels_
         return sysq, ind
     else:
         return sysq
@@ -80,7 +80,7 @@ def get_centro_symmetry_descriptors(
 
 def get_diamond_structure_descriptors(
     structure: Atoms, mode: str = "total", ovito_compatibility: bool = False
-) -> Union[dict[str, int], np.ndarray]:
+) -> dict[str, int] | np.ndarray:
     """
     Analyse diamond structure
 
@@ -197,7 +197,10 @@ def get_adaptive_cna_descriptors(
         if not ovito_compatibility:
             return cna
         else:
-            return {o: cna[p] for o, p in zip(ovito_parameter, pyscal_parameter)}
+            return {
+                o: cna[p]
+                for o, p in zip(ovito_parameter, pyscal_parameter, strict=True)
+            }
     else:
         cnalist = np.array(sys.atoms.structure)
         if mode == "numeric":
@@ -241,7 +244,7 @@ def find_solids(
     q: int = 6,
     right: bool = True,
     return_sys: bool = False,
-) -> Union[int, Any]:
+) -> int | Any:
     """
     Get the number of solids or the corresponding pyscal system.
     Calls necessary pyscal methods as described in https://pyscal.org/en/latest/methods/03_solidliquid.html.

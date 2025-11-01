@@ -3,7 +3,6 @@
 
 import itertools
 import warnings
-from typing import Optional, Union
 
 import numpy as np
 from ase.atoms import Atoms
@@ -149,8 +148,8 @@ class Tree:
     def _reshape(
         self,
         value: np.ndarray,
-        key: Optional[str] = None,
-        ref_vector: Optional[np.ndarray] = None,
+        key: str | None = None,
+        ref_vector: np.ndarray | None = None,
     ) -> np.ndarray:
         """
         Reshape the given value based on the specified key and reference vector.
@@ -258,7 +257,7 @@ class Tree:
             + " with the correct norm_order value"
         )
 
-    def _get_max_length(self, ref_vector: Optional[np.ndarray] = None) -> int:
+    def _get_max_length(self, ref_vector: np.ndarray | None = None) -> int:
         """
         Get the maximum length of the reference vector.
 
@@ -279,7 +278,7 @@ class Tree:
         return max(len(dd[dd < np.inf]) for dd in ref_vector)
 
     def _contract(
-        self, value: np.ndarray, ref_vector: Optional[np.ndarray] = None
+        self, value: np.ndarray, ref_vector: np.ndarray | None = None
     ) -> np.ndarray:
         """
         Contract the given value based on the specified reference vector.
@@ -295,7 +294,7 @@ class Tree:
             return value
         return [
             vv[: np.sum(dist < np.inf)]
-            for vv, dist in zip(value, self.filled.distances)
+            for vv, dist in zip(value, self.filled.distances, strict=True)
         ]
 
     def _allow_ragged_to_mode(self, new_bool: bool) -> str:
@@ -362,7 +361,7 @@ class Tree:
     def _get_distances_and_indices(
         self,
         positions: np.ndarray,
-        num_neighbors: Optional[int] = None,
+        num_neighbors: int | None = None,
         cutoff_radius: float = np.inf,
         width_buffer: float = 1.2,
     ) -> tuple[np.ndarray, np.ndarray]:
@@ -431,10 +430,10 @@ class Tree:
     def _get_vectors(
         self,
         positions: np.ndarray,
-        num_neighbors: Optional[int] = None,
+        num_neighbors: int | None = None,
         cutoff_radius: float = np.inf,
-        distances: Optional[np.ndarray] = None,
-        indices: Optional[np.ndarray] = None,
+        distances: np.ndarray | None = None,
+        indices: np.ndarray | None = None,
         width_buffer: float = 1.2,
     ) -> np.ndarray:
         """
@@ -470,7 +469,7 @@ class Tree:
 
     def _estimate_num_neighbors(
         self,
-        num_neighbors: Optional[int] = None,
+        num_neighbors: int | None = None,
         cutoff_radius: float = np.inf,
         width_buffer: float = 1.2,
     ) -> int:
@@ -515,7 +514,7 @@ class Tree:
 
     def _estimate_width(
         self,
-        num_neighbors: Optional[int] = None,
+        num_neighbors: int | None = None,
         cutoff_radius: float = np.inf,
         width_buffer: float = 1.2,
     ) -> float:
@@ -551,7 +550,7 @@ class Tree:
     def get_neighborhood(
         self,
         positions: np.ndarray,
-        num_neighbors: Optional[int] = None,
+        num_neighbors: int | None = None,
         cutoff_radius: float = np.inf,
         width_buffer: float = 1.2,
     ) -> "Tree":
@@ -647,7 +646,7 @@ class Tree:
         l: np.ndarray,
         m: np.ndarray,
         cutoff_radius: float = np.inf,
-        rotation: Optional[np.ndarray] = None,
+        rotation: np.ndarray | None = None,
     ) -> np.ndarray:
         """
         Args:
@@ -868,8 +867,8 @@ class Neighbors(Tree):
 
     def get_local_shells(
         self,
-        mode: Optional[str] = None,
-        tolerance: Optional[int] = None,
+        mode: str | None = None,
+        tolerance: int | None = None,
         cluster_by_distances: bool = False,
         cluster_by_vecs: bool = False,
     ) -> np.ndarray:
@@ -947,8 +946,8 @@ class Neighbors(Tree):
 
     def get_global_shells(
         self,
-        mode: Optional[str] = None,
-        tolerance: Optional[int] = None,
+        mode: str | None = None,
+        tolerance: int | None = None,
         cluster_by_distances: bool = False,
         cluster_by_vecs: bool = False,
     ) -> np.ndarray:
@@ -1008,7 +1007,7 @@ class Neighbors(Tree):
 
     def get_shell_matrix(
         self,
-        chemical_pair: Optional[list[str]] = None,
+        chemical_pair: list[str] | None = None,
         cluster_by_distances: bool = False,
         cluster_by_vecs: bool = False,
     ):
@@ -1107,8 +1106,8 @@ class Neighbors(Tree):
 
     def cluster_by_vecs(
         self,
-        distance_threshold: Optional[float] = None,
-        n_clusters: Optional[int] = None,
+        distance_threshold: float | None = None,
+        n_clusters: int | None = None,
         linkage: str = "complete",
         metric: str = "euclidean",
     ):
@@ -1152,8 +1151,8 @@ class Neighbors(Tree):
 
     def cluster_by_distances(
         self,
-        distance_threshold: Optional[float] = None,
-        n_clusters: Optional[int] = None,
+        distance_threshold: float | None = None,
+        n_clusters: int | None = None,
         linkage: str = "complete",
         metric: str = "euclidean",
         use_vecs: bool = False,
@@ -1225,7 +1224,7 @@ class Neighbors(Tree):
 
     def cluster_analysis(
         self, id_list: list, return_cluster_sizes: bool = False
-    ) -> Union[dict[int, list[int]], tuple[dict[int, list[int]], list[int]]]:
+    ) -> dict[int, list[int]] | tuple[dict[int, list[int]], list[int]]:
         """
         Perform cluster analysis on a list of atom IDs.
 
@@ -1283,7 +1282,7 @@ class Neighbors(Tree):
     def get_bonds(
         self,
         radius: float = np.inf,
-        max_shells: Optional[int] = None,
+        max_shells: int | None = None,
         prec: float = 0.1,
     ) -> list[dict[str, list[list[int]]]]:
         """
@@ -1322,7 +1321,7 @@ class Neighbors(Tree):
         el_list = self._ref_structure.get_chemical_symbols()
 
         ind_shell = []
-        for d, i in zip(dist, ind):
+        for d, i in zip(dist, ind, strict=True):
             id_list = get_cluster(d[d < radius], i[d < radius])
             ia_shells_dict = {}
             for i_shell_list in id_list:
@@ -1361,7 +1360,7 @@ def get_neighbors(
     structure: Atoms,
     num_neighbors: int = 12,
     tolerance: int = 2,
-    id_list: Optional[list] = None,
+    id_list: list | None = None,
     cutoff_radius: float = np.inf,
     width_buffer: float = 1.2,
     mode: str = "filled",
@@ -1400,12 +1399,12 @@ def _get_neighbors(
     structure: Atoms,
     num_neighbors: int = 12,
     tolerance: int = 2,
-    id_list: Optional[list] = None,
+    id_list: list | None = None,
     cutoff_radius: float = np.inf,
     width_buffer: float = 1.2,
     get_tree: bool = False,
     norm_order: int = 2,
-) -> Union[Neighbors, Tree]:
+) -> Neighbors | Tree:
     """
     Get the neighbors of atoms in a structure.
 

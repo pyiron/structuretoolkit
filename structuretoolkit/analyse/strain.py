@@ -1,5 +1,3 @@
-from typing import Optional
-
 import numpy as np
 from ase.atoms import Atoms
 from scipy.spatial.transform import Rotation
@@ -30,7 +28,7 @@ class Strain:
         self,
         structure: Atoms,
         ref_structure: Atoms,
-        num_neighbors: Optional[int] = None,
+        num_neighbors: int | None = None,
         only_bulk_type: bool = False,
     ):
         """
@@ -85,7 +83,7 @@ class Strain:
         )
 
     def _get_perpendicular_unit_vectors(
-        self, vec: np.ndarray, vec_axis: Optional[np.ndarray] = None
+        self, vec: np.ndarray, vec_axis: np.ndarray | None = None
     ) -> np.ndarray:
         """
         Get the perpendicular unit vectors of the given vectors.
@@ -146,7 +144,7 @@ class Strain:
         self,
         vec_before: np.ndarray,
         vec_after: np.ndarray,
-        vec_axis: Optional[np.ndarray] = None,
+        vec_axis: np.ndarray | None = None,
     ) -> np.ndarray:
         """
         Calculate the rotation matrix that transforms the `vec_before` vectors to the `vec_after` vectors.
@@ -319,7 +317,7 @@ class Strain:
 def get_strain(
     structure: Atoms,
     ref_structure: Atoms,
-    num_neighbors: Optional[int] = None,
+    num_neighbors: int | None = None,
     only_bulk_type: bool = False,
     return_object: bool = False,
 ):

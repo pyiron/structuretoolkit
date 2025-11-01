@@ -3,7 +3,6 @@ import random
 import warnings
 from collections.abc import Iterable
 from multiprocessing import cpu_count
-from typing import Optional, Union
 
 import numpy as np
 from ase.atoms import Atoms
@@ -127,7 +126,7 @@ def remap_sro(species: Iterable[str], array: np.ndarray) -> dict[str, list]:
 
 
 def remap_sqs_results(
-    result: dict[str, Union[Atoms, np.ndarray]],
+    result: dict[str, Atoms | np.ndarray],
 ) -> tuple[Atoms, dict[str, list]]:
     """
     Remap the results of SQS optimization.
@@ -155,28 +154,28 @@ def transpose(it: Iterable[Iterable]) -> Iterable[tuple]:
         Iterable[tuple]: The transposed iterable.
 
     """
-    return zip(*it)
+    return zip(*it, strict=True)
 
 
 def sqs_structures(
     structure: Atoms,
-    mole_fractions: dict[str, Union[float, int]],
-    weights: Optional[dict[int, float]] = None,
-    objective: Union[float, np.ndarray] = 0.0,
-    iterations: Union[float, int] = 1e6,
+    mole_fractions: dict[str, float | int],
+    weights: dict[int, float] | None = None,
+    objective: float | np.ndarray = 0.0,
+    iterations: float | int = 1e6,
     output_structures: int = 10,
     mode: str = "random",
-    num_threads: Optional[int] = None,
-    prefactors: Optional[Union[float, np.ndarray]] = None,
-    pair_weights: Optional[np.ndarray] = None,
-    rtol: Optional[float] = None,
-    atol: Optional[float] = None,
-    which: Optional[Iterable[int]] = None,
-    shell_distances: Optional[Iterable[int]] = None,
-    minimal: Optional[bool] = True,
-    similar: Optional[bool] = True,
-    return_statistics: Optional[bool] = False,
-) -> Union[Atoms, tuple[Atoms, dict[str, list], int, float]]:
+    num_threads: int | None = None,
+    prefactors: float | np.ndarray | None = None,
+    pair_weights: np.ndarray | None = None,
+    rtol: float | None = None,
+    atol: float | None = None,
+    which: Iterable[int] | None = None,
+    shell_distances: Iterable[int] | None = None,
+    minimal: bool | None = True,
+    similar: bool | None = True,
+    return_statistics: bool | None = False,
+) -> Atoms | tuple[Atoms, dict[str, list], int, float]:
     """
     Generate SQS structures.
 
