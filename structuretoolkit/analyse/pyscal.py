@@ -197,7 +197,10 @@ def get_adaptive_cna_descriptors(
         if not ovito_compatibility:
             return cna
         else:
-            return {o: cna[p] for o, p in zip(ovito_parameter, pyscal_parameter, strict=True)}
+            return {
+                o: cna[p]
+                for o, p in zip(ovito_parameter, pyscal_parameter, strict=True)
+            }
     else:
         cnalist = np.array(sys.atoms.structure)
         if mode == "numeric":
