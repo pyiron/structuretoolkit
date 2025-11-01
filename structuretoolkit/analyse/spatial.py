@@ -1,7 +1,7 @@
 # Copyright (c) Max-Planck-Institut für Eisenforschung GmbH - Computational Materials Design (CM) Department
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
-from typing import Callable, Optional
+from collections.abc import Callable
 
 import numpy as np
 from ase.atoms import Atoms
@@ -225,7 +225,7 @@ class Interstitials:
         l_values: np.ndarray = np.arange(2, 13),
         q_eps: float = 0.3,
         var_ratio: float = 5.0,
-        min_samples: Optional[int] = None,
+        min_samples: int | None = None,
         neigh_args: dict = None,
         **kwargs,
     ):
@@ -294,7 +294,7 @@ class Interstitials:
         self.structure = structure
 
     def run_workflow(
-        self, positions: Optional[np.ndarray] = None, steps: int = -1
+        self, positions: np.ndarray | None = None, steps: int = -1
     ) -> np.ndarray:
         """
         Run the workflow to obtain the interstitial positions.
@@ -407,7 +407,7 @@ def get_interstitials(
     l_values: np.ndarray = np.arange(2, 13),
     q_eps: float = 0.3,
     var_ratio: float = 5.0,
-    min_samples: Optional[int] = None,
+    min_samples: int | None = None,
     neigh_args: dict = None,
     **kwargs,
 ) -> Interstitials:
@@ -457,7 +457,7 @@ get_interstitials.__doc__ = (
 def get_layers(
     structure: Atoms,
     distance_threshold: float = 0.01,
-    id_list: Optional[list[int]] = None,
+    id_list: list[int] | None = None,
     wrap_atoms: bool = True,
     planes: np.ndarray = None,
     cluster_method: str = None,
@@ -690,9 +690,9 @@ def get_delaunay_neighbors(structure: Atoms, width_buffer: float = 10.0) -> np.n
 
 def get_cluster_positions(
     structure: Atoms,
-    positions: Optional[np.ndarray] = None,
+    positions: np.ndarray | None = None,
     eps: float = 1.0,
-    buffer_width: Optional[float] = None,
+    buffer_width: float | None = None,
     return_labels: bool = False,
 ) -> np.ndarray:
     """

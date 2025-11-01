@@ -1,5 +1,4 @@
 from ctypes import POINTER, c_double, c_int, cast
-from typing import Optional, Union
 
 import numpy as np
 from ase.atoms import Atoms
@@ -70,7 +69,7 @@ def get_snap_descriptors_per_atom(
     rmin0: float = 0.0,
     bzeroflag: bool = False,
     quadraticflag: bool = False,
-    weights: Optional[Union[list, np.ndarray]] = None,
+    weights: list | np.ndarray | None = None,
     cutoff: float = 10.0,
 ) -> np.ndarray:
     """
@@ -121,7 +120,7 @@ def get_snap_descriptor_derivatives(
     rmin0: float = 0.0,
     bzeroflag: bool = False,
     quadraticflag: bool = False,
-    weights: Optional[Union[list, np.ndarray]] = None,
+    weights: list | np.ndarray | None = None,
     cutoff: float = 10.0,
 ):
     """
@@ -659,7 +658,7 @@ def _get_default_parameters(
     rmin0: float = 0.0,
     bzeroflag: bool = False,
     quadraticflag: bool = False,
-    weights: Optional[Union[list, np.ndarray]] = None,
+    weights: list | np.ndarray | None = None,
     cutoff: float = 10.0,
 ):
     """
