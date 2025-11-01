@@ -11,7 +11,7 @@ def phonopy_to_atoms(ph_atoms) -> Atoms:
 
     """
     return Atoms(
-        symbols=list(ph_atoms.get_chemical_symbols()),
+        symbols=list(ph_atoms.symbols),
         positions=list(ph_atoms.get_positions()),
         cell=list(ph_atoms.cell),
         pbc=True,
