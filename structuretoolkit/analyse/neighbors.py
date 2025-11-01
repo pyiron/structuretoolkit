@@ -10,7 +10,7 @@ from ase.atoms import Atoms
 from scipy.sparse import coo_matrix
 from scipy.spatial import cKDTree
 from scipy.spatial.transform import Rotation
-from scipy.special import gamma, sph_harm
+from scipy.special import gamma, sph_harm_y
 
 from structuretoolkit.common.helper import (
     get_average_of_unique_labels,
@@ -668,7 +668,7 @@ class Tree:
         The angles are calculated based on `self.vecs`, where the azimuthal angle is defined on the
         xy-plane and the polar angle is along the z-axis.
 
-        See more on: scipy.special.sph_harm
+        See more on: scipy.special.sph_harm_y
 
         """
         vecs = self.filled.vecs
@@ -685,7 +685,7 @@ class Tree:
         phi[within_cutoff] = np.arctan2(
             np.linalg.norm(vecs[within_cutoff, :2], axis=-1), vecs[within_cutoff, 2]
         )
-        return np.sum(sph_harm(m, l, theta, phi) * within_cutoff, axis=-1) / np.sum(
+        return np.sum(sph_harm_y(m, l, theta, phi) * within_cutoff, axis=-1) / np.sum(
             within_cutoff, axis=-1
         )
 
