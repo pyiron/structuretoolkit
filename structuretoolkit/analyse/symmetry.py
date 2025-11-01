@@ -4,7 +4,6 @@
 import ast
 import dataclasses
 import string
-from typing import Optional
 
 import numpy as np
 import spglib
@@ -263,7 +262,7 @@ class Symmetry(dict):
         ) / len(self.rotations)
 
     def _get_spglib_cell(
-        self, use_elements: Optional[bool] = None, use_magmoms: Optional[bool] = None
+        self, use_elements: bool | None = None, use_magmoms: bool | None = None
     ) -> tuple:
         """
         Get the cell information in the format required by spglib.
@@ -380,8 +379,8 @@ class Symmetry(dict):
     def get_primitive_cell(
         self,
         standardize: bool = False,
-        use_elements: Optional[bool] = None,
-        use_magmoms: Optional[bool] = None,
+        use_elements: bool | None = None,
+        use_magmoms: bool | None = None,
     ) -> Atoms:
         """
         Get primitive cell of a given structure.

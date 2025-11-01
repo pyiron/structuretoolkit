@@ -1,7 +1,6 @@
 # Copyright (c) Max-Planck-Institut für Eisenforschung GmbH - Computational Materials Design (CM) Department
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
-from typing import Optional
 from warnings import warn
 
 import numpy as np
@@ -59,7 +58,7 @@ def grainboundary(
     delete_layer: str = "0b0t0b0t",
     tol: float = 0.25,
     to_primitive: bool = False,
-    add_if_dist: Optional[float] = None,
+    add_if_dist: float | None = None,
 ):
     """
     Generate a grain boundary structure based on aimsgb.
