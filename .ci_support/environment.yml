@@ -10,7 +10,7 @@ dependencies:
 - nglview =3.1.4
 - notebook
 - numpy =2.3.5
-- phonopy =2.45.1
+- phonopy =2.46.1
 - plotly =6.5.0
 - pymatgen =2025.10.7
 - pyscal3 =3.3.0
@@ -18,5 +18,5 @@ dependencies:
 - scipy =1.16.3
 - spglib =2.6.0
 - sqsgenerator =0.3
-- hatchling =1.28.0
+- hatchling =1.27.0
 - hatch-vcs =0.5.0
