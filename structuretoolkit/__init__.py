@@ -96,7 +96,7 @@ from structuretoolkit.common import (
 )
 
 # Visualize
-from structuretoolkit.visualize import plot3d
+from structuretoolkit.visualize import plot3d, plot_isosurface
 
 __all__ = [
     "find_mic",
