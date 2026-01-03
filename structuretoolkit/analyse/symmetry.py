@@ -329,7 +329,7 @@ class Symmetry(dict):
             angle_tolerance=angle_tolerance,
         )
         if sym is None:
-            raise SymmetryError(spglib.error.message)
+            raise SymmetryError(spglib.error.get_error_message())
         return sym
 
     @property
@@ -345,7 +345,7 @@ class Symmetry(dict):
             angle_tolerance=self._angle_tolerance,
         )
         if info is None:
-            raise SymmetryError(spglib.error.message)
+            raise SymmetryError(spglib.error.get_error_message())
         if dataclasses.is_dataclass(info):
             info = dataclasses.asdict(info)
         return info
@@ -367,7 +367,7 @@ class Symmetry(dict):
             angle_tolerance=self._angle_tolerance,
         )
         if space_group is None:
-            raise SymmetryError(spglib.error.message)
+            raise SymmetryError(spglib.error.get_error_message())
         space_group = space_group.split()
         if len(space_group) == 1:
             return {"Number": ast.literal_eval(space_group[0])}
@@ -406,7 +406,7 @@ class Symmetry(dict):
             to_primitive=not standardize,
         )
         if ret is None:
-            raise SymmetryError(spglib.error.message)
+            raise SymmetryError(spglib.error.get_error_message())
         cell, positions, indices = ret
         positions = (cell.T @ positions.T).T
         new_structure = self._structure.copy()
@@ -450,7 +450,7 @@ class Symmetry(dict):
             symprec=self._symprec,
         )
         if mesh is None:
-            raise SymmetryError(spglib.error.message)
+            raise SymmetryError(spglib.error.get_error_message())
         return mesh
 
 
