@@ -24,8 +24,8 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
-    "ase==3.26.0",
-    "numpy==2.3.4",
+    "ase==3.27.0",
+    "numpy==2.3.5",
     "scipy==1.16.3",
 ]
 dynamic = ["version"]
@@ -43,8 +43,8 @@ grainboundary = [
 ]
 pyscal = ["pyscal3==3.3.0"]
 nglview = ["nglview==4.0"]
-matplotlib = ["matplotlib==3.10.7"]
-plotly = ["plotly==6.4.0"]
+matplotlib = ["matplotlib==3.10.8"]
+plotly = ["plotly==6.5.0"]
 clusters = ["scikit-learn==1.7.2"]
 symmetry = ["spglib==2.6.0"]
 surface = [
@@ -52,7 +52,7 @@ surface = [
     "pymatgen==2025.10.7",
 ]
 phonopy = [
-    "phonopy==2.43.6",
+    "phonopy==2.46.1",
     "spglib==2.6.0",
 ]
 

@@ -3,15 +3,15 @@ channels:
 - conda-forge
 dependencies:
 - aimsgb =1.1.1
-- ase =3.26.0
+- ase =3.27.0
 - coverage
 - dscribe =2.1.2
-- matplotlib-base =3.10.7
+- matplotlib-base =3.10.8
 - nglview =4.0
 - notebook
-- numpy =2.3.4
-- phonopy =2.43.6
-- plotly =6.4.0
+- numpy =2.3.5
+- phonopy =2.46.1
+- plotly =6.5.0
 - pymatgen =2025.10.7
 - pyscal3 =3.3.0
 - scikit-learn =1.7.2
