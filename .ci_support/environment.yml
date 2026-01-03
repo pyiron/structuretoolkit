@@ -16,7 +16,7 @@ dependencies:
 - pyscal3 =3.3.0
 - scikit-learn =1.7.2
 - scipy =1.16.3
-- spglib =2.6.0
+- spglib =2.7.0
 - sqsgenerator =0.3
 - hatchling =1.27.0
 - hatch-vcs =0.5.0
