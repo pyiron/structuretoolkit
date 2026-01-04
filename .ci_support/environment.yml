@@ -18,5 +18,5 @@ dependencies:
 - scipy =1.16.3
 - spglib =2.7.0
 - sqsgenerator =0.3
-- hatchling =1.27.0
+- hatchling =1.28.0
 - hatch-vcs =0.5.0
