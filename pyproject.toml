@@ -106,22 +106,22 @@ ignore = [
 ]
 
 [tool.hatch.build.hooks.vcs]
-version-file = "structuretoolkit/_version.py"
+version-file = "src/structuretoolkit/_version.py"
 
 [tool.hatch.build.targets.sdist]
 include = [
-    "structuretoolkit"
+    "src/structuretoolkit"
 ]
 
 [tool.hatch.build.targets.wheel]
 packages = [
-    "structuretoolkit"
+    "src/structuretoolkit"
 ]
 
 [tool.hatch.version]
 source = "vcs"
-path = "structuretoolkit/_version.py"
+path = "src/structuretoolkit/_version.py"
 
 [tool.coverage.run]
-omit = ["structuretoolkit/_version.py", "tests/*"]
+source = ["structuretoolkit"]
 command_line = "-m unittest discover tests"
