@@ -26,7 +26,7 @@ classifiers = [
 dependencies = [
     "ase==3.27.0",
     "numpy==2.3.5",
-    "scipy==1.16.3",
+    "scipy==1.17.0",
 ]
 dynamic = ["version"]
 
@@ -41,7 +41,7 @@ grainboundary = [
     "aimsgb==1.1.1",
     "pymatgen==2025.10.7",
 ]
-pyscal = ["pyscal3==3.3.0"]
+pyscal = ["pyscal3==3.3.1"]
 nglview = ["nglview==3.1.4"]
 matplotlib = ["matplotlib==3.10.8"]
 plotly = ["plotly==6.5.2"]
