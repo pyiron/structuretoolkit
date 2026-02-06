@@ -42,7 +42,7 @@ grainboundary = [
     "pymatgen==2025.10.7",
 ]
 pyscal = ["pyscal3==3.3.1"]
-nglview = ["nglview==3.1.4"]
+nglview = ["nglview==4.0.1"]
 matplotlib = ["matplotlib==3.10.8"]
 plotly = ["plotly==6.5.2"]
 clusters = ["scikit-learn==1.8.0"]
