@@ -1,5 +1,5 @@
 [build-system]
-requires = ["ase", "numpy", "scipy", "hatchling==1.27.0", "hatch-vcs==0.5.0"]
+requires = ["ase", "numpy", "scipy", "hatchling==1.28.0", "hatch-vcs==0.5.0"]
 build-backend = "hatchling.build"
 
 [project]
@@ -25,8 +25,8 @@ classifiers = [
 ]
 dependencies = [
     "ase==3.27.0",
-    "numpy==2.4.0",
-    "scipy==1.16.3",
+    "numpy==2.4.2",
+    "scipy==1.17.0",
 ]
 dynamic = ["version"]
 
@@ -41,19 +41,19 @@ grainboundary = [
     "aimsgb==1.1.1",
     "pymatgen==2025.10.7",
 ]
-pyscal = ["pyscal3==3.3.0"]
-nglview = ["nglview==3.1.4"]
+pyscal = ["pyscal3==3.3.1"]
+nglview = ["nglview==4.0.1"]
 matplotlib = ["matplotlib==3.10.8"]
-plotly = ["plotly==6.5.0"]
-clusters = ["scikit-learn==1.7.2"]
-symmetry = ["spglib==2.6.0"]
+plotly = ["plotly==6.5.2"]
+clusters = ["scikit-learn==1.8.0"]
+symmetry = ["spglib==2.7.0"]
 surface = [
-    "spglib==2.6.0",
+    "spglib==2.7.0",
     "pymatgen==2025.10.7",
 ]
 phonopy = [
-    "phonopy==2.46.1",
-    "spglib==2.6.0",
+    "phonopy==2.47.1",
+    "spglib==2.7.0",
 ]
 
 [tool.ruff]
@@ -106,22 +106,22 @@ ignore = [
 ]
 
 [tool.hatch.build.hooks.vcs]
-version-file = "structuretoolkit/_version.py"
+version-file = "src/structuretoolkit/_version.py"
 
 [tool.hatch.build.targets.sdist]
 include = [
-    "structuretoolkit"
+    "src/structuretoolkit"
 ]
 
 [tool.hatch.build.targets.wheel]
 packages = [
-    "structuretoolkit"
+    "src/structuretoolkit"
 ]
 
 [tool.hatch.version]
 source = "vcs"
-path = "structuretoolkit/_version.py"
+path = "src/structuretoolkit/_version.py"
 
 [tool.coverage.run]
-omit = ["structuretoolkit/_version.py", "tests/*"]
+source = ["structuretoolkit"]
 command_line = "-m unittest discover tests"

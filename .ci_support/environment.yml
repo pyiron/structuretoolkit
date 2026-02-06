@@ -7,17 +7,16 @@ dependencies:
 - coverage
 - dscribe =2.1.2
 - matplotlib-base =3.10.8
-- nglview =3.1.4
+- nglview =4.0.1
 - notebook
-- numpy =2.4.0
-- phonopy =2.46.1
-- plotly =6.5.0
+- numpy =2.4.2
+- phonopy =2.47.1
+- plotly =6.5.2
 - pymatgen =2025.10.7
-- pyscal3 =3.3.0
-- scikit-learn =1.7.2
-- scipy =1.16.3
-- spglib =2.6.0
-- sparse =0.17.0
+- pyscal3 =3.3.1
+- scikit-learn =1.8.0
+- scipy =1.17.0
+- spglib =2.7.0
 - sqsgenerator =0.3
-- hatchling =1.27.0
+- hatchling =1.28.0
 - hatch-vcs =0.5.0
