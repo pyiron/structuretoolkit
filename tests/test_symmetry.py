@@ -7,7 +7,6 @@ import unittest
 import numpy as np
 from ase.atoms import Atoms
 from ase.build import bulk
-from spglib.error import SpglibError
 
 import structuretoolkit as stk
 
@@ -21,6 +20,7 @@ except ImportError:
 
 try:
     import spglib
+    from spglib.error import SpglibError
 
     skip_spglib_test = False
 except ImportError:
