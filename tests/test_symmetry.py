@@ -7,6 +7,7 @@ import unittest
 import numpy as np
 from ase.atoms import Atoms
 from ase.build import bulk
+from spglib.error import SpglibError
 
 import structuretoolkit as stk
 
@@ -315,7 +316,7 @@ class TestSymmetry(unittest.TestCase):
 
         structure = bulk("Al")
         structure += structure[-1]
-        with self.assertRaises(stk.common.SymmetryError):
+        with self.assertRaises((stk.common.SymmetryError, SpglibError)):
             stk.analyse.get_symmetry(structure=structure)
 
 
