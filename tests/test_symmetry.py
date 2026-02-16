@@ -20,6 +20,7 @@ except ImportError:
 
 try:
     import spglib
+    from spglib.error import SpglibError
 
     skip_spglib_test = False
 except ImportError:
@@ -315,7 +316,7 @@ class TestSymmetry(unittest.TestCase):
 
         structure = bulk("Al")
         structure += structure[-1]
-        with self.assertRaises(stk.common.SymmetryError):
+        with self.assertRaises((stk.common.SymmetryError, SpglibError)):
             stk.analyse.get_symmetry(structure=structure)
 
 
