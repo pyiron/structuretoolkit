@@ -635,9 +635,9 @@ def make_slab(supercell: Atoms, step_direction: np.ndarray, vacuum: float) -> At
     # 5.  Insert vacuum: zero x‑ and y‑components of the third lattice vector
     #     and add the requested vacuum thickness to its z‑component
     # ------------------------------------------------------------------ #
-    cell = slab.get_cell()  # rows again
-    cell[0, 2] = 0.0  # a3_x → 0
-    cell[1, 2] = 0.0  # a3_y → 0
+    cell = slab.get_cell()
+    cell[2, :2] = 0.0  # a3_{x,y}=0
+    cell[:2, 2] = 0.0  # a{1,2}_z =0
     cell[2, 2] += float(vacuum)  # extend along z
 
     slab.set_cell(cell, scale_atoms=False)
