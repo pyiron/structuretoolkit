@@ -68,17 +68,13 @@ def get_high_index_surface_info(
     eqvdirs_ind = np.where(np.dot(np.squeeze(eqvdirs), terrace_orientation) == 0)[0]
     eqvdirk_ind = np.where(np.dot(np.squeeze(eqvdirk), terrace_orientation) == 0)[0]
     if len(eqvdirs_ind) == 0:
-        raise ValueError(
-            "Step orientation vector should lie in terrace.\
+        raise ValueError("Step orientation vector should lie in terrace.\
         For the given choice I could not find any symmetrically equivalent vector that lies in the terrace.\
-        please change the stepOrientation and try again"
-        )
+        please change the stepOrientation and try again")
     if len(eqvdirk_ind) == 0:
-        raise ValueError(
-            "Kink orientation vector should lie in terrace.\
+        raise ValueError("Kink orientation vector should lie in terrace.\
         For the given choice I could not find any symmetrically equivalent vector that lies in the terrace.\
-        please change the kinkOrientation and try again"
-        )
+        please change the kinkOrientation and try again")
     temp = (
         (np.cross(np.squeeze(eqvdirk[eqvdirk_ind[0]]), np.squeeze(eqvdirs)))
         .tolist()
@@ -186,22 +182,25 @@ def find_inplane_directions(
     eqvdirs_ind = np.where(np.dot(np.squeeze(eqvdirs), terrace_orientation) == 0)[0]
     eqvdirk_ind = np.where(np.dot(np.squeeze(eqvdirk), terrace_orientation) == 0)[0]
     if len(eqvdirs_ind) == 0:
-        raise ValueError(
-            "Step orientation vector should lie in terrace.\
+        raise ValueError("Step orientation vector should lie in terrace.\
         For the given choice I could not find any symmetrically equivalent vector that lies in the terrace.\
-        please change the stepOrientation and try again"
-        )
+        please change the stepOrientation and try again")
     if len(eqvdirk_ind) == 0:
-        raise ValueError(
-            "Kink orientation vector should lie in terrace.\
+        raise ValueError("Kink orientation vector should lie in terrace.\
         For the given choice I could not find any symmetrically equivalent vector that lies in the terrace.\
-        please change the kinkOrientation and try again"
-        )
-    temp = (
-        (np.cross(np.squeeze(eqvdirk[eqvdirk_ind[0]]), np.squeeze(eqvdirs)))
-        .tolist()
-        .index(terrace_orientation)
-    )
+        please change the kinkOrientation and try again")
+    crossp = np.cross(np.squeeze(eqvdirk[eqvdirk_ind[0]]), np.squeeze(eqvdirs)).tolist()
+    if terrace_orientation in crossp:
+        # fast search
+        temp = crossp.index(terrace_orientation)
+    else:
+        # check for same orientations (normalized)
+        tn = terrace_orientation / np.linalg.norm(terrace_orientation)
+        for i, cp in enumerate(crossp):
+            cn = cp / np.linalg.norm(cp)
+            if np.abs(np.dot(tn, cn) - 1.0) < 1e-8:
+                temp = i
+                break
     fin_kink_orientation = eqvdirk[eqvdirk_ind[0]]
     fin_step_orientation = eqvdirs[temp]
     return fin_step_orientation, fin_kink_orientation
@@ -274,33 +273,55 @@ def _hnf_and_U(P):
     """
     Return (H, U) where H is the Hermite normal form of the integer matrix P
     and U is unimodular such that P = U·H.
-
-    The function tries to use SymPy; if SymPy is missing or too old it falls
-    back to a simple diagonal case (which is sufficient for most
-    “repeat‑along‑a‑axis” super‑cells).
     """
-    try:
-        # SymPy ≥ 1.12 provides the method directly on Matrix objects.
-        # Newer versions also allow the functional form with calc_transform.
-        from sympy import Matrix
+    from sympy import Matrix
 
-        P_sym = Matrix(P.tolist())
-        # The functional interface works for all recent SymPy releases.
-        from sympy.matrices.normalforms import hermite_normal_form
+    P_sym = Matrix(P.tolist())
+    # The functional interface works for all recent SymPy releases.
+    from sympy.matrices.normalforms import hermite_normal_form
 
-        H_sym = hermite_normal_form(P_sym)
-        H = np.array(H_sym, dtype=int)
-        U = np.asarray(H_sym.inv() @ P_sym, dtype=int)
+    H_sym = hermite_normal_form(P_sym)
+    H = np.array(H_sym, dtype=int)
+    U = np.asarray(H_sym.inv() @ P_sym, dtype=int)
 
-        return H, U
-    except Exception:
-        raise
-        # pragma: no cover   (covers missing SymPy or old version)
-        # Very simple fallback: assume P is already upper‑triangular (or diagonal)
-        # In that case U = identity and H = P.
-        # This will still produce a correct super‑cell, only the enumeration
-        # of translation vectors may be less compact.
-        return np.array(P, dtype=int), np.eye(3, dtype=int)
+    return H, U
+
+
+# ----------------------------------------------------------------------
+# auxiliary functions: test for cubic and fcc/bcc lattices
+# ----------------------------------------------------------------------
+def _is_cubic(cell: np.ndarray | ase.cell.Cell) -> bool:
+    """
+    Check if a cell has cubic symmetry.
+
+    Returns True if the cell's symmetry group has 48 operations and no translational components.
+    """
+    sym = Symmetry(
+        Atoms(
+            symbols="H",
+            cell=cell,
+            positions=[
+                3 * [0],
+            ],
+        )
+    )
+    return bool(len(sym.rotations) == 48 and np.linalg.norm(sym.translations) < 1e-6)
+
+
+def _is_cubic_nonsimple(cell: np.ndarray | ase.cell.Cell) -> bool:
+    """
+    Check if a cubic cell is non-simple (e.g., FCC or BCC).
+
+    Returns True if the cell is cubic and has non-orthogonal lattice vectors.
+    """
+    if not _is_cubic(cell):
+        return False
+    for i in range(3):
+        if np.dot(cell[i], cell[i - 1]) > 1e-6 * np.linalg.norm(
+            cell[i]
+        ) * np.linalg.norm(cell[i - 1]):
+            return True
+    return False
 
 
 # ----------------------------------------------------------------------
@@ -357,11 +378,6 @@ def make_supercell(primitive: Atoms, P: np.ndarray) -> Atoms:
     H, U = _hnf_and_U(P)  # H is upper‑triangular, U unimodular
     # diagonal entries of H give the limits of the three nested loops
     h11, h22, h33 = H[0, 0], H[1, 1], H[2, 2]
-    print(H)
-    print(U)
-    print(f"P={P}")
-    print(h11, h22, h33)
-    print(f"H U = {H @ U}")
 
     # ------------------------------------------------------------------
     # 4.  Build the list of integer translation vectors (in the primitive basis)
@@ -378,10 +394,10 @@ def make_supercell(primitive: Atoms, P: np.ndarray) -> Atoms:
     # ------------------------------------------------------------------
     # 5.  New lattice vectors (Cartesian)
     # ------------------------------------------------------------------
-    print(P)
+    # print(P)
     cell_super = P @ cell_prim  # (3,3)
 
-    print(cell_super)
+    # print(cell_super)
     # ------------------------------------------------------------------
     # 6.  Fractional coordinates in the super‑cell
     # ------------------------------------------------------------------
@@ -467,7 +483,6 @@ def bulk_supercell_with_mapping(
     v1 = n * S + kink_length * K  # b1
     D = t * S - step_depth * T  # step‑down vector
     v2 = m * K + D  # b2 = t S + m·K – T
-    print(f"v2={v2}")
     v3 = l * T  # b3
     P_super = np.vstack([v1, v2, v3])  # 3 × 3 integer matrix
 
@@ -733,12 +748,13 @@ def create_slab(
 
     Example
     -------
-    import slab_generator
+    from ase.build import bulk
+    from structuretoolkit.build.surface import create_slab
     cu = bulk('Cu', 'fcc', a=3.6)
     terrace = [1, 1, 1]          # (111) normal
     step    = [-1, 1, 0]         # in‑plane step direction
     kink    = [1, 1, -2]         # kink direction
-    slab, idxmap = slab_generator.create_slab(
+    slab, idxmap = create_slab(
          bulk_str=cu,
          vacuum_size=15,
          terrace_orientation=terrace,
@@ -795,31 +811,100 @@ def create_slab(
 
 
 def make_stepped_surface(
-    bulk_str,
-    vacuum_size=15,
-    terrace_orientation=(0, 0, 1),
-    thickness=4,
-    step_orientation=(1, 0, 0),
-    step_length=3,
-    terrace_width=3,
-    filter_function=None,
-):
+    bulk_str: Atoms,
+    vacuum_size: float = 15,
+    terrace_orientation: Sequence[int] | np.ndarray = (0, 0, 1),
+    thickness: int = 4,
+    step_orientation: Sequence[int] | np.ndarray = (1, 0, 0),
+    step_length: int = 3,
+    terrace_width: int = 3,
+    filter_function: (
+        Callable[[Sequence[float] | np.ndarray, str, int], bool] | None
+    ) = None,
+) -> Atoms:
+    """
+    Generate a stepped surface slab from a bulk crystal structure with a single step edge.
+
+    This function constructs a surface slab with a defined terrace and a step, where the step
+    is oriented along a specified direction and the terrace extends in a perpendicular direction.
+    The kink direction is automatically computed as the cross product of the terrace and step
+    orientations, ensuring orthogonality.
+
+    Parameters
+    ----------
+    bulk_str : ase.Atoms
+        The bulk crystal structure from which the slab will be derived.
+
+    vacuum_size : float, optional
+        Thickness of the vacuum layer (in Å) to be added above and below the slab along the
+        surface normal direction. Default is 15 Å.
+
+    terrace_orientation : Sequence[int] | np.ndarray, optional
+        Miller index defining the surface normal (i.e., the direction perpendicular to the
+        terrace plane). Default is (0, 0, 1), corresponding to a (001) surface.
+
+    thickness : int, optional
+        Number of atomic layers in the slab along the terrace normal direction. Default is 4.
+
+    step_orientation : Sequence[int] | np.ndarray, optional
+        Miller index defining the direction along the step edge (in-plane). Must be orthogonal
+        to the terrace normal. If not, a symmetry-equivalent direction will be used. Default is (1, 0, 0).
+
+    step_length : int, optional
+        Number of repetitions of the step along the step_orientation direction. Controls the
+        length of the step in the unit cell. Default is 3.
+
+    terrace_width : int, optional
+        Width of the terrace in atomic layers along the kink direction (perpendicular to the step).
+        Default is 3.
+
+    filter_function : Callable[[Sequence[float] | np.ndarray, str, int], bool] | None, optional
+        A function that determines which atoms from the bulk are retained in the final slab.
+        It takes three arguments: the fractional coordinates of the atom, its chemical symbol,
+        and its index in the bulk. Returns True to keep the atom, False to discard it.
+        If None, all atoms are kept. Default is None.
+
+    Returns
+    -------
+    slab : ase.Atoms
+        The resulting stepped surface slab, rotated to align with the specified terrace
+        orientation, with vacuum padding and the step geometry applied.
+
+    Example
+    -------
+    >>> from ase.build import bulk
+    >>> from structuretoolkit.build.surface import make_stepped_surface
+    >>> cu = bulk('Cu', 'fcc', a=3.6)
+    >>> slab = make_stepped_surface(
+    ...     bulk_str=cu,
+    ...     vacuum_size=15,
+    ...     terrace_orientation=(1, 1, 1),
+    ...     thickness=2, # (111) direction has 3 sublayers => 6 sublayers
+    ...     step_orientation=(1, -1, 0),
+    ...     step_length=3,
+    ...     terrace_width=4
+    ... )
+    >>> print(slab.get_volume())
+    """
     if filter_function is None:
 
         def filter_function(*args) -> bool:
             return True
 
-    # TODO: spit out warning if bulk_str can be identified as cubic-type primitive (fcc, bcc)
-    # that all orientation are NOT in conventional system
-    print("If this is fcc, bcc, primitive etc., do NOT use cubic orientations")
+    if _is_cubic_nonsimple(bulk_str.cell):
+        print("=== WARNING ===")
+        print("This seems to be a cubic lattice, but not a conventional (cubic) cell.")
+        print("- maybe a fcc or bcc primitive cell?")
+        print(
+            "The Miller indices you provide refer to the cell as given, NOT to the conventional one!"
+        )
+        print("===============")
     kink_orientation = np.cross(terrace_orientation, step_orientation)
     step_xyz = step_orientation @ bulk_str.cell
     kink_xyz = kink_orientation @ bulk_str.cell
-    print(step_xyz, kink_xyz)
     cosangle = np.dot(step_xyz, kink_xyz) / (
         np.linalg.norm(step_xyz) * np.linalg.norm(kink_xyz)
     )
-    print(cosangle, cosangle * terrace_width)
     print(
         f"terrace={terrace_orientation} step={step_orientation} kink={kink_orientation}"
     )
