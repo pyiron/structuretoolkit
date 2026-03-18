@@ -85,6 +85,18 @@ jobs:
         pip install . --no-deps --no-build-isolation
         python -m pip check
 
+  uv_check:
+    needs: [black]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: astral-sh/setup-uv@v7
+    - name: Install the project and pip check
+      shell: bash -l {0}
+      run: |
+        uv sync --all-extras --dev
+        pip check
+
   unittest_matrix:
     needs: [black]
     runs-on: ${{ matrix.operating-system }}
@@ -161,7 +173,7 @@ jobs:
         python -m unittest discover tests
 
   autobot:
-    needs: [unittest_old, unittest_matrix, pip_check, minimal]
+    needs: [uv_check, unittest_old, unittest_matrix, pip_check, minimal]
     permissions:
       contents: write
       pull-requests: write
