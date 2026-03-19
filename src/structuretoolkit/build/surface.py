@@ -416,6 +416,27 @@ def make_supercell(primitive: Atoms, P: np.ndarray) -> Atoms:
 
     new_frac = new_pos @ np.linalg.inv(cell_super)
     new_frac %= 1.0  # bring into [0,1)
+    # minimize wrap-around noise
+    for dir in range(3):
+        # sort fractional coordinates
+        sortedf = sorted(new_frac[:,dir])
+        # define a suitable "gap size" that is garantueed to exist
+        gap_f = min(1e-3, 0.5/len(sortedf))
+        # now search a limit for wrapping boundary that separates
+        # the fractional coordinates by at least gap_f
+        limit=1.0+min(0.,sortedf[0]) + 0.5*gap_f
+        for f in sortedf[::-1]:
+              if (f > limit - gap_f):
+                  limit=f
+              else:
+                  limit -= 0.5 * gap_f
+                  break
+        # if necessary, wrap atoms above limit to negative values
+        wrap_again = new_frac[:,dir] >= limit
+        if any(wrap_again):
+            print (f"supercell wrap around fix: limit[{dir}]={limit}")
+            new_frac[wrap_again,dir] -= 1.
+          
     new_pos = new_frac @ cell_super
 
     # ------------------------------------------------------------------
