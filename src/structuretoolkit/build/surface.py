@@ -68,13 +68,17 @@ def get_high_index_surface_info(
     eqvdirs_ind = np.where(np.dot(np.squeeze(eqvdirs), terrace_orientation) == 0)[0]
     eqvdirk_ind = np.where(np.dot(np.squeeze(eqvdirk), terrace_orientation) == 0)[0]
     if len(eqvdirs_ind) == 0:
-        raise ValueError("Step orientation vector should lie in terrace.\
+        raise ValueError(
+            "Step orientation vector should lie in terrace.\
         For the given choice I could not find any symmetrically equivalent vector that lies in the terrace.\
-        please change the stepOrientation and try again")
+        please change the stepOrientation and try again"
+        )
     if len(eqvdirk_ind) == 0:
-        raise ValueError("Kink orientation vector should lie in terrace.\
+        raise ValueError(
+            "Kink orientation vector should lie in terrace.\
         For the given choice I could not find any symmetrically equivalent vector that lies in the terrace.\
-        please change the kinkOrientation and try again")
+        please change the kinkOrientation and try again"
+        )
     temp = (
         (np.cross(np.squeeze(eqvdirk[eqvdirk_ind[0]]), np.squeeze(eqvdirs)))
         .tolist()
@@ -182,13 +186,17 @@ def find_inplane_directions(
     eqvdirs_ind = np.where(np.dot(np.squeeze(eqvdirs), terrace_orientation) == 0)[0]
     eqvdirk_ind = np.where(np.dot(np.squeeze(eqvdirk), terrace_orientation) == 0)[0]
     if len(eqvdirs_ind) == 0:
-        raise ValueError("Step orientation vector should lie in terrace.\
+        raise ValueError(
+            "Step orientation vector should lie in terrace.\
         For the given choice I could not find any symmetrically equivalent vector that lies in the terrace.\
-        please change the stepOrientation and try again")
+        please change the stepOrientation and try again"
+        )
     if len(eqvdirk_ind) == 0:
-        raise ValueError("Kink orientation vector should lie in terrace.\
+        raise ValueError(
+            "Kink orientation vector should lie in terrace.\
         For the given choice I could not find any symmetrically equivalent vector that lies in the terrace.\
-        please change the kinkOrientation and try again")
+        please change the kinkOrientation and try again"
+        )
     crossp = np.cross(np.squeeze(eqvdirk[eqvdirk_ind[0]]), np.squeeze(eqvdirs)).tolist()
     if terrace_orientation in crossp:
         # fast search
