@@ -281,10 +281,12 @@ def _hnf_and_U(P):
     and U is unimodular such that P = U·H.
     """
     from sympy import Matrix
+
     P_sym = Matrix(P.tolist())
-    
+
     # The functional interface works for all recent SymPy releases.
     from sympy.matrices.normalforms import hermite_normal_form
+
     H_sym = hermite_normal_form(P_sym)
     H = np.array(H_sym, dtype=int)
     U = np.asarray(H_sym.inv() @ P_sym, dtype=int)
