@@ -6,6 +6,18 @@ from ase.build import bulk
 from ase.cell import Cell
 from structuretoolkit.build.surface import create_slab, _is_cubic_nonsimple, make_supercell, make_stepped_surface
 
+try:
+    import spglib
+    from spglib.error import SpglibError
+
+    skip_spglib_test = False
+except ImportError:
+    skip_spglib_test = True
+
+
+@unittest.skipIf(
+    skip_spglib_test, "spglib is not installed, so the spglib tests are skipped."
+)
 class TestAuxiliaryFunctions(unittest.TestCase):
     """
     Test cases for the auxiliary functions in the build.surface module.
@@ -103,6 +115,9 @@ class TestAuxiliaryFunctions(unittest.TestCase):
             make_supercell(primitive, P)
 
 
+@unittest.skipIf(
+    skip_spglib_test, "spglib is not installed, so the spglib tests are skipped."
+)
 class TestCreateSlabFunction(unittest.TestCase):
     """
     Test cases for the create_slab function.
@@ -197,6 +212,10 @@ class TestCreateSlabFunction(unittest.TestCase):
         # Check the chemical formula of the slab
         self.assertEqual(slab.get_chemical_formula(), 'La36Ni180')
 
+
+@unittest.skipIf(
+    skip_spglib_test, "spglib is not installed, so the spglib tests are skipped."
+)
 class TestMakeSteppedSurfaceFunction(unittest.TestCase):
     """
     Test cases for the make_stepped_surface function.
@@ -250,6 +269,7 @@ class TestMakeSteppedSurfaceFunction(unittest.TestCase):
         self.assertLess(np.abs(slab.get_volume() - 6175.953827914318), 1e-3)
         # Check the chemical formula of the slab
         self.assertEqual(slab.get_chemical_formula(), 'La36Ni180')
+
 
 if __name__ == "__main__":
     unittest.main()
