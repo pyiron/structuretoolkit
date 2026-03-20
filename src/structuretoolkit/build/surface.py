@@ -1,13 +1,13 @@
 from __future__ import annotations
-
 from collections.abc import Callable, Sequence
 
 import numpy as np
 from ase.atoms import Atoms
 from ase.build import bulk, surface
+from sympy import Matrix
+from sympy.matrices.normalforms import hermite_normal_form
 
 from structuretoolkit.analyse import get_symmetry
-from structuretoolkit.analyse.symmetry import Symmetry
 from structuretoolkit.common.pymatgen import ase_to_pymatgen, pymatgen_to_ase
 
 
@@ -282,12 +282,8 @@ def _hnf_and_U(P):
     Return (H, U) where H is the Hermite normal form of the integer matrix P
     and U is unimodular such that P = U·H.
     """
-    from sympy import Matrix
-
     P_sym = Matrix(P.tolist())
     # The functional interface works for all recent SymPy releases.
-    from sympy.matrices.normalforms import hermite_normal_form
-
     H_sym = hermite_normal_form(P_sym)
     H = np.array(H_sym, dtype=int)
     U = np.asarray(H_sym.inv() @ P_sym, dtype=int)
@@ -304,8 +300,8 @@ def _is_cubic(cell: np.ndarray | ase.cell.Cell) -> bool:
 
     Returns True if the cell's symmetry group has 48 operations and no translational components.
     """
-    sym = Symmetry(
-        Atoms(
+    sym = get_symmetry(
+        structure=Atoms(
             symbols="H",
             cell=cell,
             positions=[
