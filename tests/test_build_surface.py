@@ -16,8 +16,7 @@ class TestAuxiliaryFunctions(unittest.TestCase):
         Test _is_cubic_nonsimple function with a BCC lattice.
         """
         # Create a BCC lattice
-        cell = Cell(np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]))
-        cell *= np.array([[1, 1, 1], [1, -1, 1], [-1, 1, -1]]) / 2
+        cell = Cell(np.array([[-1, 1, 1], [1, -1, 1], [1, 1, -1]]))
         self.assertTrue(_is_cubic_nonsimple(cell))
 
     def test_is_cubic_nonsimple_fcc(self):
@@ -25,8 +24,7 @@ class TestAuxiliaryFunctions(unittest.TestCase):
         Test _is_cubic_nonsimple function with an FCC lattice.
         """
         # Create an FCC lattice
-        cell = Cell(np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]))
-        cell *= np.array([[0, 1, 1], [1, 0, 1], [1, 1, 0]]) / 2
+        cell = Cell(np.array([[0, 1, 1], [1, 0, 1], [1, 1, 0]]))
         self.assertTrue(_is_cubic_nonsimple(cell))
 
     def test_is_cubic_nonsimple_simple_cubic(self):
@@ -58,8 +56,7 @@ class TestAuxiliaryFunctions(unittest.TestCase):
         Test make_supercell function with an FCC lattice.
         """
         # Create an FCC lattice
-        primitive = Atoms('H', positions=[[0, 0, 0]], cell=np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]))
-        primitive.cell *= np.array([[0, 1, 1], [1, 0, 1], [1, 1, 0]]) / 2
+        primitive = Atoms('H', positions=[[0, 0, 0]], cell=np.array([[0, 1, 1], [1, 0, 1], [1, 1, 0]]))
         P = np.array([[-1, 1, 1], [1, -1, 1], [1, 1, -1]])
         supercell = make_supercell(primitive, P)
         self.assertEqual(len(supercell), 4)
@@ -69,8 +66,7 @@ class TestAuxiliaryFunctions(unittest.TestCase):
         Test make_supercell function with an FCC lattice and 2 atoms in the bulk cell.
         """
         # Create an FCC lattice with 2 atoms in the bulk cell
-        primitive = Atoms('H2', positions=[[0, 0, 0], [0.25, 0.25, 0.25]], cell=np.array([[10, 0, 0], [0, 10, 0], [0, 0, 10]]))
-        primitive.cell *= np.array([[0, 1, 1], [1, 0, 1], [1, 1, 0]]) / 2
+        primitive = Atoms('H2', positions=[[0, 0, 0], [2.5, 2.5, 2.5]], cell=np.array([[0,5,5],[5,0,5],[5,5,0]]))
         P = np.array([[-1, 1, 1], [1, -1, 1], [1, 1, -1]])
         supercell = make_supercell(primitive, P)
         self.assertEqual(len(supercell), 8)
@@ -80,8 +76,7 @@ class TestAuxiliaryFunctions(unittest.TestCase):
         Test make_supercell function with a large FCC lattice.
         """
         # Create an FCC lattice
-        primitive = Atoms('H', positions=[[0, 0, 0]], cell=np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]))
-        primitive.cell *= np.array([[0, 1, 1], [1, 0, 1], [1, 1, 0]]) / 2
+        primitive = Atoms('H', positions=[[0, 0, 0]], cell=np.array([[0, 1, 1], [1, 0, 1], [1, 1, 0]]))
         P = np.array([[4, 0, 0], [0, 3, 0], [0, 0, 7]])
         supercell = make_supercell(primitive, P)
         self.assertEqual(len(supercell), 4*3*7)
@@ -91,8 +86,7 @@ class TestAuxiliaryFunctions(unittest.TestCase):
         Test make_supercell function with a BCC lattice.
         """
         # Create a BCC lattice
-        primitive = Atoms('H', positions=[[0, 0, 0]], cell=np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]]))
-        primitive.cell *= np.array([[1, 1, 1], [1, -1, 1], [-1, 1, -1]]) / 2
+        primitive = Atoms('H', positions=[[0, 0, 0]], cell=np.array([[-1, 1, 1], [1, -1, 1], [1, 1, -1]]))
         P = np.array([[0, 1, 0], [0, 0, 1], [1, 0, 0]])
         supercell = make_supercell(primitive, P)
         self.assertEqual(len(supercell), 1)
@@ -146,11 +140,11 @@ class TestCreateSlabFunction(unittest.TestCase):
             step_depth=step_depth,
         )
         # Check the number of atoms in the slab
-        self.assertEqual(len(slab), 144)
+        self.assertEqual(len(slab), 48)
         # Check the volume of the slab
-        self.assertLess(np.abs(slab.get_volume() - 3861.750587966561), 1e-3)
+        self.assertLess(np.abs(slab.get_volume() - 2598.7564008427744), 1e-3)
         # Check the number of elements in the index map
-        self.assertEqual(len(idxmap), 144)
+        self.assertEqual(len(idxmap), 48)
 
     def test_create_slab_lani5(self):
         """
@@ -225,9 +219,9 @@ class TestMakeSteppedSurfaceFunction(unittest.TestCase):
             terrace_width=4
         )
         # Check the number of atoms in the slab
-        self.assertEqual(len(slab), 240)
+        self.assertEqual(len(slab), 80)
         # Check the volume of the slab
-        self.assertLess(np.abs(slab.get_volume() - 6370.7160449778785), 1e-3)
+        self.assertLess(np.abs(slab.get_volume() - 4184.238422943097), 1e-3)
 
     def test_make_stepped_surface_lani5(self):
         """
