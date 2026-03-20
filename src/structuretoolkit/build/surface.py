@@ -325,7 +325,7 @@ def _is_cubic_nonsimple(cell: np.ndarray | ase.cell.Cell) -> bool:
     if not _is_cubic(cell):
         return False
     for i in range(3):
-        if np.dot(cell[i], cell[i - 1]) > 1e-6 * np.linalg.norm(
+        if np.abs(np.dot(cell[i], cell[i - 1])) > 1e-6 * np.linalg.norm(
             cell[i]
         ) * np.linalg.norm(cell[i - 1]):
             return True
@@ -816,12 +816,27 @@ def create_slab(
     if np.dot(kink_orientation, terrace_orientation) == 0:
         K = kink_orientation
 
+    # find a (primitive) basis vector out of plane
+    possible_T = []
+    for vec in (1,0,0), (0,1,0), (0,0,1):
+        dp = int(np.dot (np.array(vec, dtype=np.int32),
+                         np.array(terrace_orientation,dtype=np.int32)))
+        if np.abs(dp) > 0:
+            T = vec if dp > 0 else -vec
+            if (np.dot (kink_orientation @ bulk_str.cell, T @ bulk_str.cell)>0.):
+                possible_T.insert (0,T)
+            else:
+                possible_T.append (T)
+    T = possible_T[0]
+    print (f"Choosing {T} as depth direction for terrace {terrace_orientation}")
+    
+
     # create an appropriate bulk supercell
     supercell, mapcell, frac, idxmap = bulk_supercell_with_mapping(
         bulk_str,
         S,
         K,
-        terrace_orientation,
+        T,
         step_length,
         terrace_width,
         kink_shift,
