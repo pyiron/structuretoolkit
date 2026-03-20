@@ -419,24 +419,24 @@ def make_supercell(primitive: Atoms, P: np.ndarray) -> Atoms:
     # minimize wrap-around noise
     for dir in range(3):
         # sort fractional coordinates
-        sortedf = sorted(new_frac[:,dir])
+        sortedf = sorted(new_frac[:, dir])
         # define a suitable "gap size" that is garantueed to exist
-        gap_f = min(1e-3, 0.5/len(sortedf))
+        gap_f = min(1e-3, 0.5 / len(sortedf))
         # now search a limit for wrapping boundary that separates
         # the fractional coordinates by at least gap_f
-        limit=1.0+min(0.,sortedf[0]) + 0.5*gap_f
+        limit = 1.0 + min(0.0, sortedf[0]) + 0.5 * gap_f
         for f in sortedf[::-1]:
-              if (f > limit - gap_f):
-                  limit=f
-              else:
-                  limit -= 0.5 * gap_f
-                  break
+            if f > limit - gap_f:
+                limit = f
+            else:
+                limit -= 0.5 * gap_f
+                break
         # if necessary, wrap atoms above limit to negative values
-        wrap_again = new_frac[:,dir] >= limit
+        wrap_again = new_frac[:, dir] >= limit
         if any(wrap_again):
-            print (f"supercell wrap around fix: limit[{dir}]={limit}")
-            new_frac[wrap_again,dir] -= 1.
-          
+            print(f"supercell wrap around fix: limit[{dir}]={limit}")
+            new_frac[wrap_again, dir] -= 1.0
+
     new_pos = new_frac @ cell_super
 
     # ------------------------------------------------------------------
@@ -818,18 +818,21 @@ def create_slab(
 
     # find a (primitive) basis vector out of plane
     possible_T = []
-    for vec in (1,0,0), (0,1,0), (0,0,1):
-        dp = int(np.dot (np.array(vec, dtype=np.int32),
-                         np.array(terrace_orientation,dtype=np.int32)))
+    for vec in (1, 0, 0), (0, 1, 0), (0, 0, 1):
+        dp = int(
+            np.dot(
+                np.array(vec, dtype=np.int32),
+                np.array(terrace_orientation, dtype=np.int32),
+            )
+        )
         if np.abs(dp) > 0:
             T = vec if dp > 0 else -vec
-            if (np.dot (kink_orientation @ bulk_str.cell, T @ bulk_str.cell)>0.):
-                possible_T.insert (0,T)
+            if np.dot(kink_orientation @ bulk_str.cell, T @ bulk_str.cell) > 0.0:
+                possible_T.insert(0, T)
             else:
-                possible_T.append (T)
+                possible_T.append(T)
     T = possible_T[0]
-    print (f"Choosing {T} as depth direction for terrace {terrace_orientation}")
-    
+    print(f"Choosing {T} as depth direction for terrace {terrace_orientation}")
 
     # create an appropriate bulk supercell
     supercell, mapcell, frac, idxmap = bulk_supercell_with_mapping(
