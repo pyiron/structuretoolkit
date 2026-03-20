@@ -174,7 +174,7 @@ def find_inplane_directions(
     terrace_orientation = list(terrace_orientation)
     step_orientation = list(step_orientation)
     kink_orientation = list(kink_orientation)
-    sym = Symmetry(basis)
+    sym = get_symmetry(basis)
     eqvdirs = np.unique(
         np.matmul(sym.rotations[:], (np.array(step_orientation))), axis=0
     )
