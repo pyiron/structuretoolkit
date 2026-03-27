@@ -217,16 +217,16 @@ def sqs_structures(
     result = optimize({k: v for k, v in settings.items() if v is not None})
 
     structures = []
+    sro_breakdown: list = []
     finished = False
     for r_lst in result:
         if not finished:
             for s in r_lst[1]:
                 structures.append(to_ase(s.structure()))
+                sro_breakdown.append(s.sro())
                 if len(structures) == output_structures:
                     finished = True
                     break
-
-    sro_breakdown = [s.sro() for s in result[0][1]]
     cycle_time = list(result.statistics.timings.values())[0]
     num_iterations = result.config.iterations
 
