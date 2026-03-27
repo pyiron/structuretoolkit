@@ -166,14 +166,8 @@ def sqs_structures(
     output_structures: int = 10,
     mode: str = "random",
     num_threads: int | None = None,
-    prefactors: float | np.ndarray | None = None,
-    pair_weights: np.ndarray | None = None,
     rtol: float | None = None,
     atol: float | None = None,
-    which: Iterable[int] | None = None,
-    shell_distances: Iterable[int] | None = None,
-    minimal: bool | None = True,
-    similar: bool | None = True,
     return_statistics: bool | None = False,
 ) -> Atoms | tuple[Atoms, dict[str, list], int, float]:
     """
@@ -188,54 +182,54 @@ def sqs_structures(
         output_structures (int): The number of output structures.
         mode (str): The mode for selecting configurations.
         num_threads (Optional[int]): The number of threads to use.
-        prefactors (Optional[Union[float, np.ndarray]]): The prefactors for each shell.
-        pair_weights (Optional[np.ndarray]): The pair weights.
         rtol (Optional[float]): The relative tolerance.
         atol (Optional[float]): The absolute tolerance.
-        which (Optional[Iterable[int]]): The indices of the shells to optimize.
-        shell_distances (Optional[Iterable[int]]): The distances for each shell.
-        minimal (Optional[bool]): Whether to minimize the objective function.
-        similar (Optional[bool]): Whether to generate similar structures.
         return_statistics (Optional[bool]): Whether to return additional statistics.
 
     Returns:
         Union[Atoms, Tuple[Atoms, Dict[str, list], int, float]]: The generated structures or a tuple containing the structures, short-range order parameters breakdown, number of iterations, and average cycle time.
 
     """
-    from sqsgenerator import sqs_optimize
+    from sqsgenerator import optimize, to_ase
 
     composition = mole_fractions_to_composition(mole_fractions, len(structure))
 
     settings = {
         "atol": atol,
         "rtol": rtol,
-        "mode": mode,
-        "which": which,
-        "structure": structure,
-        "prefactors": prefactors,
-        "shell_weights": weights,
-        "iterations": iterations,
-        "composition": composition,
-        "pair_weights": pair_weights,
+        "iteration_mode": mode,
+        "structure": {
+            "lattice": structure.cell.array.tolist(),
+            "coords": structure.get_scaled_positions().tolist(),
+            "species": structure.get_chemical_symbols(),
+        },
+        "iterations": int(iterations),
+        "composition": {k: int(v) for k, v in composition.items()},
         "target_objective": objective,
-        "shell_distances": shell_distances,
-        "threads_per_rank": num_threads or cpu_count(),
-        "max_output_configurations": output_structures,
+        "thread_config": num_threads or cpu_count(),
+        "max_results_per_objective": output_structures,
     }
+    if weights is not None:
+        settings["shell_weights"] = weights
+
     # not specifying a parameter in settings causes sqsgenerator to choose a "sensible" default,
     # hence we remove all entries with a None value
+    result = optimize({k: v for k, v in settings.items() if v is not None})
 
-    results, timings = sqs_optimize(
-        {param: value for param, value in settings.items() if value is not None},
-        minimal=minimal,
-        similar=similar,
-        make_structures=True,
-        structure_format="ase",
-    )
+    structures = []
+    sro_breakdown: list = []
+    finished = False
+    for r_lst in result:
+        if not finished:
+            for s in r_lst[1]:
+                structures.append(to_ase(s.structure()))
+                sro_breakdown.append(s.sro())
+                if len(structures) == output_structures:
+                    finished = True
+                    break
+    cycle_time = list(result.statistics.timings.values())[0]
+    num_iterations = result.config.iterations
 
-    structures, sro_breakdown = transpose(map(remap_sqs_results, results.values()))
-    num_iterations = iterations
-    cycle_time = np.average(list(map_dict(np.average, timings).values()))
     if not return_statistics:
         return structures
     else:
