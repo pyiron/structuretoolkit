@@ -60,6 +60,7 @@ class SQSTestCase(unittest.TestCase):
             self.assertEqual(len(s), 32)
             for el in ["Au", "Cu"]:
                 self.assertAlmostEqual(s.count(el) / len(s), 0.5)
+        self.assertEqual(len(sro_breakdown), len(structures_lst))
         for sro in sro_breakdown:
             self.assertEqual((5, 2, 2), sro.shape)
         self.assertEqual(num_iterations, 1000000)
