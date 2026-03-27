@@ -204,7 +204,7 @@ def sqs_structures(
             "species": structure.get_chemical_symbols(),
         },
         "iterations": int(iterations),
-        "composition": {k: int(v) for k,v in composition.items()},
+        "composition": {k: int(v) for k, v in composition.items()},
         "target_objective": objective,
         "thread_config": num_threads or cpu_count(),
         "max_results_per_objective": output_structures,
@@ -214,8 +214,8 @@ def sqs_structures(
 
     # not specifying a parameter in settings causes sqsgenerator to choose a "sensible" default,
     # hence we remove all entries with a None value
-    result = optimize({k: v for k,v in settings.items() if v is not None})
-    
+    result = optimize({k: v for k, v in settings.items() if v is not None})
+
     structures = []
     finished = False
     for r_lst in result:
