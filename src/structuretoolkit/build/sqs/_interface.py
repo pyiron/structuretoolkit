@@ -137,7 +137,56 @@ def sqs_structures(
     max_results_per_objective: int = 10,
     log_level: LogLevel = "warn",
     **kwargs: Any,
-) -> list[SqsResultSplit]:
+) -> SqsResultPack[SqsResultSplit] | SqsResultPack[SqsResultInteract]:
+    """
+    Generate special quasirandom structures (SQS) using the sqsgenerator package.
+    The function can handle both single and multiple sublattices,
+
+    Args:
+        structure: (ase.atoms.Atoms) The initial structure to optimize.
+        composition (dict[str, int] | list[dict[str, int]]): The target composition(s) for the optimization.
+            Each dictionary should map element symbols to their desired counts. If a list is provided, each dictionary
+            corresponds to a different sublattice. A list is expected if sublattice_mode is set to "split".
+            Use "sites" key to specify the sites that belong to a sublattice,
+            e.g. {"Cu": 8, "Au": 8, "sites": [0, 1, ..., 15]}. In case you use "sites" key with atomic species,
+            e.g. {"Cu": 8, "Au": 8, "sites": "Al"}, the "Al" sites refer to the atoms of the {structure} argument.
+        supercell (tuple[int, int, int] | None): The supercell size to use for the optimization.
+            If None, the original cell is used.
+        shell_weights (dict[int, float] | list[dict[int, float]] | None): The weights for each shell in the objective
+            function. The keys should be the shell numbers (starting from 1) and the values should be the corresponding
+            weights. If a list is provided, each dictionary corresponds to a different sublattice ("split" mode).
+        shell_radii (list[float] | list[list[float]] | None): The radii for each shell. Use to manually define
+            the coordination shell radii. The list should contain the radii for each shell, starting from the first
+            shell. If a list of lists is provided, each inner list corresponds to a different sublattice ("split" mode).
+        objective: (float | list[float]) The target objective value(s) for the optimization. If a list is provided,
+        each value corresponds to a different sublattice ("split" mode). In split mode diverging objectives are
+        supported, e.g. [0, 1], to enable clustering, ordering, partial ordering or randomization for each sublattice.
+        iterations: (int) The maximum number of iterations to perform during the optimization. In case iteration_mode
+            is set to "systematic", this parameter is ignored.
+        atol (float | None): The absolute tolerance for shell radii detection. If None, no absolute tolerance is used.
+        rtol (float | None): The relative tolerance for shell radii detection. If None, no relative tolerance is used.
+        sublattice_mode (str): The mode to use for handling sublattices. Can be either "interact" or "split".
+            In "interact" mode, the whole cell is treated as a whole. In "split" mode, the cell is split into
+            sublattices according to the "sites" key in the composition dictionaries, and the optimization is performed
+            separately for each sublattice. "split" mode does not support iteration_mode "systematic".
+        iteration_mode (str): The mode to use for iterating through the configuration space.
+            Can be either "random" or "systematic".
+        num_threads (int | None): The number of threads to use for the optimization.
+            If None, the optimization will use the number of hardware threads it detects.
+        precision (str): The precision to use for the optimization. Can be either "single" or "double".
+        max_results_per_objective (int): The maximum number of results to return for each objective value.
+            If the optimization finds more results with the same objective value, only at most
+            {max_results_per_objective} results will be kept.
+        log_level (str): The log level to use for the optimization. Can be either "trace", "debug", "info", "warn",
+            or "error". The log level controls the verbosity of the output during optimization.
+        **kwargs (Any): Additional keyword arguments to pass to the sqsgenerator optimization function.
+
+    Returns:
+        SqsResultPack: A pack of optimization results. The type of the results (SqsResultInteract or SqsResultSplit)
+        depends on the sublattice_mode used for the optimization.
+
+    """
+
     from sqsgenerator import parse_config
     from sqsgenerator.core import (
         ParseError,
