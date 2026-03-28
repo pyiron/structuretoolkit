@@ -134,8 +134,6 @@ ShellWeights = dict[Shell, float]
 
 ShellRadii = list[float]
 
-ResultType = Literal["best", "all"]
-
 LogLevel = Literal["warn", "info", "debug", "error", "trace"]
 
 

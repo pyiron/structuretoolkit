@@ -12,7 +12,6 @@ from ._types import (
     Prec,
     SqsResultInteract,
     SqsResultSplit,
-    ResultType,
     LogLevel,
 )
 
