@@ -6,7 +6,7 @@ Shell: TypeAlias = int
 
 SublatticeMode = Literal["split", "interact"]
 IterationMode = Literal["random", "systematic"]
-Element = [
+Element = Literal[
     "0",
     "H",
     "He",

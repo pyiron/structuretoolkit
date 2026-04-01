@@ -81,7 +81,7 @@ def sqs_structures(
     supercell: tuple[int, int, int] | None = None,
     shell_weights: ShellWeights | None = None,
     shell_radii: ShellRadii | None = None,
-    objective: float = 0.0,
+    objective: float | None = None,
     iterations: int = 1_000_000,
     atol: float | None = None,
     rtol: float | None = None,
@@ -92,8 +92,7 @@ def sqs_structures(
     max_results_per_objective: int = 10,
     log_level: LogLevel = "warn",
     **kwargs: Any,
-) -> SqsResultPack[SqsResultInteract]:
-    pass
+) -> SqsResultPack[SqsResultInteract]: ...
 
 
 @overload
@@ -103,7 +102,7 @@ def sqs_structures(
     supercell: tuple[int, int, int] | None = None,
     shell_weights: list[ShellWeights] | None = None,
     shell_radii: list[ShellRadii] | None = None,
-    objective: list[float] = 0.0,
+    objective: list[float] | None = None,
     iterations: int = 1_000_000,
     atol: float | None = None,
     rtol: float | None = None,
@@ -114,8 +113,7 @@ def sqs_structures(
     max_results_per_objective: int = 10,
     log_level: LogLevel = "warn",
     **kwargs: Any,
-) -> SqsResultPack[SqsResultSplit]:
-    pass
+) -> SqsResultPack[SqsResultSplit]: ...
 
 
 def sqs_structures(
@@ -124,7 +122,7 @@ def sqs_structures(
     supercell: tuple[int, int, int] | None = None,
     shell_weights: list[ShellWeights] | ShellWeights | None = None,
     shell_radii: list[ShellRadii] | ShellRadii | None = None,
-    objective: list[float] | float = 0.0,
+    objective: list[float] | float | None = None,
     iterations: int = 1_000_000,
     atol: float | None = None,
     rtol: float | None = None,
@@ -156,6 +154,7 @@ def sqs_structures(
         shell_radii (list[float] | list[list[float]] | None): The radii for each shell. Use to manually define
             the coordination shell radii. The list should contain the radii for each shell, starting from the first
             shell. If a list of lists is provided, each inner list corresponds to a different sublattice ("split" mode).
+            If set to None 0.0 (=random) will be used in interact and [0.0, 0.0, ...] in split mode.
         objective: (float | list[float]) The target objective value(s) for the optimization. If a list is provided,
         each value corresponds to a different sublattice ("split" mode). In split mode diverging objectives are
         supported, e.g. [0, 1], to enable clustering, ordering, partial ordering or randomization for each sublattice.
@@ -234,7 +233,8 @@ def sqs_structures(
         config["shell_weights"] = shell_weights
     if (shell_radii := _preprocess_for_mode(shell_radii)) is not None:
         config["shell_radii"] = shell_radii
-
+    if objective is None:
+        objective = 0.0 if sublattice_mode == "interact" else [0.0] * len(composition)
     config["target_objective"] = _preprocess_for_mode(objective)
 
     if num_threads is not None:
@@ -291,11 +291,18 @@ def sqs_structures(
     t.start()
     try:
         while t.is_alive() and not stop_event.is_set():
-            stop_event.wait()
+            stop_event.wait(timeout=1.0)
     except (KeyboardInterrupt, EOFError):
         stop_gracefully = True
     finally:
-        t.join()
+        try:
+            t.join(timeout=5.0)
+        except TimeoutError:
+            raise RuntimeError(
+                "Optimization thread did not finish within the timeout period after requesting it to stop. "
+                "The optimization may still be running in the background. Try to decrease chunk_size by passing it as a "
+                "keyword argument to sqs_structures to make the optimization more responsive to stop requests."
+            )
 
     if optimization_result is None:
         raise RuntimeError("Optimization failed to produce a result.")
