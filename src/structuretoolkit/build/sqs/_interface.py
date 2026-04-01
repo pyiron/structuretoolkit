@@ -20,7 +20,6 @@ T = TypeVar("T")
 
 
 class _SqsResultProxy(Generic[R]):
-
     def __init__(self, result: R):
         self._result = result
 
@@ -47,7 +46,6 @@ class _SqsResultProxy(Generic[R]):
 
 
 class SqsResultPack(Generic[R]):
-
     def __init__(self, pack):
         self._pack = pack
 
