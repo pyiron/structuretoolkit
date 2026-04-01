@@ -138,7 +138,6 @@ LogLevel = Literal["warn", "info", "debug", "error", "trace"]
 
 
 class SroParameter:
-
     @property
     def i(self) -> int: ...
 
@@ -155,7 +154,6 @@ class SroParameter:
 
 
 class SqsResultInteract(Protocol):
-
     def shell_index(self, shell: int) -> int: ...
 
     def species_index(self, species: int) -> int: ...
@@ -186,7 +184,6 @@ class SqsResultInteract(Protocol):
 
 
 class SqsResultSplit(Protocol):
-
     @property
     def objective(self) -> float: ...
 
