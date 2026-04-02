@@ -63,9 +63,10 @@ def search(
             chemsys=chemsys, **kwargs, fields=["structure", "material_id"]
         )
     for r in results:
-        if 'structure' in r:
-            r['structure'] = pymatgen_to_ase(r['structure'])
+        if "structure" in r:
+            r["structure"] = pymatgen_to_ase(r["structure"])
             yield r
+
 
 def by_id(
     material_id: str | int,
