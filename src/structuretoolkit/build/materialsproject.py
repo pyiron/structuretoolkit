@@ -20,13 +20,13 @@ def search(
     Search for all iron structures:
 
     >>> irons = structuretoolkit.build.materialsproject.search("Fe")
-    >>> len(irons)
+    >>> len(list(irons))
     10
 
     Search for all structures with Al, Li that are on the T=0 convex hull:
 
     >>> alli = structuretoolkit.build.materialsproject.search(['Al', 'Li', 'Al-Li'], is_stable=True)
-    >>> len(alli)
+    >>> len(list(alli))
     6
 
     Usage is only possible with an API key obtained from the Materials Project.  To do this, create an account with
