@@ -1,4 +1,5 @@
-from typing import Any, Generator
+from typing import Any
+from collections.abc import Generator
 from ase.atoms import Atoms
 from structuretoolkit.common.pymatgen import pymatgen_to_ase
 
