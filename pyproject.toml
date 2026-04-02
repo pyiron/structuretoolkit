@@ -55,6 +55,7 @@ phonopy = [
     "phonopy==3.3.0",
     "spglib==2.7.0",
 ]
+mp-api = ["mp-api==0.37.2"]
 
 [tool.ruff]
 exclude = [".ci_support", "tests", "setup.py", "_version.py"]

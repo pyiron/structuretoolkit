@@ -1,12 +1,12 @@
-from typing import Any
+from typing import Any, Iterable
 from collections.abc import Generator
 from ase.atoms import Atoms
 from structuretoolkit.common.pymatgen import pymatgen_to_ase
 
 
 def search(
-    chemsys: str | list[str], api_key=None, **kwargs
-) -> Generator[dict[str, Any]]:
+        chemsys: str | list[str], fields: Iterable[str] = (), api_key=None, **kwargs
+) -> Generator[dict[str, Any], None, None]:
     """
     Search the database for all structures matching the given query.
 
@@ -19,20 +19,13 @@ def search(
 
     Search for all iron structures:
 
-    >>> pr = Project(...)
-    >>> irons = pr.create.structure.materialsproject.search("Fe")
-    >>> irons.number_of_structures
+    >>> irons = structuretoolkit.build.materialsproject.search("Fe")
+    >>> len(irons)
     10
-
-    The returned :class:`~.MPQueryResults` object implements :class:`~.HasStructure` and can be accessed with the
-    material ids as a short-hand
-
-    >>> irons.get_structure(1) == irons.get_structure('mp-13')
-    True
 
     Search for all structures with Al, Li that are on the T=0 convex hull:
 
-    >>> alli = pr.create.structure.materialsproject.search(['Al', 'Li', 'Al-Li'], is_stable=True)
+    >>> alli = structuretoolkit.build.materialsproject.search(['Al', 'Li', 'Al-Li'], is_stable=True)
     >>> len(alli)
     6
 
@@ -44,12 +37,17 @@ def search(
 
     Args:
         chemsys (str, list of str): confine search to given elements; either an element symbol or multiple element
-        symbols seperated by dashes; if a list of strings is given return structures matching either of them
+            symbols seperated by dashes; if a list of strings is given return structures matching either of them
+        fields (iterable of str): pass as `fields` to :meth:`mp_api.MPRester.summary.search` to request additional
+            database entries beyond the structure
         api_key (str, optional): if your API key is not exported in the environment flag MP_API_KEY, pass it here
         **kwargs: passed verbatim to :meth:`mp_api.MPRester.summary.search` to further filter the results
 
     Returns:
-        :class:`~.MPQueryResults`: resulting structures from the query
+        list of dict: one dictionary for each search results with at least keys
+            'material_id': database key of the hit
+            'structure': ASE atoms object
+            plus any requested via `fields`.
     """
     from mp_api.client import MPRester
 
@@ -61,12 +59,12 @@ def search(
         rest_kwargs["api_key"] = api_key
     with MPRester(**rest_kwargs) as mpr:
         results = mpr.summary.search(
-            chemsys=chemsys, **kwargs, fields=["structure", "material_id"]
+            chemsys=chemsys, **kwargs, fields=list(fields) + ["structure", "material_id"]
         )
     for r in results:
         if "structure" in r:
             r["structure"] = pymatgen_to_ase(r["structure"])
-            yield r
+        yield r
 
 
 def by_id(
@@ -80,8 +78,7 @@ def by_id(
 
     This is how you would ask for the iron ground state:
 
-    >>> pr = Project(...)
-    >>> pr.create.structure.materialsproject.by_id('mp-13')
+    >>> structuretoolkit.build.materialsproject.by_id('mp-13')
     Fe: [0. 0. 0.]
     tags:
         spin: [(0: 2.214)]
