@@ -5,7 +5,7 @@ from structuretoolkit.common.pymatgen import pymatgen_to_ase
 
 
 def search(
-        chemsys: str | list[str], fields: Iterable[str] = (), api_key=None, **kwargs
+    chemsys: str | list[str], fields: Iterable[str] = (), api_key=None, **kwargs
 ) -> Generator[dict[str, Any], None, None]:
     """
     Search the database for all structures matching the given query.
@@ -59,7 +59,9 @@ def search(
         rest_kwargs["api_key"] = api_key
     with MPRester(**rest_kwargs) as mpr:
         results = mpr.summary.search(
-            chemsys=chemsys, **kwargs, fields=list(fields) + ["structure", "material_id"]
+            chemsys=chemsys,
+            **kwargs,
+            fields=list(fields) + ["structure", "material_id"],
         )
     for r in results:
         if "structure" in r:
