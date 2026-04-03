@@ -10,8 +10,8 @@ def search(
     """
     Search the database for all structures matching the given query.
 
-    Note that `chemsys` takes distint values for unaries, binaries and so!  A query with `chemsys=["Fe", "O"]` will
-    return iron structures and oxygen structures, but no iron oxide structures.  Similarily `chemsys=["Fe-O"]` will
+    Note that `chemsys` takes distinct values for unaries, binaries and so!  A query with `chemsys=["Fe", "O"]` will
+    return iron and oxygen structures but not iron oxide.  Similarly `chemsys=["Fe-O"]` will
     not return unary structures.
 
     All keyword arguments for filtering from the original API are supported.  See the
@@ -37,7 +37,7 @@ def search(
 
     Args:
         chemsys (str, list of str): confine search to given elements; either an element symbol or multiple element
-            symbols seperated by dashes; if a list of strings is given return structures matching either of them
+            symbols separated by dashes; if a list of strings is given return structures matching either of them
         fields (iterable of str): pass as `fields` to :meth:`mp_api.MPRester.summary.search` to request additional
             database entries beyond the structure
         api_key (str, optional): if your API key is not exported in the environment flag MP_API_KEY, pass it here
