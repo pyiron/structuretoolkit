@@ -13,7 +13,7 @@ def setUpModule():
     """Skip the entire module if mp_api and pymatgen are not installed."""
     if (
         importlib.util.find_spec("mp_api") is None
-        and importlib.util.find_spec("pymatgen") is None
+        or importlib.util.find_spec("pymatgen") is None
     ):
         raise unittest.SkipTest("mp-api and pymatgen are not installed")
 
