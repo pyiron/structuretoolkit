@@ -2,18 +2,20 @@ import importlib
 import unittest
 from unittest.mock import MagicMock, patch
 
-import pytest
 import numpy as np
 from ase.atoms import Atoms
 from ase.build import bulk
 
-pytestmark = pytest.mark.skipif(
-    importlib.util.find_spec("mp_api") is None
-    and importlib.util.find_spec("pymatgen") is None,
-    reason="mp-api and pymatgen are not installed",
-)
-
 from structuretoolkit.build.materialsproject import by_id, search
+
+
+def setUpModule():
+    """Skip the entire module if mp_api and pymatgen are not installed."""
+    if (
+        importlib.util.find_spec("mp_api") is None
+        and importlib.util.find_spec("pymatgen") is None
+    ):
+        raise unittest.SkipTest("mp-api and pymatgen are not installed")
 
 
 def _make_pymatgen_structure(ase_atoms):
