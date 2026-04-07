@@ -413,7 +413,7 @@ class Symmetry(dict):
             to_primitive=not standardize,
         )
         if ret is None:
-            raise SymmetryError(spglib.spglib.spglib_error.message)
+            raise SymmetryError(spglib.error.get_error_message())
         cell, scaled_positions, indices = ret
         indices_dict = {
             v: k
