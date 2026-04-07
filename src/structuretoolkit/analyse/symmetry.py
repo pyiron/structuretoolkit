@@ -404,7 +404,7 @@ class Symmetry(dict):
 
         .. warning::
             Custom arrays defined in the base structures
-            :attr:`ase.atoms.Atoms.arrays` are not copied to the new structure!
+            :attr:`ase.atoms.Atoms.arrays` and other state (.info, .calc, etc.) are not copied to the new structure!
         """
         if not all(self._structure.pbc):
             raise ValueError("Can only symmetrize periodic structures.")
