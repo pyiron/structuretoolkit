@@ -13,17 +13,40 @@ def repulse(
     iterations: int = 100,
     inplace=False,
 ):
-    """Displace atoms to avoid minimum overlap.
+    """Iteratively displace atoms apart until all interatomic distances exceed a minimum threshold.
+
+    For each pair of atoms closer than ``min_dist``, the atom is displaced away from its nearest
+    neighbour by up to ``step_size`` along the direction of the interatomic vector.  The loop
+    repeats until all nearest-neighbour distances satisfy the minimum criterion or the iteration
+    limit is reached.
 
     Args:
         structure (:class:`ase.Atoms`):
-            structure to modify
+            Structure to modify.
         min_dist (float):
-            Minimum distance to enforce between atoms
+            Minimum interatomic distance (in Å) to enforce between every pair of atoms.
+            Defaults to 1.5.
         step_size (float):
-            Maximum distance to displace atoms in one step
+            Maximum displacement (in Å) applied to a single atom per iteration.
+            Smaller values give smoother convergence but require more iterations.
+            Defaults to 0.2.
+        axis (int or None):
+            Cartesian axis index (0, 1, or 2) along which displacements are restricted.
+            When *None* (default) displacements are applied in all three directions.
         iterations (int):
-            Maximum number of displacements made before giving up
+            Maximum number of displacement steps before raising a :class:`RuntimeError`.
+            Defaults to 100.
+        inplace (bool):
+            If *True*, the positions of ``structure`` are modified directly.
+            If *False* (default), a copy is made and the original is left unchanged.
+
+    Returns:
+        :class:`ase.Atoms`: The structure with adjusted atomic positions.  This is the
+        same object as ``structure`` when ``inplace=True``, or a new copy otherwise.
+
+    Raises:
+        RuntimeError: If the minimum distance criterion is not satisfied within
+            ``iterations`` steps.
     """
     if not inplace:
         structure = structure.copy()
