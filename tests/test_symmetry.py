@@ -193,6 +193,20 @@ class TestSymmetry(unittest.TestCase):
             221,
         )
 
+    def test_get_primitive_cell_standardize_fcc(self):
+        # primitive FCC cell has 1 atom; standardize=True should return the
+        # conventional cubic cell with 4 atoms
+        a_0 = 4.05
+        structure = bulk("Al", crystalstructure="fcc", a=a_0)
+        self.assertEqual(len(structure), 1)
+        sym = stk.analyse.get_symmetry(structure=structure)
+        std = sym.get_primitive_cell(standardize=True)
+        self.assertEqual(len(std), 4)
+        # conventional cell should be approximately cubic
+        cell = std.get_cell()
+        lengths = np.linalg.norm(cell, axis=1)
+        self.assertTrue(np.allclose(lengths, a_0, atol=1e-3))
+
     def test_get_primitive_cell_hex(self):
         elements = ["Fe", "Fe", "Fe", "Fe", "O", "O", "O", "O", "O", "O"]
         positions = [
