@@ -1,18 +1,19 @@
 """Utilities that operate purely geometric aspects of structures."""
 
 import numpy as np
+from ase.atoms import Atoms
 
 from structuretoolkit.analyse import get_neighbors
 
 
 def repulse(
-    structure,
-    min_dist=1.5,
-    step_size=0.2,
-    axis=None,
+    structure: Atoms,
+    min_dist: float = 1.5,
+    step_size: float = 0.2,
+    axis: int | None = None,
     iterations: int = 100,
-    inplace=False,
-):
+    inplace: bool = False,
+) -> Atoms:
     """Iteratively displace atoms apart until all interatomic distances exceed a minimum threshold.
 
     For each pair of atoms closer than ``min_dist``, the atom is displaced away from its nearest
