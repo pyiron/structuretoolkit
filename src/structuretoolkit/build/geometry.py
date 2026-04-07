@@ -6,12 +6,12 @@ from structuretoolkit.analyse import get_neighbors
 
 
 def repulse(
-        structure,
-        min_dist=1.5,
-        step_size=0.2,
-        axis=None,
-        iterations: int = 100,
-        inplace=False
+    structure,
+    min_dist=1.5,
+    step_size=0.2,
+    axis=None,
+    iterations: int = 100,
+    inplace=False,
 ):
     """Displace atoms to avoid minimum overlap.
 
@@ -31,29 +31,29 @@ def repulse(
         axis = slice(None)
     for _ in range(iterations):
         neigh = get_neighbors(structure, num_neighbors=1)
-        dd=neigh.distances[:,0]
-        if dd.min()>min_dist:
+        dd = neigh.distances[:, 0]
+        if dd.min() > min_dist:
             break
 
-        I = dd<min_dist
+        I = dd < min_dist
 
         vv = neigh.vecs[I, 0, :]
-        vv /= dd[I,None]
+        vv /= dd[I, None]
 
-        disp = np.clip(min_dist-dd[I], 0, step_size)
+        disp = np.clip(min_dist - dd[I], 0, step_size)
 
         displacement = disp[:, None] * vv  # (N_close, 3)
         structure.positions[I, axis] -= displacement[:, axis]
 
     else:
-        raise RuntimeError(
-            f"repulse did not converge within {iterations} iterations"
-        )
+        raise RuntimeError(f"repulse did not converge within {iterations} iterations")
 
     return structure
 
 
-def merge(structure: "ase.Atoms", cutoff: float = 1.8, iterations: int = 10) -> "ase.Atoms":
+def merge(
+    structure: "ase.Atoms", cutoff: float = 1.8, iterations: int = 10
+) -> "ase.Atoms":
     """Merge pairs of atoms that are closer than ``cutoff`` by collapsing each
     pair to their midpoint and deleting one of the two atoms.
 
@@ -78,7 +78,7 @@ def merge(structure: "ase.Atoms", cutoff: float = 1.8, iterations: int = 10) -> 
         replaced by single atoms at their midpoints.
     """
     neigh = get_neighbors(structure, 1)
-    clashing = np.argwhere( neigh.distances[:,0] < cutoff ).ravel()
+    clashing = np.argwhere(neigh.distances[:, 0] < cutoff).ravel()
     if len(clashing) == 0:
         return structure
 
@@ -92,11 +92,11 @@ def merge(structure: "ase.Atoms", cutoff: float = 1.8, iterations: int = 10) -> 
         moving.append(c)
         deleting.append(neigh.indices[c, 0])
 
-    structure.positions[moving] += neigh.vecs[moving, 0]/2
+    structure.positions[moving] += neigh.vecs[moving, 0] / 2
     del structure[deleting]
 
     if iterations > 0:
-        return merge(structure, cutoff=cutoff, iterations=iterations-1)
+        return merge(structure, cutoff=cutoff, iterations=iterations - 1)
     return structure
 
 
