@@ -53,6 +53,54 @@ def repulse(
     return structure
 
 
+def merge(structure: "ase.Atoms", cutoff: float = 1.8, iterations: int = 10) -> "ase.Atoms":
+    """Merge pairs of atoms that are closer than ``cutoff`` by collapsing each
+    pair to their midpoint and deleting one of the two atoms.
+
+    The operation is applied repeatedly (up to ``iterations`` times) to handle
+    cases where a merge creates new close contacts.
+
+    .. note::
+        The structure is modified **in place**.  Pass a copy if you need the
+        original to remain unchanged.
+
+    Args:
+        structure (:class:`ase.Atoms`):
+            Structure to modify.
+        cutoff (float):
+            Distance threshold in Ångström below which two atoms are
+            considered clashing and will be merged.  Defaults to ``1.8``.
+        iterations (int):
+            Maximum number of recursive merge passes.  Defaults to ``10``.
+
+    Returns:
+        :class:`ase.Atoms`: The modified structure with clashing atom pairs
+        replaced by single atoms at their midpoints.
+    """
+    neigh = get_neighbors(structure, 1)
+    clashing = np.argwhere( neigh.distances[:,0] < cutoff ).ravel()
+    if len(clashing) == 0:
+        return structure
+
+    moving = []
+    deleting = []
+
+    for c in clashing:
+        if c in deleting:
+            continue
+
+        moving.append(c)
+        deleting.append(neigh.indices[c, 0])
+
+    structure.positions[moving] += neigh.vecs[moving, 0]/2
+    del structure[deleting]
+
+    if iterations > 0:
+        return merge(structure, cutoff=cutoff, iterations=iterations-1)
+    return structure
+
+
 __all__ = [
-        "repulse"
+    "merge",
+    "repulse",
 ]
