@@ -422,18 +422,13 @@ class Symmetry(dict):
             ).items()
         }
         symbols = [indices_dict[i] for i in indices]
-        arrays = {
-            k: self._structure.arrays[k]
-            for k in self._structure.arrays
-            if k not in ("numbers", "positions")
-        }
         new_structure = type(self._structure)(
             symbols=symbols,
             scaled_positions=scaled_positions,
             cell=cell,
             pbc=[True, True, True],
         )
-        keys = set(arrays) - {"numbers", "positions"}
+        keys = set(self._structure.arrays) - {"numbers", "positions"}
         if len(keys) > 0:
             warning(f"Custom arrays {keys} do not carry over to new structure!")
 
