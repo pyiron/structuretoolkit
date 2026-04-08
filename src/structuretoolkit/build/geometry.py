@@ -56,13 +56,17 @@ def repulse(
     for _ in range(iterations):
         neigh = get_neighbors(structure, num_neighbors=1)
         dd = neigh.distances[:, 0]
-        if dd.min() > min_dist:
+        if dd.min() >= min_dist:
             break
 
         I = dd < min_dist
 
-        vv = neigh.vecs[I, 0, :]
-        vv /= dd[I, None]
+        dd_I = dd[I]
+        vv = neigh.vecs[I, 0, :].copy()
+        # Avoid division by zero for coincident atoms; fall back to x-axis direction
+        vv[dd_I == 0] = [1.0, 0.0, 0.0]
+        safe_dd = np.where(dd_I > 0, dd_I, 1.0)
+        vv /= safe_dd[:, None]
 
         disp = np.clip(min_dist - dd[I], 0, step_size)
 
