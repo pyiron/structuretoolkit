@@ -63,8 +63,15 @@ def repulse(
 
         dd_I = dd[I]
         vv = neigh.vecs[I, 0, :].copy()
-        # Avoid division by zero for coincident atoms; fall back to x-axis direction
-        vv[dd_I == 0] = [1.0, 0.0, 0.0]
+        # Avoid division by zero for coincident atoms (distance == 0).
+        # Assign opposite fallback directions based on atom-index ordering so
+        # the two coincident atoms separate rather than move together.
+        atom_indices = np.where(I)[0]
+        zero_mask = dd_I == 0
+        if np.any(zero_mask):
+            neighbor_indices = neigh.indices[atom_indices[zero_mask], 0]
+            sign = np.where(atom_indices[zero_mask] < neighbor_indices, 1.0, -1.0)
+            vv[zero_mask] = sign[:, None] * np.array([1.0, 0.0, 0.0])
         safe_dd = np.where(dd_I > 0, dd_I, 1.0)
         vv /= safe_dd[:, None]
 
