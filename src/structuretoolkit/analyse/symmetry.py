@@ -4,7 +4,7 @@
 import ast
 import dataclasses
 import string
-from logging import warning
+import warnings
 
 import numpy as np
 import spglib
@@ -430,7 +430,7 @@ class Symmetry(dict):
         )
         keys = set(self._structure.arrays) - {"numbers", "positions"}
         if len(keys) > 0:
-            warning(f"Custom arrays {keys} do not carry over to new structure!")
+            warnings.warn(f"Custom arrays {keys} do not carry over to new structure!", stacklevel=2)
 
         return new_structure
 
