@@ -7,30 +7,25 @@ from ase.atoms import Atoms
 from ase.build import bulk
 
 from structuretoolkit.build.materialsproject import by_id, search
+from structuretoolkit.common.pymatgen import ase_to_pymatgen
+
+try:
+    import mp_api
+
+    skip_mp_api_test = False
+except ImportError:
+    skip_mp_api_test = True
 
 
-def setUpModule():
-    """Skip the entire module if mp_api and pymatgen are not installed."""
-    if (
-        importlib.util.find_spec("mp_api") is None
-        or importlib.util.find_spec("pymatgen") is None
-    ):
-        raise unittest.SkipTest("mp-api and pymatgen are not installed")
-
-
-def _make_pymatgen_structure(ase_atoms):
-    """Convert ASE Atoms to a pymatgen Structure for use as mock return value."""
-    from pymatgen.io.ase import AseAtomsAdaptor
-
-    return AseAtomsAdaptor().get_structure(atoms=ase_atoms)
-
-
+@unittest.skipIf(
+    skip_mp_api_test, "mp_api is not installed, so the dscribe tests are skipped."
+)
 class TestMaterialsProjectSearch(unittest.TestCase):
     def setUp(self):
         self.fe_bcc = bulk("Fe", "bcc", a=2.87)
         self.al_fcc = bulk("Al", "fcc", a=4.05)
-        self.fe_pmg = _make_pymatgen_structure(self.fe_bcc)
-        self.al_pmg = _make_pymatgen_structure(self.al_fcc)
+        self.fe_pmg = ase_to_pymatgen(self.fe_bcc)
+        self.al_pmg = ase_to_pymatgen(self.al_fcc)
 
     def test_search_single_chemsys(self):
         with patch("mp_api.client.MPRester") as MockMPRester:
@@ -165,6 +160,9 @@ class TestMaterialsProjectSearch(unittest.TestCase):
             self.assertIsInstance(gen, types.GeneratorType)
 
 
+@unittest.skipIf(
+    skip_mp_api_test, "mp_api is not installed, so the dscribe tests are skipped."
+)
 class TestMaterialsProjectById(unittest.TestCase):
     def setUp(self):
         self.fe_bcc = bulk("Fe", "bcc", a=2.87)
