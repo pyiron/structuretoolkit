@@ -430,7 +430,10 @@ class Symmetry(dict):
         )
         keys = set(self._structure.arrays) - {"numbers", "positions"}
         if len(keys) > 0:
-            warnings.warn(f"Custom arrays {keys} do not carry over to new structure!", stacklevel=2)
+            warnings.warn(
+                f"Custom arrays {keys} do not carry over to new structure!",
+                stacklevel=2,
+            )
 
         return new_structure
 
