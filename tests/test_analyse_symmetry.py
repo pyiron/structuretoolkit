@@ -443,8 +443,8 @@ class TestSymmetry(unittest.TestCase):
         self.assertTrue(
             any(
                 "Custom arrays {'test_array'} do not carry over to new structure!"
-                in output
-                for output in w
+                in str(warning.message)
+                for warning in w
             )
         )
 
