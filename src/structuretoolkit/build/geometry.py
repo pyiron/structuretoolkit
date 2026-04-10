@@ -86,7 +86,9 @@ def repulse(
     return structure
 
 
-def merge(structure: "ase.Atoms", cutoff: float = 1.8, iterations: int = 10) -> "ase.Atoms":
+def merge(
+    structure: "ase.Atoms", cutoff: float = 1.8, iterations: int = 10
+) -> "ase.Atoms":
     """Merge pairs of atoms that are closer than ``cutoff`` by collapsing each
     pair to their midpoint and deleting one of the two atoms.
 
@@ -111,7 +113,7 @@ def merge(structure: "ase.Atoms", cutoff: float = 1.8, iterations: int = 10) -> 
         replaced by single atoms at their midpoints.
     """
     neigh = get_neighbors(structure, 1)
-    clashing = np.argwhere( neigh.distances[:,0] < cutoff ).ravel()
+    clashing = np.argwhere(neigh.distances[:, 0] < cutoff).ravel()
     if len(clashing) == 0:
         return structure
 
@@ -125,11 +127,11 @@ def merge(structure: "ase.Atoms", cutoff: float = 1.8, iterations: int = 10) -> 
         moving.append(c)
         deleting.append(neigh.indices[c, 0])
 
-    structure.positions[moving] += neigh.vecs[moving, 0]/2
+    structure.positions[moving] += neigh.vecs[moving, 0] / 2
     del structure[deleting]
 
     if iterations > 0:
-        return merge(structure, cutoff=cutoff, iterations=iterations-1)
+        return merge(structure, cutoff=cutoff, iterations=iterations - 1)
     return structure
 
 
