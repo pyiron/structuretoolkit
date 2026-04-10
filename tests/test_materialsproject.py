@@ -166,7 +166,7 @@ class TestMaterialsProjectSearch(unittest.TestCase):
 class TestMaterialsProjectById(unittest.TestCase):
     def setUp(self):
         self.fe_bcc = bulk("Fe", "bcc", a=2.87)
-        self.fe_pmg = _make_pymatgen_structure(self.fe_bcc)
+        self.fe_pmg = ase_to_pymatgen(self.fe_bcc)
 
     def test_by_id_final(self):
         with patch("mp_api.client.MPRester") as MockMPRester:
