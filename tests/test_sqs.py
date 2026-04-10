@@ -127,3 +127,113 @@ class SQSTestCase(unittest.TestCase):
         self.assertEqual(num_solutions, results.num_results())
         self.assertEqual(len(objectives), results.num_objectives())
         self.assertEqual(len(results), results.num_objectives())
+
+    def test_sqs_structures_tolerances_and_radii(self):
+        # test atol and rtol
+        stk.build.sqs_structures(
+            structure=bulk("Au", cubic=True).repeat([2, 2, 2]),
+            composition=dict(Cu=16, Au=16),
+            atol=1e-5,
+            rtol=1e-5,
+            iterations=10,
+        )
+
+        # test shell_radii in interact mode
+        stk.build.sqs_structures(
+            structure=bulk("Au", cubic=True).repeat([2, 2, 2]),
+            composition=dict(Cu=16, Au=16),
+            shell_radii=[2.5, 4.0],
+            iterations=10,
+        )
+
+        # test shell_radii in split mode
+        stk.build.sqs_structures(
+            structure=bulk("Au", cubic=True).repeat([2, 2, 2]),
+            composition=[
+                dict(Cu=8, Au=8, sites=list(range(16))),
+                dict(Al=8, Mg=8, sites=list(range(16, 32))),
+            ],
+            shell_radii=[[2.5, 4.0], [2.5, 4.0]],
+            sublattice_mode="split",
+            iterations=10,
+        )
+
+    def test_sqs_structures_log_levels_and_kwargs(self):
+        config = dict(
+            structure=bulk("Au", cubic=True).repeat([2, 2, 2]),
+            composition=dict(Cu=16, Au=16),
+            iterations=10,
+        )
+        for level in ["info", "debug", "error", "trace"]:
+            stk.build.sqs_structures(log_level=level, **config)
+
+        # test invalid log level
+        with self.assertRaises(ValueError):
+            stk.build.sqs_structures(log_level="invalid", **config)
+
+        # test kwargs
+        stk.build.sqs_structures(chunk_size=1, **config)
+
+    def test_sqs_structures_errors(self):
+        config = dict(
+            structure=bulk("Au", cubic=True).repeat([2, 2, 2]),
+            iterations=10,
+        )
+
+        # test ParseError from sqsgenerator
+        with self.assertRaises(ValueError):
+            stk.build.sqs_structures(composition=dict(InvalidElement=16, Au=16), **config)
+
+    def test_sqs_result_proxy_sublattices_error(self):
+        result = stk.build.sqs_structures(
+            structure=bulk("Au", cubic=True).repeat([2, 2, 2]),
+            composition=dict(Cu=16, Au=16),
+            iterations=10,
+        ).best()
+
+        with self.assertRaises(AttributeError):
+            result.sublattices()
+
+    def test_sqs_keyboard_interrupt(self):
+        from unittest.mock import patch
+
+        # We mock time.sleep to raise KeyboardInterrupt to simulate it during the wait loop
+        # However sqs_structures uses stop_event.wait(timeout=1.0)
+        # Let's mock stop_event.wait instead, but carefully.
+
+        # We need to make sure we only mock the wait call inside sqs_structures loop
+        # but since we are mocking the class Event in the module, it might be safer to mock the instance
+        # but we don't have access to the instance easily.
+
+        # Alternatively, we can mock Thread.is_alive to raise it.
+        # However, stk.build.sqs_structures catches KeyboardInterrupt and sets stop_gracefully = True
+        # but it DOES NOT re-raise it if a result is already available or if it finishes.
+        # Actually it should probably re-raise it or return what it has.
+        # In the current implementation, it catches it and proceeds to join the thread and return results.
+        with patch("structuretoolkit.build.sqs._interface.Thread.is_alive", side_effect=[True, KeyboardInterrupt, False]):
+            stk.build.sqs_structures(
+                structure=bulk("Au", cubic=True).repeat([2, 2, 2]),
+                composition=dict(Cu=16, Au=16),
+                iterations=10,
+            )
+
+    def test_sqs_num_threads(self):
+        stk.build.sqs_structures(
+            structure=bulk("Au", cubic=True).repeat([2, 2, 2]),
+            composition=dict(Cu=16, Au=16),
+            iterations=10,
+            num_threads=2
+        )
+
+    def test_sqs_optimization_failed(self):
+        from unittest.mock import patch
+        # sqs_optimize is imported inside the function, so we need to mock it where it is used.
+        # But wait, it's imported from sqsgenerator.core.
+        # So we should patch 'sqsgenerator.core.optimize'
+        with patch("sqsgenerator.core.optimize", return_value=None):
+            with self.assertRaises(RuntimeError):
+                stk.build.sqs_structures(
+                    structure=bulk("Au", cubic=True).repeat([2, 2, 2]),
+                    composition=dict(Cu=16, Au=16),
+                    iterations=10,
+                )
