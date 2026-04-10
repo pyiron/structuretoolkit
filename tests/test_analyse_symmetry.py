@@ -3,6 +3,7 @@
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import unittest
+import warnings
 
 import numpy as np
 from ase.atoms import Atoms
@@ -436,13 +437,14 @@ class TestSymmetry(unittest.TestCase):
         structure = bulk("Al", cubic=True)
         structure.set_array("test_array", np.zeros(len(structure)))
         sym = stk.analyse.get_symmetry(structure=structure)
-        with self.assertLogs(level="WARNING") as cm:
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
             sym.get_primitive_cell()
         self.assertTrue(
             any(
                 "Custom arrays {'test_array'} do not carry over to new structure!"
                 in output
-                for output in cm.output
+                for output in w
             )
         )
 
