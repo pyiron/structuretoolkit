@@ -3,6 +3,7 @@
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 import unittest
+import warnings
 
 import numpy as np
 from ase.atoms import Atoms
@@ -424,6 +425,28 @@ class TestSymmetry(unittest.TestCase):
         )
         dx_round = np.round(np.absolute(dx), decimals=3)
         self.assertEqual(len(np.unique(dx_round + arg_v)), len(np.unique(arg_v)))
+
+    def test_get_primitive_cell_pbc_error(self):
+        structure = bulk("Al", cubic=True)
+        structure.pbc = [True, True, False]
+        sym = stk.analyse.get_symmetry(structure=structure)
+        with self.assertRaisesRegex(ValueError, "Can only symmetrize periodic structures."):
+            sym.get_primitive_cell()
+
+    def test_get_primitive_cell_arrays_warning(self):
+        structure = bulk("Al", cubic=True)
+        structure.set_array("test_array", np.zeros(len(structure)))
+        sym = stk.analyse.get_symmetry(structure=structure)
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            sym.get_primitive_cell()
+        self.assertTrue(
+            any(
+                "Custom arrays {'test_array'} do not carry over to new structure!"
+                in str(warning.message)
+                for warning in w
+            )
+        )
 
     def test_error(self):
         """spglib errors should be wrapped in a SymmetryError."""
