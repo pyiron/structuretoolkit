@@ -56,7 +56,7 @@ phonopy = [
     "spglib==2.7.0",
 ]
 mp-api = [
-    "mp-api==0.37.2",
+    "mp-api==0.45.15",
     "pymatgen==2026.3.23",
 ]
 
