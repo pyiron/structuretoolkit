@@ -20,4 +20,4 @@ dependencies:
 - sqsgenerator =0.5.4
 - hatchling =1.29.0
 - hatch-vcs =0.5.0
-- mp-api =0.37.2
+- mp-api =0.45.15
