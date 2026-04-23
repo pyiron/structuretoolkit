@@ -4,6 +4,7 @@
 import ast
 import dataclasses
 import string
+import warnings
 
 import numpy as np
 import spglib
@@ -400,26 +401,40 @@ class Symmetry(dict):
         >>> symmetry = Symmetry(structure)
         >>> len(symmetry.get_primitive_cell()) == len(basis)
         True
+
+        .. warning::
+            Custom arrays defined in the base structures
+            :attr:`ase.atoms.Atoms.arrays` and other state (.info, .calc, etc.) are not copied to the new structure!
         """
+        if not all(self._structure.pbc):
+            raise ValueError("Can only symmetrize periodic structures.")
         ret = spglib.standardize_cell(
             self._get_spglib_cell(use_elements=use_elements, use_magmoms=use_magmoms),
             to_primitive=not standardize,
         )
         if ret is None:
             raise SymmetryError(spglib.error.get_error_message())
-        cell, positions, indices = ret
-        positions = (cell.T @ positions.T).T
-        new_structure = self._structure.copy()
-        new_structure.cell = cell
-        new_structure = new_structure[: len(indices)]
+        cell, scaled_positions, indices = ret
         indices_dict = {
             v: k
             for k, v in structuretoolkit.common.helper.get_species_indices_dict(
                 structure=self._structure
             ).items()
         }
-        new_structure.symbols = [indices_dict[i] for i in indices]
-        new_structure.positions = positions
+        symbols = [indices_dict[i] for i in indices]
+        new_structure = type(self._structure)(
+            symbols=symbols,
+            scaled_positions=scaled_positions,
+            cell=cell,
+            pbc=[True, True, True],
+        )
+        keys = set(self._structure.arrays) - {"numbers", "positions"}
+        if len(keys) > 0:
+            warnings.warn(
+                f"Custom arrays {keys} do not carry over to new structure!",
+                stacklevel=2,
+            )
+
         return new_structure
 
     def get_ir_reciprocal_mesh(
