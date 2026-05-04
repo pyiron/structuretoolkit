@@ -40,3 +40,16 @@ class TestAimsgb(unittest.TestCase):
             len(gb2),
             msg="Expected structure to be bigger in proportion to grain thickness",
         )
+
+    def test_get_grainboundary_info(self):
+        axis = [0, 0, 1]
+        max_sigma = 5
+        info = stk.build.aimsgb.get_grainboundary_info(axis, max_sigma)
+        self.assertIsNotNone(info)
+
+    def test_grainboundary_deprecated(self):
+        axis = [0, 0, 1]
+        sigma = 5
+        plane = [1, 2, 0]
+        with self.assertWarns(UserWarning):
+            stk.build.grainboundary(axis, sigma, plane, self.fcc_basis, add_if_dist=0.1)
