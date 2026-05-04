@@ -60,18 +60,12 @@ class TestMoleFractionsToComposition(unittest.TestCase):
             mole_fractions_to_composition({"Fe": 0.3, "Al": 0.3}, num_atoms=4)
 
     def test_rounding_with_warning(self):
-        # 0.333 * 9 = 2.997 ≈ 3, 0.667 * 9 = 6.003 ≈ 6
+        # 0.3334 * 9 = 3.0006 → 3, 0.6666 * 9 = 5.9994 → 6
+        import warnings
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             comp = mole_fractions_to_composition(
                 {"Fe": 0.3334, "Al": 0.6666}, num_atoms=9
-            )
-            # Should produce a warning about non-integer occupation
-            self.assertTrue(
-                any("mole-fraction" in str(warning.message).lower() or
-                    "fractional" in str(warning.message).lower()
-                    for warning in w)
-                or isinstance(comp, dict)  # or just completes normally
             )
         self.assertEqual(sum(comp.values()), 9)
 

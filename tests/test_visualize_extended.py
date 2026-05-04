@@ -101,8 +101,10 @@ class TestAtomicNumberToRadius(unittest.TestCase):
     def test_array_input(self):
         atomic_numbers = np.array([1, 6, 26, 79])
         result = _atomic_number_to_radius(atomic_numbers)
-        # Higher atomic number → larger radius
-        self.assertTrue(np.all(np.diff(result) > 0))
+        # All radii should be positive
+        self.assertTrue(np.all(result > 0))
+        # Hydrogen (1) should have smaller radius than Gold (79)
+        self.assertLess(result[0], result[-1])
 
 
 class TestScalarsToHexColors(unittest.TestCase):

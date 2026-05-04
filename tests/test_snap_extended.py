@@ -55,9 +55,8 @@ class TestSnapPureFunctions(unittest.TestCase):
     def test_convert_mat(self):
         mat = np.eye(3).copy()
         result = _convert_mat(mat)
-        # Upper triangular of identity: (0,0), (0,1), (0,2), (1,1), (1,2), (2,2)
-        # After halving diagonal, diag values are 0.5
-        self.assertEqual(len(result), 6)  # 3x3 upper tri
+        # 3x3 upper triangular (including diagonal) has 6 elements
+        self.assertEqual(len(result), 6)
 
     def test_convert_mat_2x2(self):
         mat = np.array([[1.0, 2.0], [3.0, 4.0]])
