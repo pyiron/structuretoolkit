@@ -22,7 +22,7 @@ except ImportError:
 
 
 try:
-    import pyscal
+    import pyscal3 as pyscal
 
     skip_pyscal_test = False
 except ImportError:

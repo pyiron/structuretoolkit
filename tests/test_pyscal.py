@@ -555,6 +555,30 @@ class Testpyscalatoms(unittest.TestCase):
         self.assertEqual(len(res_str), len(self.si_dia))
         self.assertTrue(all([v == "Cubic diamond" for v in res_str]))
 
+    def test_diamond_structure_invalid_mode_raises(self):
+        with self.assertRaises(ValueError):
+            stk.analyse.get_diamond_structure_descriptors(
+                structure=self.si_dia, mode="invalid_mode"
+            )
+
+    def test_cna_invalid_mode_raises(self):
+        with self.assertRaises(ValueError):
+            stk.analyse.get_adaptive_cna_descriptors(
+                structure=self.al_fcc, mode="invalid_mode"
+            )
+
+    def test_find_solids(self):
+        result = stk.analyse.find_solids(
+            structure=self.al_fcc_4, neighbor_method="cutoff", cutoff=0
+        )
+        self.assertIsNotNone(result)
+
+    def test_find_solids_return_sys(self):
+        sys = stk.analyse.find_solids(
+            structure=self.al_fcc_4, neighbor_method="cutoff", cutoff=0, return_sys=True
+        )
+        self.assertIsNotNone(sys)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -6,18 +6,18 @@ dependencies:
 - ase =3.28.0
 - coverage
 - dscribe =2.1.2
-- matplotlib-base =3.10.8
+- matplotlib-base =3.10.9
 - nglview =4.0.1
 - notebook
 - numpy =2.4.3
-- phonopy =3.5.0
+- phonopy =3.5.1
 - plotly =6.6.0
 - pymatgen =2026.3.23
 - pyscal3 =3.3.2
 - scikit-learn =1.8.0
 - scipy =1.17.1
 - spglib =2.7.0
-- sqsgenerator =0.5.4
+- sqsgenerator =0.5.5
 - hatchling =1.29.0
 - hatch-vcs =0.5.0
-- mp-api =0.37.2
+- mp-api =0.45.15

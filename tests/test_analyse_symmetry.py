@@ -456,6 +456,60 @@ class TestSymmetry(unittest.TestCase):
         with self.assertRaises((stk.common.SymmetryError, SpglibError)):
             stk.analyse.get_symmetry(structure=structure)
 
+    def test_symmetrize_vectors(self):
+        cell = 2.2 * np.identity(3)
+        structure = Atoms("AlAl", scaled_positions=[(0, 0, 0), (0.5, 0.5, 0.5)], cell=cell)
+        vectors = np.zeros((len(structure), 3))
+        result = stk.analyse.symmetrize_vectors(structure=structure, vectors=vectors)
+        self.assertEqual(result.shape, vectors.shape)
+
+    def test_get_symmetry_dataset_function(self):
+        cell = 2.2 * np.identity(3)
+        Al_sc = Atoms("AlAl", scaled_positions=[(0, 0, 0), (0.5, 0.5, 0.5)], cell=cell)
+        result = stk.analyse.get_symmetry_dataset(structure=Al_sc)
+        self.assertIsNotNone(result)
+        self.assertIn("number", result)
+
+    def test_get_spacegroup_function(self):
+        cell = 2.2 * np.identity(3)
+        Al_sc = Atoms("AlAl", scaled_positions=[(0, 0, 0), (0.5, 0.5, 0.5)], cell=cell)
+        result = stk.analyse.get_spacegroup(structure=Al_sc)
+        self.assertIsInstance(result, dict)
+        self.assertIn("Number", result)
+
+    def test_get_ir_reciprocal_mesh_function(self):
+        cell = 2.2 * np.identity(3)
+        Al_sc = Atoms("AlAl", scaled_positions=[(0, 0, 0), (0.5, 0.5, 0.5)], cell=cell)
+        result = stk.analyse.get_ir_reciprocal_mesh(structure=Al_sc, mesh=[3, 3, 3])
+        self.assertIsNotNone(result)
+
+    def test_symmetry_arg_equivalent_atoms(self):
+        cell = 2.2 * np.identity(3)
+        structure = Atoms("AlAl", scaled_positions=[(0, 0, 0), (0.5, 0.5, 0.5)], cell=cell)
+        sym = stk.analyse.get_symmetry(structure=structure)
+        atoms = sym.arg_equivalent_atoms
+        self.assertIsNotNone(atoms)
+
+    def test_symmetry_translations(self):
+        cell = 2.2 * np.identity(3)
+        structure = Atoms("AlAl", scaled_positions=[(0, 0, 0), (0.5, 0.5, 0.5)], cell=cell)
+        sym = stk.analyse.get_symmetry(structure=structure)
+        trans = sym.translations
+        self.assertIsNotNone(trans)
+
+    def test_symmetry_use_elements_false(self):
+        cell = 2.2 * np.identity(3)
+        structure = Atoms("AlFe", scaled_positions=[(0, 0, 0), (0.5, 0.5, 0.5)], cell=cell)
+        sym = stk.analyse.get_symmetry(structure=structure, use_elements=False)
+        self.assertIsNotNone(sym)
+
+    def test_symmetry_use_magmoms_true(self):
+        cell = 2.2 * np.identity(3)
+        structure = Atoms("AlAl", scaled_positions=[(0, 0, 0), (0.5, 0.5, 0.5)], cell=cell)
+        structure.set_initial_magnetic_moments([1.0, -1.0])
+        sym = stk.analyse.get_symmetry(structure=structure, use_magmoms=True)
+        self.assertIsNotNone(sym)
+
 
 if __name__ == "__main__":
     unittest.main()
