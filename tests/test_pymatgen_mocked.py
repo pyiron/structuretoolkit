@@ -54,7 +54,7 @@ class TestPymatgenMocked(unittest.TestCase):
         ):
             result = pymatgen_to_ase(mock_pymatgen_struct)
         self.assertEqual(result, mock_ase_atoms)
-        mock_adapter.get_atoms.assert_called_once_with(structure=mock_pymatgen_struct)
+        mock_adapter.get_atoms.assert_called_once_with(structure=mock_pymatgen_struct, msonable=False)
 
     def test_pymatgen_read_from_file(self):
         from structuretoolkit.common.pymatgen import pymatgen_read_from_file
