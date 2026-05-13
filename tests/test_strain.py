@@ -7,7 +7,7 @@ from ase.build import bulk
 import structuretoolkit as stk
 
 try:
-    import pyscal
+    import pyscal3 as pyscal
 
     skip_pyscal_test = False
 except ImportError:
@@ -32,6 +32,33 @@ class TestAtoms(unittest.TestCase):
             structure=bulk_structure, ref_structure=bulk_structure, return_object=True
         )
         self.assertEqual(strain.num_neighbors, 12)
+
+    @unittest.skipIf(
+        skip_pyscal_test, "pyscal is not installed, so the pyscal tests are skipped."
+    )
+    def test_crystal_phase(self):
+        self.assertEqual(self.strain.crystal_phase, "bcc")
+
+    def test_get_number_of_neighbors_bcc(self):
+        from structuretoolkit.analyse.strain import Strain
+
+        self.assertEqual(Strain._get_number_of_neighbors("bcc"), 8)
+
+    def test_get_number_of_neighbors_fcc(self):
+        from structuretoolkit.analyse.strain import Strain
+
+        self.assertEqual(Strain._get_number_of_neighbors("fcc"), 12)
+
+    def test_get_number_of_neighbors_hcp(self):
+        from structuretoolkit.analyse.strain import Strain
+
+        self.assertEqual(Strain._get_number_of_neighbors("hcp"), 12)
+
+    def test_get_number_of_neighbors_unknown_raises(self):
+        from structuretoolkit.analyse.strain import Strain
+
+        with self.assertRaises(ValueError):
+            Strain._get_number_of_neighbors("unknown_phase")
 
     def test_get_angle(self):
         self.assertAlmostEqual(
@@ -67,6 +94,18 @@ class TestAtoms(unittest.TestCase):
         self.assertTrue(
             np.allclose(self.strain._get_rotation_from_vectors(v, w) @ v, w)
         )
+
+    @unittest.skipIf(
+        skip_pyscal_test, "pyscal is not installed, so the pyscal tests are skipped."
+    )
+    def test_only_bulk_type(self):
+        """Test the only_bulk_type path by testing _get_majority_phase directly."""
+        from structuretoolkit.analyse.strain import Strain
+
+        bulk_structure = bulk("Fe", cubic=True)
+        # Test _get_majority_phase directly (uses pyscal CNA)
+        phase = Strain._get_majority_phase(bulk_structure)
+        self.assertEqual(phase, "bcc")
 
 
 if __name__ == "__main__":

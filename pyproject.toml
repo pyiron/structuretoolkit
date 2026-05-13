@@ -18,7 +18,6 @@ classifiers = [
     "License :: OSI Approved :: BSD License",
     "Intended Audience :: Science/Research",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -43,7 +42,7 @@ grainboundary = [
 ]
 pyscal = ["pyscal3==3.3.2"]
 nglview = ["nglview==4.0.1"]
-matplotlib = ["matplotlib==3.10.8"]
+matplotlib = ["matplotlib==3.10.9"]
 plotly = ["plotly==6.6.0"]
 clusters = ["scikit-learn==1.8.0"]
 symmetry = ["spglib==2.7.0"]
@@ -52,11 +51,11 @@ surface = [
     "pymatgen==2026.3.23",
 ]
 phonopy = [
-    "phonopy==3.5.0",
+    "phonopy==3.5.1",
     "spglib==2.7.0",
 ]
 mp-api = [
-    "mp-api==0.37.2",
+    "mp-api==0.45.15",
     "pymatgen==2026.3.23",
 ]
 

@@ -12,7 +12,7 @@ def pymatgen_to_ase(structure) -> Atoms:
     from pymatgen.io.ase import AseAtomsAdaptor
 
     adapter = AseAtomsAdaptor()
-    return adapter.get_atoms(structure=structure)
+    return adapter.get_atoms(structure=structure, msonable=False)
 
 
 def pymatgen_read_from_file(*args, **kwargs) -> Atoms:
