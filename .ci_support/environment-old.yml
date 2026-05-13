@@ -7,7 +7,7 @@ dependencies:
 - nglview =2.7.7
 - numpy =1.23.5
 - phonopy =2.21.2
-- plotly =5.0.0
+- plotly =6.0.0
 - pymatgen =2026.3.23
 - pyscal3 =3.2.5
 - scikit-learn =1.2.1
