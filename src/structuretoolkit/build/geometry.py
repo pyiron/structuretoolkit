@@ -86,9 +86,7 @@ def repulse(
     return structure
 
 
-def merge(
-    structure: "ase.Atoms", cutoff: float = 1.8, iterations: int = 10
-) -> "ase.Atoms":
+def merge(structure: Atoms, cutoff: float = 1.8, iterations: int = 10) -> Atoms:
     """Merge pairs of atoms that are closer than ``cutoff`` by collapsing each
     pair to their midpoint and deleting one of the two atoms.
 

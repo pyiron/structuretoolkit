@@ -1,18 +1,21 @@
 from __future__ import annotations
-from ase.atoms import Atoms
+
+from collections.abc import Iterator
 from threading import Event, Thread
-from typing import overload, Literal, TypeVar, Generic, Any, Iterator
+from typing import Any, Generic, Literal, TypeVar, overload
+
+from ase.atoms import Atoms
 
 from ._types import (
     Composition,
-    ShellWeights,
-    ShellRadii,
-    SublatticeMode,
     IterationMode,
+    LogLevel,
     Prec,
+    ShellRadii,
+    ShellWeights,
     SqsResultInteract,
     SqsResultSplit,
-    LogLevel,
+    SublatticeMode,
 )
 
 R = TypeVar("R", SqsResultInteract, SqsResultSplit)
@@ -186,24 +189,28 @@ def sqs_structures(
 
     from sqsgenerator import parse_config
     from sqsgenerator.core import (
-        ParseError,
         LogLevel as SqsLogLevel,
+    )
+    from sqsgenerator.core import (
+        ParseError,
         SqsCallbackContext,
+    )
+    from sqsgenerator.core import (
         optimize as sqs_optimize,
     )
 
-    config = dict(
-        prec=precision,
-        iteration_mode=iteration_mode,
-        sublattice_mode=sublattice_mode,
-        structure=dict(
-            lattice=structure.cell.array.tolist(),
-            coords=structure.get_scaled_positions().tolist(),
-            species=structure.get_atomic_numbers().tolist(),
-        ),
-        iterations=iterations,
-        max_results_per_objective=max_results_per_objective,
-    )
+    config = {
+        "prec": precision,
+        "iteration_mode": iteration_mode,
+        "sublattice_mode": sublattice_mode,
+        "structure": {
+            "lattice": structure.cell.array.tolist(),
+            "coords": structure.get_scaled_positions().tolist(),
+            "species": structure.get_atomic_numbers().tolist(),
+        },
+        "iterations": iterations,
+        "max_results_per_objective": max_results_per_objective,
+    }
     if atol is not None:
         config["atol"] = atol
     if rtol is not None:

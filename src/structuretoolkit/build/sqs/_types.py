@@ -1,6 +1,7 @@
+from typing import Literal, Protocol, TypeAlias, overload
+
 import numpy as np
 from ase import Atoms
-from typing import Literal, TypeAlias, Protocol, overload, Union
 
 Shell: TypeAlias = int
 
@@ -124,11 +125,11 @@ Element = Literal[
     "Fl",
 ]
 
-Site = Union[str, list[int]]
+Site = str | list[int]
 
 Prec = Literal["single", "double"]
 
-Composition = dict[Element | Literal["sites"], Union[int, Site]]
+Composition = dict[Element | Literal["sites"], int | Site]
 
 ShellWeights = dict[Shell, float]
 
