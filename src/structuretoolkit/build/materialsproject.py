@@ -1,6 +1,8 @@
-from typing import Any, Iterable
-from collections.abc import Generator
+from collections.abc import Generator, Iterable
+from typing import Any
+
 from ase.atoms import Atoms
+
 from structuretoolkit.common.pymatgen import pymatgen_to_ase
 
 
