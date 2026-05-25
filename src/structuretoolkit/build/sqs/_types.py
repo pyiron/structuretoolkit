@@ -1,4 +1,4 @@
-from typing import Literal, Protocol, TypeAlias, Union, overload
+from typing import Literal, Protocol, TypeAlias, overload
 
 import numpy as np
 from ase import Atoms
@@ -125,7 +125,7 @@ Element = Literal[
     "Fl",
 ]
 
-Site = Union[str, list[int]]
+Site = str | list[int]
 
 Prec = Literal["single", "double"]
 

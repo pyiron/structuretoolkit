@@ -199,18 +199,18 @@ def sqs_structures(
         optimize as sqs_optimize,
     )
 
-    config = dict(
-        prec=precision,
-        iteration_mode=iteration_mode,
-        sublattice_mode=sublattice_mode,
-        structure=dict(
-            lattice=structure.cell.array.tolist(),
-            coords=structure.get_scaled_positions().tolist(),
-            species=structure.get_atomic_numbers().tolist(),
-        ),
-        iterations=iterations,
-        max_results_per_objective=max_results_per_objective,
-    )
+    config = {
+        "prec": precision,
+        "iteration_mode": iteration_mode,
+        "sublattice_mode": sublattice_mode,
+        "structure": {
+            "lattice": structure.cell.array.tolist(),
+            "coords": structure.get_scaled_positions().tolist(),
+            "species": structure.get_atomic_numbers().tolist(),
+        },
+        "iterations": iterations,
+        "max_results_per_objective": max_results_per_objective,
+    }
     if atol is not None:
         config["atol"] = atol
     if rtol is not None:
