@@ -135,6 +135,28 @@ class TestScalarsToHexColors(unittest.TestCase):
         colors = _scalars_to_hex_colors([1.0, 1.0, 1.0], cmap=viridis)
         self.assertEqual(len(colors), 3)
 
+    def test_cmap_none_uses_seaborn(self):
+        """When cmap=None, seaborn diverging_palette is used as default."""
+        colors = _scalars_to_hex_colors([0.0, 0.5, 1.0], cmap=None)
+        self.assertEqual(len(colors), 3)
+        for c in colors:
+            self.assertTrue(c.startswith("#"))
+
+    def test_cmap_none_seaborn_missing_prints_warning(self, capsys=None):
+        """When cmap=None and seaborn is missing, a message is printed."""
+        import builtins
+
+        real_import = builtins.__import__
+
+        def _no_seaborn(name, *args, **kwargs):
+            if name == "seaborn":
+                raise ImportError("mocked: seaborn not available")
+            return real_import(name, *args, **kwargs)
+
+        with patch("builtins.__import__", side_effect=_no_seaborn):
+            with self.assertRaises(Exception):
+                _scalars_to_hex_colors([0.0, 0.5, 1.0], cmap=None)
+
 
 class TestGetOrientation(unittest.TestCase):
     def test_invalid_view_plane_raises(self):
@@ -432,6 +454,38 @@ class TestPlot3dNGLView(unittest.TestCase):
                     select_atoms=select_atoms,
                     scalar_field=scalar_field,
                 )
+        self.assertIsNotNone(result)
+
+    def test_nglview_select_atoms_with_vector_field(self):
+        """Test select_atoms + vector_field (hits vector_field[select_atoms] path)."""
+        structure = bulk("Fe", cubic=True).repeat(2)
+        nglview_mock, mock_view = self._make_nglview_mock()
+        select_atoms = np.array([0, 1])
+        vector_field = np.random.random((len(structure), 3))
+        with patch.dict("sys.modules", {"nglview": nglview_mock}):
+            result = plot3d(
+                structure=structure,
+                mode="NGLview",
+                select_atoms=select_atoms,
+                vector_field=vector_field,
+            )
+        self.assertIsNotNone(result)
+
+    def test_nglview_select_atoms_with_vector_color(self):
+        """Test select_atoms + vector_color (hits vector_color[select_atoms] path)."""
+        structure = bulk("Fe", cubic=True).repeat(2)
+        nglview_mock, mock_view = self._make_nglview_mock()
+        select_atoms = np.array([0, 1])
+        vector_field = np.random.random((len(structure), 3))
+        vector_color = np.random.random((len(structure), 3))
+        with patch.dict("sys.modules", {"nglview": nglview_mock}):
+            result = plot3d(
+                structure=structure,
+                mode="NGLview",
+                select_atoms=select_atoms,
+                vector_field=vector_field,
+                vector_color=vector_color,
+            )
         self.assertIsNotNone(result)
 
     def test_nglview_vector_color_scalar(self):
