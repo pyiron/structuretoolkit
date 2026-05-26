@@ -1,3 +1,5 @@
+from typing import Union
+
 import numpy as np
 from ase.atoms import Atoms
 from scipy.spatial.transform import Rotation
@@ -47,18 +49,19 @@ class Strain:
         """
         self.structure = structure
         self.ref_structure = ref_structure
-        self._num_neighbors = num_neighbors
+        self._num_neighbors: int | None = num_neighbors
         self.only_bulk_type = only_bulk_type
-        self._crystal_phase = None
-        self._ref_coord = None
-        self._coords = None
-        self._rotations = None
+        self._crystal_phase: str | None = None
+        self._ref_coord: np.ndarray | None = None
+        self._coords: np.ndarray | None = None
+        self._rotations: np.ndarray | None = None
 
     @property
     def num_neighbors(self) -> int:
         """Number of neighbors to consider the local frame. Should be the coordination number."""
         if self._num_neighbors is None:
             self._num_neighbors = self._get_number_of_neighbors(self.crystal_phase)
+        assert self._num_neighbors is not None
         return self._num_neighbors
 
     @property
@@ -66,6 +69,7 @@ class Strain:
         """Majority crystal phase calculated via common neighbor analysis."""
         if self._crystal_phase is None:
             self._crystal_phase = self._get_majority_phase(self.ref_structure)
+        assert self._crystal_phase is not None
         return self._crystal_phase
 
     @property
@@ -79,7 +83,8 @@ class Strain:
                 than the bulk.
         """
         return np.array(
-            self.structure.analyse.pyscal_cna_adaptive(mode="str") != self.crystal_phase
+            get_adaptive_cna_descriptors(structure=self.structure, mode="str")
+            != self.crystal_phase
         )
 
     def _get_perpendicular_unit_vectors(
@@ -197,6 +202,7 @@ class Strain:
             w_second = self.ref_coord[dist.argmin(axis=1)].copy()
             second_rot = self._get_rotation_from_vectors(v, w_second, all_vecs[:, 0])
             self._rotations = np.einsum("nij,njk->nik", second_rot, first_rot)
+        assert self._rotations is not None
         return self._rotations
 
     @staticmethod
@@ -219,7 +225,7 @@ class Strain:
         return np.argmin(distances, axis=-1)
 
     @staticmethod
-    def _get_majority_phase(structure: Atoms) -> np.ndarray:
+    def _get_majority_phase(structure: Atoms) -> str:
         """
         Get the majority crystal phase in the structure based on the common neighbor analysis (CNA) descriptors.
 
@@ -227,10 +233,12 @@ class Strain:
             structure (ase.atoms.Atoms): The structure to analyze.
 
         Returns:
-            np.ndarray: The crystal phase with the highest count.
+            str: The crystal phase with the highest count.
         """
         cna = get_adaptive_cna_descriptors(structure=structure)
-        return np.asarray(list(cna.keys()))[np.argmax(list(cna.values()))]
+        if not isinstance(cna, dict):
+            raise TypeError("Expected CNA descriptors as a dictionary")
+        return str(np.asarray(list(cna.keys()))[np.argmax(list(cna.values()))])
 
     @staticmethod
     def _get_number_of_neighbors(crystal_phase: str) -> int:
@@ -265,6 +273,7 @@ class Strain:
             self._ref_coord = get_neighbors(
                 structure=self.ref_structure, num_neighbors=self.num_neighbors
             ).vecs[0]
+        assert self._ref_coord is not None
         return self._ref_coord
 
     @property
@@ -279,6 +288,7 @@ class Strain:
             self._coords = get_neighbors(
                 structure=self.structure, num_neighbors=self.num_neighbors
             ).vecs
+        assert self._coords is not None
         return self._coords
 
     @property
@@ -320,7 +330,7 @@ def get_strain(
     num_neighbors: int | None = None,
     only_bulk_type: bool = False,
     return_object: bool = False,
-):
+) -> Union[np.ndarray, "Strain"]:
     """
     Calculate local strain of each atom following the Lagrangian strain tensor:
 

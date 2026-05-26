@@ -12,7 +12,7 @@ class MeshInputError(ValueError):
 
 def create_mesh(
     cell: ase.atoms.Atoms | np.ndarray | list | float,
-    n_mesh: int | list[int, int, int] = 10,
+    n_mesh: int | list[int] | None = 10,
     density: float | None = None,
     endpoint: bool = False,
 ):
@@ -32,20 +32,22 @@ def create_mesh(
     Returns:
         (3, n, n, n)-array: mesh
     """
-    cell = get_cell(cell)
+    cell = np.asarray(get_cell(cell), dtype=float)
+    n_arr: np.ndarray
     if n_mesh is None:
         if density is None:
             raise MeshInputError("either n_mesh or density must be specified")
-        n_mesh = np.rint(np.linalg.norm(cell, axis=-1) / density).astype(int)
+        n_arr = np.rint(np.linalg.norm(cell, axis=-1) / density).astype(int)
     elif density is not None:
         raise MeshInputError(
             "You cannot set n_mesh at density at the same time. Set one of them to None"
         )
-    n_mesh = np.atleast_1d(n_mesh).astype(int)
-    if len(n_mesh) == 1:
-        n_mesh = np.repeat(n_mesh, 3)
-    elif len(n_mesh) != 3:
+    else:
+        n_arr = np.atleast_1d(n_mesh).astype(int)
+    if len(n_arr) == 1:
+        n_arr = np.repeat(n_arr, 3)
+    elif len(n_arr) != 3:
         raise MeshInputError("n_mesh must be a 3-dim vector")
-    linspace = [np.linspace(0, 1, nn, endpoint=endpoint) for nn in n_mesh]
+    linspace = [np.linspace(0, 1, nn, endpoint=endpoint) for nn in n_arr]
     x_mesh = np.meshgrid(*linspace, indexing="ij")
     return np.einsum("ixyz,ij->jxyz", x_mesh, cell)
