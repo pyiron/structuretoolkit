@@ -721,12 +721,7 @@ class Tree:
             ** 2
             for m in np.arange(-l, l + 1)
         ]
-        return np.sqrt(
-            4
-            * np.pi
-            / (2 * l + 1)
-            * np.sum(harmonic_values, axis=0)
-        )
+        return np.sqrt(4 * np.pi / (2 * l + 1) * np.sum(harmonic_values, axis=0))
 
     @staticmethod
     def _get_all_possible_pairs(l: int) -> np.ndarray:

@@ -571,17 +571,13 @@ def _extract_computes_snap(
 
     lmp_dbarr = _extract_compute_np(lmp, "db", 1, 2, (num_atoms, num_types, 3, n_coeff))
     lmp_dbsum = _extract_compute_np(lmp, "db_sum", 0, 1, (num_types, 3, n_coeff))
-    cond = bool(
-        np.allclose(lmp_dbsum, lmp_dbarr.sum(axis=0), rtol=1e-12, atol=1e-12)
-    )
+    cond = bool(np.allclose(lmp_dbsum, lmp_dbarr.sum(axis=0), rtol=1e-12, atol=1e-12))
     assert cond, "db_sum doesn't match sum of db"
     db_atom = np.transpose(lmp_dbarr, (0, 2, 1, 3))
 
     lmp_vbarr = _extract_compute_np(lmp, "vb", 1, 2, (num_atoms, num_types, 6, n_coeff))
     lmp_vbsum = _extract_compute_np(lmp, "vb_sum", 0, 1, (num_types, 6, n_coeff))
-    cond = bool(
-        np.allclose(lmp_vbsum, lmp_vbarr.sum(axis=0), rtol=1e-12, atol=1e-12)
-    )
+    cond = bool(np.allclose(lmp_vbsum, lmp_vbarr.sum(axis=0), rtol=1e-12, atol=1e-12))
     assert cond, "vb_sum doesn't match sum of vb"
     vb_sum = np.transpose(lmp_vbsum, (1, 0, 2)) / lmp_volume * eV_div_A3_to_bar
 
