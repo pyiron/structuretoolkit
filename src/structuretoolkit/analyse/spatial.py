@@ -2,6 +2,7 @@
 # Distributed under the terms of "New BSD License", see the LICENSE file.
 
 from collections.abc import Callable
+from typing import Any
 
 import numpy as np
 from ase.atoms import Atoms
@@ -74,10 +75,10 @@ def create_gridpoints(
     """
     cell = get_vertical_length(structure=structure)
     n_points = (n_gridpoints_per_angstrom * cell).astype(int)
-    positions = np.meshgrid(
+    grids = np.meshgrid(
         *[np.linspace(0, 1, n_points[i], endpoint=False) for i in range(3)]
     )
-    positions = np.stack(positions, axis=-1).reshape(-1, 3)
+    positions = np.stack(grids, axis=-1).reshape(-1, 3)
     return np.einsum("ji,nj->ni", structure.cell, positions)
 
 
@@ -226,7 +227,7 @@ class Interstitials:
         q_eps: float = 0.3,
         var_ratio: float = 5.0,
         min_samples: int | None = None,
-        neigh_args: dict = None,
+        neigh_args: dict | None = None,
         **kwargs,
     ):
         """
@@ -266,7 +267,7 @@ class Interstitials:
         self._neigh = get_neighbors(
             structure=structure, num_neighbors=num_neighbors, **neigh_args
         )
-        self.workflow = [
+        self.workflow: list[dict[str, Any]] = [
             {
                 "f": remove_too_close,
                 "kwargs": {"structure": structure, "min_distance": min_distance},
@@ -290,7 +291,7 @@ class Interstitials:
                 },
             },
         ]
-        self._positions = None
+        self._positions: np.ndarray | None = None
         self.structure = structure
 
     def run_workflow(
@@ -312,7 +313,8 @@ class Interstitials:
         if positions is None:
             positions = self.initial_positions.copy()
         for ii, ww in enumerate(self.workflow):
-            positions = ww["f"](positions=positions, **ww["kwargs"])
+            f: Callable[..., np.ndarray] = ww["f"]
+            positions = f(positions=positions, **ww["kwargs"])
             if ii == steps:
                 return positions
         return positions
@@ -338,6 +340,7 @@ class Interstitials:
         if self._positions is None:
             self._positions = self.run_workflow()
             self._neigh = self.neigh.get_neighborhood(self._positions)
+        assert self._positions is not None
         return self._positions
 
     @property
@@ -408,7 +411,7 @@ def get_interstitials(
     q_eps: float = 0.3,
     var_ratio: float = 5.0,
     min_samples: int | None = None,
-    neigh_args: dict = None,
+    neigh_args: dict | None = None,
     **kwargs,
 ) -> Interstitials:
     """
@@ -450,7 +453,8 @@ def get_interstitials(
 
 
 get_interstitials.__doc__ = (
-    Interstitials.__doc__.replace("Class", "Function") + Interstitials.__init__.__doc__
+    (Interstitials.__doc__ or "").replace("Class", "Function")
+    + (Interstitials.__init__.__doc__ or "")
 )
 
 
@@ -459,8 +463,8 @@ def get_layers(
     distance_threshold: float = 0.01,
     id_list: list[int] | None = None,
     wrap_atoms: bool = True,
-    planes: np.ndarray = None,
-    cluster_method: str = None,
+    planes: np.ndarray | None = None,
+    cluster_method: Any | None = None,
 ) -> np.ndarray:
     """
     Get an array of layer numbers.
@@ -512,10 +516,10 @@ def get_layers(
             structure=structure, width=distance_threshold, return_indices=True
         )
         if id_list is not None:
-            id_list = np.arange(len(structure))[np.array(id_list)]
-            id_list = np.any(id_list[:, np.newaxis] == indices[np.newaxis, :], axis=0)
-            positions = positions[id_list]
-            indices = indices[id_list]
+            id_arr = np.arange(len(structure))[np.array(id_list)]
+            id_mask = np.any(id_arr[:, np.newaxis] == indices[np.newaxis, :], axis=0)
+            positions = positions[id_mask]
+            indices = indices[id_mask]
     else:
         positions = structure.positions
         if id_list is not None:
@@ -694,7 +698,7 @@ def get_cluster_positions(
     eps: float = 1.0,
     buffer_width: float | None = None,
     return_labels: bool = False,
-) -> np.ndarray:
+) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """
     Cluster positions according to the distances. Clustering algorithm uses DBSCAN:
 

@@ -63,7 +63,7 @@ def get_snap_descriptors_per_atom(
     structure: Atoms,
     atom_types: list[str],
     twojmax: int = 6,
-    element_radius: list[int] = None,
+    element_radius: list[float] | None = None,
     rcutfac: float = 1.0,
     rfac0: float = 0.99363,
     rmin0: float = 0.0,
@@ -114,7 +114,7 @@ def get_snap_descriptor_derivatives(
     structure: Atoms,
     atom_types: list[str],
     twojmax: int = 6,
-    element_radius: list[int] = None,
+    element_radius: list[float] | None = None,
     rcutfac: float = 1.0,
     rfac0: float = 0.99363,
     rmin0: float = 0.0,
@@ -161,7 +161,7 @@ def get_snap_descriptor_derivatives(
     )
 
 
-def get_snap_descriptor_names(twojmax: int) -> np.ndarray:
+def get_snap_descriptor_names(twojmax: int) -> list[list[float]]:
     """
     Get names of the SNAP descriptors
 
@@ -556,7 +556,7 @@ def _extract_computes_snap(
     lmp_volume = lmp.get_thermo("vol")
 
     # Extract Bsum
-    _extract_compute_np(lmp, "b_sum", 0, 1, (n_coeff))
+    _extract_compute_np(lmp, "b_sum", 0, 1, (n_coeff,))
 
     # Extract B
     lmp_barr = _extract_compute_np(lmp, "b", 1, 2, (num_atoms, n_coeff))
@@ -571,14 +571,12 @@ def _extract_computes_snap(
 
     lmp_dbarr = _extract_compute_np(lmp, "db", 1, 2, (num_atoms, num_types, 3, n_coeff))
     lmp_dbsum = _extract_compute_np(lmp, "db_sum", 0, 1, (num_types, 3, n_coeff))
-    cond = np.allclose(lmp_dbsum, lmp_dbarr.sum(axis=0), rtol=1e-12, atol=1e-12)
-    assert cond, "db_sum doesn't match sum of db"
+    assert np.allclose(lmp_dbsum, lmp_dbarr.sum(axis=0), rtol=1e-12, atol=1e-12), "db_sum doesn't match sum of db"
     db_atom = np.transpose(lmp_dbarr, (0, 2, 1, 3))
 
     lmp_vbarr = _extract_compute_np(lmp, "vb", 1, 2, (num_atoms, num_types, 6, n_coeff))
     lmp_vbsum = _extract_compute_np(lmp, "vb_sum", 0, 1, (num_types, 6, n_coeff))
-    cond = np.allclose(lmp_vbsum, lmp_vbarr.sum(axis=0), rtol=1e-12, atol=1e-12)
-    assert cond, "vb_sum doesn't match sum of vb"
+    assert np.allclose(lmp_vbsum, lmp_vbarr.sum(axis=0), rtol=1e-12, atol=1e-12), "vb_sum doesn't match sum of vb"
     vb_sum = np.transpose(lmp_vbsum, (1, 0, 2)) / lmp_volume * eV_div_A3_to_bar
 
     dbatom_shape = db_atom.shape

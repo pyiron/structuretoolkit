@@ -153,7 +153,7 @@ def plot3d(
             spacefill=spacefill,
             particle_size=particle_size,
             background=background,
-            color_scheme=color_scheme,
+            color_scheme=color_scheme if color_scheme is not None else "element",
         )
     else:
         raise ValueError("plot method not recognized")
@@ -453,15 +453,17 @@ def _plot3d(
         vector_field is not None and vector_field is not None
     ):  # WARNING: There must be a bug here...
         try:
-            if vector_color.shape != np.ones((len(structure), 3)).shape:
+            if vector_color is not None and vector_color.shape != np.ones((len(structure), 3)).shape:
                 vector_color = np.outer(
                     np.ones(len(structure)),
                     vector_color / np.linalg.norm(vector_color),
                 )
         except AttributeError:
-            vector_color = np.ones((len(structure), 3)) * vector_color
+            if vector_color is not None:
+                vector_color = np.ones((len(structure), 3)) * vector_color
 
     if vector_field is not None:
+        assert vector_color is not None
         for arr, pos, col in zip(vector_field, positions, vector_color, strict=True):
             view.shape.add_arrow(list(pos), list(pos + arr), list(col), 0.2)
 

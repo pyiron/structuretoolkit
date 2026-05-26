@@ -51,8 +51,7 @@ def repulse(
     """
     if not inplace:
         structure = structure.copy()
-    if axis is None:
-        axis = slice(None)
+    ax: int | slice = axis if axis is not None else slice(None)
     for _ in range(iterations):
         neigh = get_neighbors(structure, num_neighbors=1)
         dd = neigh.distances[:, 0]
@@ -78,7 +77,7 @@ def repulse(
         disp = np.clip(min_dist - dd[I], 0, step_size)
 
         displacement = disp[:, None] * vv  # (N_close, 3)
-        structure.positions[I, axis] -= displacement[:, axis]
+        structure.positions[I, ax] -= displacement[:, ax]
 
     else:
         raise RuntimeError(f"repulse did not converge within {iterations} iterations")

@@ -138,7 +138,7 @@ ShellRadii = list[float]
 LogLevel = Literal["warn", "info", "debug", "error", "trace"]
 
 
-class SroParameter:
+class SroParameter(Protocol):
     @property
     def i(self) -> int: ...
 

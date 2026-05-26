@@ -199,7 +199,7 @@ def sqs_structures(
         optimize as sqs_optimize,
     )
 
-    config = {
+    config: dict[str, Any] = {
         "prec": precision,
         "iteration_mode": iteration_mode,
         "sublattice_mode": sublattice_mode,

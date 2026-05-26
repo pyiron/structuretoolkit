@@ -6,7 +6,7 @@ from ase.spacegroup import crystal
 from structuretoolkit.analyse.neighbors import get_neighbors
 
 
-def B2(element_a: str, element_b: str, a: float | None = None):
+def B2(element_a: str, element_b: str, a: float | None = None) -> Atoms:
     """
     Builds a cubic $AB$ B2 structure of interpenetrating simple cubic lattices.
 
