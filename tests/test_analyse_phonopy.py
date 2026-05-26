@@ -30,3 +30,11 @@ class TestPhonopyAtoms(unittest.TestCase):
         self.assertTrue(np.all(structure.symbols == structure_converted.symbols))
         self.assertTrue(np.all(structure.positions == structure_converted.positions))
         self.assertTrue(np.all(structure.cell == structure_converted.cell))
+
+    def test_get_equivalent_atoms_spglib_failure_raises(self):
+        from unittest.mock import patch
+
+        structure = bulk("Al", cubic=True)
+        with patch("spglib.get_symmetry", return_value=None):
+            with self.assertRaises(RuntimeError):
+                get_equivalent_atoms(structure)

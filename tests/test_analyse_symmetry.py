@@ -510,6 +510,56 @@ class TestSymmetry(unittest.TestCase):
         sym = stk.analyse.get_symmetry(structure=structure, use_magmoms=True)
         self.assertIsNotNone(sym)
 
+    def test_info_spglib_failure_raises(self):
+        from unittest.mock import patch
+        from structuretoolkit.common.error import SymmetryError
+
+        structure = bulk("Fe", cubic=True)
+        sym = stk.analyse.get_symmetry(structure=structure)
+        with patch("spglib.get_symmetry_dataset", return_value=None):
+            with self.assertRaises(SymmetryError):
+                sym.info
+
+    def test_spacegroup_spglib_failure_raises(self):
+        from unittest.mock import patch
+        from structuretoolkit.common.error import SymmetryError
+
+        structure = bulk("Fe", cubic=True)
+        sym = stk.analyse.get_symmetry(structure=structure)
+        with patch("spglib.get_spacegroup", return_value=None):
+            with self.assertRaises(SymmetryError):
+                sym.spacegroup
+
+    def test_spacegroup_number_only(self):
+        from unittest.mock import patch
+
+        structure = bulk("Fe", cubic=True)
+        sym = stk.analyse.get_symmetry(structure=structure)
+        with patch("spglib.get_spacegroup", return_value="225"):
+            result = sym.spacegroup
+        self.assertIn("Number", result)
+        self.assertNotIn("InternationalTableSymbol", result)
+
+    def test_get_primitive_cell_spglib_failure_raises(self):
+        from unittest.mock import patch
+        from structuretoolkit.common.error import SymmetryError
+
+        structure = bulk("Fe", cubic=True)
+        sym = stk.analyse.get_symmetry(structure=structure)
+        with patch("spglib.standardize_cell", return_value=None):
+            with self.assertRaises(SymmetryError):
+                sym.get_primitive_cell()
+
+    def test_get_ir_reciprocal_mesh_spglib_failure_raises(self):
+        from unittest.mock import patch
+        from structuretoolkit.common.error import SymmetryError
+
+        structure = bulk("Fe", cubic=True)
+        sym = stk.analyse.get_symmetry(structure=structure)
+        with patch("spglib.get_ir_reciprocal_mesh", return_value=None):
+            with self.assertRaises(SymmetryError):
+                sym.get_ir_reciprocal_mesh(mesh=[4, 4, 4])
+
 
 if __name__ == "__main__":
     unittest.main()

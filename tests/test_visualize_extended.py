@@ -135,6 +135,21 @@ class TestScalarsToHexColors(unittest.TestCase):
         colors = _scalars_to_hex_colors([1.0, 1.0, 1.0], cmap=viridis)
         self.assertEqual(len(colors), 3)
 
+    def test_cmap_none_seaborn_missing_prints_warning(self, capsys=None):
+        """When cmap=None and seaborn is missing, a message is printed."""
+        import builtins
+
+        real_import = builtins.__import__
+
+        def _no_seaborn(name, *args, **kwargs):
+            if name == "seaborn":
+                raise ImportError("mocked: seaborn not available")
+            return real_import(name, *args, **kwargs)
+
+        with patch("builtins.__import__", side_effect=_no_seaborn):
+            with self.assertRaises(Exception):
+                _scalars_to_hex_colors([0.0, 0.5, 1.0], cmap=None)
+
 
 class TestGetOrientation(unittest.TestCase):
     def test_invalid_view_plane_raises(self):

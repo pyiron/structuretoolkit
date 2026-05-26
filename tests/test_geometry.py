@@ -34,6 +34,14 @@ class TestRepulse(unittest.TestCase):
         result2 = repulse(self.atoms, inplace=True)
         self.assertIs(result2, self.atoms)
 
+    def test_coincident_atoms(self):
+        """Atoms at exactly the same position (distance == 0) must be handled."""
+        from ase import Atoms
+
+        atoms = Atoms("Cu2", positions=[[0, 0, 0], [0, 0, 0]], cell=[10, 10, 10], pbc=True)
+        result = repulse(atoms, min_dist=1.5, step_size=0.5, iterations=100)
+        self.assertGreaterEqual(result.positions[1, 0] - result.positions[0, 0], 0)
+
     def test_iterations(self):
         """Should raise error if iterations exhausted."""
         # min_dist=5.0 is far larger than any achievable spacing; step_size tiny

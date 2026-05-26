@@ -107,6 +107,32 @@ class TestAtoms(unittest.TestCase):
         phase = Strain._get_majority_phase(bulk_structure)
         self.assertEqual(phase, "bcc")
 
+    @unittest.skipIf(
+        skip_pyscal_test, "pyscal is not installed, so the pyscal tests are skipped."
+    )
+    def test_only_bulk_type_strain(self):
+        """Full get_strain call with only_bulk_type=True exercises J[_nullify_non_bulk]."""
+        bulk_structure = bulk("Fe", cubic=True)
+        result = stk.analyse.get_strain(
+            structure=bulk_structure,
+            ref_structure=bulk_structure,
+            only_bulk_type=True,
+        )
+        self.assertEqual(result.shape, (len(bulk_structure), 3, 3))
+
+    def test_get_majority_phase_non_dict_raises(self):
+        """_get_majority_phase must raise TypeError when CNA result is not a dict."""
+        from unittest.mock import patch
+        from structuretoolkit.analyse.strain import Strain
+
+        bulk_structure = bulk("Fe", cubic=True)
+        with patch(
+            "structuretoolkit.analyse.strain.get_adaptive_cna_descriptors",
+            return_value="not_a_dict",
+        ):
+            with self.assertRaises(TypeError):
+                Strain._get_majority_phase(bulk_structure)
+
 
 if __name__ == "__main__":
     unittest.main()
