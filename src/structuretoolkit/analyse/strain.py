@@ -1,3 +1,5 @@
+from typing import Union
+
 import numpy as np
 from ase.atoms import Atoms
 from scipy.spatial.transform import Rotation
@@ -328,7 +330,7 @@ def get_strain(
     num_neighbors: int | None = None,
     only_bulk_type: bool = False,
     return_object: bool = False,
-) -> np.ndarray | "Strain":
+) -> Union[np.ndarray, "Strain"]:
     """
     Calculate local strain of each atom following the Lagrangian strain tensor:
 
