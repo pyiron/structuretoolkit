@@ -452,10 +452,9 @@ def get_interstitials(
     )
 
 
-get_interstitials.__doc__ = (
-    (Interstitials.__doc__ or "").replace("Class", "Function")
-    + (Interstitials.__init__.__doc__ or "")
-)
+get_interstitials.__doc__ = (Interstitials.__doc__ or "").replace(
+    "Class", "Function"
+) + (Interstitials.__init__.__doc__ or "")
 
 
 def get_layers(

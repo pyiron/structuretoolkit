@@ -81,7 +81,8 @@ class Strain:
                 than the bulk.
         """
         return np.array(
-            get_adaptive_cna_descriptors(structure=self.structure, mode="str") != self.crystal_phase
+            get_adaptive_cna_descriptors(structure=self.structure, mode="str")
+            != self.crystal_phase
         )
 
     def _get_perpendicular_unit_vectors(

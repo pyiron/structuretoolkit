@@ -453,7 +453,10 @@ def _plot3d(
         vector_field is not None and vector_field is not None
     ):  # WARNING: There must be a bug here...
         try:
-            if vector_color is not None and vector_color.shape != np.ones((len(structure), 3)).shape:
+            if (
+                vector_color is not None
+                and vector_color.shape != np.ones((len(structure), 3)).shape
+            ):
                 vector_color = np.outer(
                     np.ones(len(structure)),
                     vector_color / np.linalg.norm(vector_color),
