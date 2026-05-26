@@ -245,9 +245,7 @@ def sqs_structures(
         config["shell_radii"] = shell_radii_processed
     if objective is None:
         objective = (
-            0.0
-            if sublattice_mode == "interact"
-            else [0.0] * len(composition_processed)
+            0.0 if sublattice_mode == "interact" else [0.0] * len(composition_processed)
         )
     config["target_objective"] = cast(Any, _preprocess_for_mode(objective))
 
