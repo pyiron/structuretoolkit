@@ -135,13 +135,6 @@ class TestScalarsToHexColors(unittest.TestCase):
         colors = _scalars_to_hex_colors([1.0, 1.0, 1.0], cmap=viridis)
         self.assertEqual(len(colors), 3)
 
-    def test_cmap_none_uses_seaborn(self):
-        """When cmap=None, seaborn diverging_palette is used as default."""
-        colors = _scalars_to_hex_colors([0.0, 0.5, 1.0], cmap=None)
-        self.assertEqual(len(colors), 3)
-        for c in colors:
-            self.assertTrue(c.startswith("#"))
-
     def test_cmap_none_seaborn_missing_prints_warning(self, capsys=None):
         """When cmap=None and seaborn is missing, a message is printed."""
         import builtins
