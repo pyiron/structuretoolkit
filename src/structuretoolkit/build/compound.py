@@ -207,7 +207,7 @@ def D03(element_a: str, element_b: str, a: float | None = None) -> Atoms:
     )
 
 
-def _bcc_lattice_constant_from_nn_distance(element: Atoms):
+def _bcc_lattice_constant_from_nn_distance(element: str) -> float:
     """
     Build a BCC lattice constant by making the BCC have the same nearest neighbour distance as the regular cell.
 

@@ -3,6 +3,7 @@
 
 import itertools
 import warnings
+from typing import Any, cast
 
 import numpy as np
 from ase.atoms import Atoms
@@ -56,18 +57,18 @@ class Tree:
         Args:
             ref_structure (ase.atoms.Atoms): Reference structure.
         """
-        self._distances = None
-        self._vectors = None
-        self._indices = None
+        self._distances: Any = None
+        self._vectors: Any = None
+        self._indices: Any = None
         self._mode = {"filled": True, "ragged": False, "flattened": False}
-        self._extended_positions = None
-        self._positions = None
-        self._wrapped_indices = None
-        self._extended_indices = None
+        self._extended_positions: Any = None
+        self._positions: Any = None
+        self._wrapped_indices: Any = None
+        self._extended_indices: Any = None
         self._ref_structure = ref_structure.copy()
         self.wrap_positions = False
-        self._tree = None
-        self.num_neighbors = None
+        self._tree: Any = None
+        self.num_neighbors: int | None = None
         self.cutoff_radius = np.inf
         self._norm_order = 2
 
@@ -91,6 +92,7 @@ class Tree:
         for k, v in self._mode.items():
             if v:
                 return k
+        raise ValueError("No neighbor representation mode is active")
 
     def _set_mode(self, new_mode: str) -> None:
         """
@@ -172,6 +174,7 @@ class Tree:
             return self._contract(value, ref_vector=ref_vector)
         elif key == "flattened":
             return value[self._distances < np.inf]
+        raise ValueError(f"Unknown neighbor representation mode: {key}")
 
     @property
     def distances(self) -> np.ndarray:
@@ -257,7 +260,7 @@ class Tree:
             + " with the correct norm_order value"
         )
 
-    def _get_max_length(self, ref_vector: np.ndarray | None = None) -> int:
+    def _get_max_length(self, ref_vector: np.ndarray | None = None) -> int | None:
         """
         Get the maximum length of the reference vector.
 
@@ -277,9 +280,7 @@ class Tree:
             return None
         return max(len(dd[dd < np.inf]) for dd in ref_vector)
 
-    def _contract(
-        self, value: np.ndarray, ref_vector: np.ndarray | None = None
-    ) -> np.ndarray:
+    def _contract(self, value: np.ndarray, ref_vector: np.ndarray | None = None):
         """
         Contract the given value based on the specified reference vector.
 
@@ -297,7 +298,7 @@ class Tree:
             for vv, dist in zip(value, self.filled.distances, strict=True)
         ]
 
-    def _allow_ragged_to_mode(self, new_bool: bool) -> str:
+    def _allow_ragged_to_mode(self, new_bool: bool | None) -> str:
         """
         Set the representation mode based on the value of new_bool.
 
@@ -504,6 +505,8 @@ class Tree:
         if self.num_neighbors is None:
             self.num_neighbors = num_neighbors
             self.cutoff_radius = cutoff_radius
+        assert num_neighbors is not None
+        assert self.num_neighbors is not None
         if num_neighbors > self.num_neighbors:
             warnings.warn(
                 "Taking a larger search area after initialization has the risk of "
@@ -582,7 +585,7 @@ class Tree:
     def _get_neighborhood(
         self,
         positions: np.ndarray,
-        num_neighbors: int = 12,
+        num_neighbors: int | None = 12,
         cutoff_radius: float = np.inf,
         exclude_self: bool = False,
         width_buffer: float = 1.2,
@@ -611,7 +614,7 @@ class Tree:
             cutoff_radius=cutoff_radius,
             width_buffer=width_buffer,
         )
-        if num_neighbors is not None:
+        if num_neighbors is not None and self.num_neighbors is not None:
             self.num_neighbors -= 1
         max_column = np.sum(distances < np.inf, axis=-1).max()
         self._distances = distances[..., start_column:max_column]
@@ -620,7 +623,7 @@ class Tree:
         self._positions = positions
         return self
 
-    def _check_width(self, width: float, pbc: list[bool, bool, bool]) -> bool:
+    def _check_width(self, width: float, pbc: np.ndarray) -> bool:
         """
         Check if the width of the layer exceeds the specified value.
 
@@ -706,25 +709,23 @@ class Tree:
         radius. For automated uses, see Atoms.analyse.pyscal_steinhardt_parameter()
         """
         random_rotation = Rotation.from_mrp(np.random.random(3)).as_matrix()
+        harmonic_values: list[np.ndarray] = [
+            np.absolute(
+                self.get_spherical_harmonics(
+                    l=l,
+                    m=m,
+                    cutoff_radius=cutoff_radius,
+                    rotation=random_rotation,
+                )
+            )
+            ** 2
+            for m in np.arange(-l, l + 1)
+        ]
         return np.sqrt(
             4
             * np.pi
             / (2 * l + 1)
-            * np.sum(
-                [
-                    np.absolute(
-                        self.get_spherical_harmonics(
-                            l=l,
-                            m=m,
-                            cutoff_radius=cutoff_radius,
-                            rotation=random_rotation,
-                        )
-                    )
-                    ** 2
-                    for m in np.arange(-l, l + 1)
-                ],
-                axis=0,
-            )
+            * np.sum(harmonic_values, axis=0)
         )
 
     @staticmethod
@@ -827,8 +828,8 @@ class Neighbors(Tree):
         """
         super().__init__(ref_structure=ref_structure)
         self._tolerance = tolerance
-        self._cluster_vecs = None
-        self._cluster_dist = None
+        self._cluster_vecs: Any = None
+        self._cluster_dist: Any = None
 
     def __repr__(self):
         """
@@ -1072,7 +1073,7 @@ class Neighbors(Tree):
 
     def find_neighbors_by_vector(
         self, vector: np.ndarray, return_deviation: bool = False
-    ) -> np.ndarray:
+    ) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
         """
         Args:
             vector (list/np.ndarray): vector by which positions are translated (and neighbors are searched)
@@ -1323,9 +1324,9 @@ class Neighbors(Tree):
         ind_shell = []
         for d, i in zip(dist, ind, strict=True):
             id_list = get_cluster(d[d < radius], i[d < radius])
-            ia_shells_dict = {}
+            ia_shells_dict: dict[str, list[list[int]]] = {}
             for i_shell_list in id_list:
-                ia_shell_dict = {}
+                ia_shell_dict: dict[str, list[int]] = {}
                 for i_s in i_shell_list:
                     el = el_list[i_s]
                     if el not in ia_shell_dict:
@@ -1382,14 +1383,17 @@ def get_neighbors(
     Returns:
         Neighbors: An instance of the Neighbors class with the neighbor indices, distances, and vectors.
     """
-    neigh = _get_neighbors(
-        structure=structure,
-        num_neighbors=num_neighbors,
-        tolerance=tolerance,
-        id_list=id_list,
-        cutoff_radius=cutoff_radius,
-        width_buffer=width_buffer,
-        norm_order=norm_order,
+    neigh = cast(
+        Neighbors,
+        _get_neighbors(
+            structure=structure,
+            num_neighbors=num_neighbors,
+            tolerance=tolerance,
+            id_list=id_list,
+            cutoff_radius=cutoff_radius,
+            width_buffer=width_buffer,
+            norm_order=norm_order,
+        ),
     )
     neigh._set_mode(mode)
     return neigh

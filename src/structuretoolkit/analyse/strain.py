@@ -234,6 +234,8 @@ class Strain:
             str: The crystal phase with the highest count.
         """
         cna = get_adaptive_cna_descriptors(structure=structure)
+        if not isinstance(cna, dict):
+            raise TypeError("Expected CNA descriptors as a dictionary")
         return str(np.asarray(list(cna.keys()))[np.argmax(list(cna.values()))])
 
     @staticmethod

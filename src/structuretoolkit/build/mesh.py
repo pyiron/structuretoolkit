@@ -32,7 +32,7 @@ def create_mesh(
     Returns:
         (3, n, n, n)-array: mesh
     """
-    cell = get_cell(cell)
+    cell = np.asarray(get_cell(cell), dtype=float)
     n_arr: np.ndarray
     if n_mesh is None:
         if density is None:
