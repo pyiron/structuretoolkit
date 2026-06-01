@@ -27,7 +27,7 @@ def get_steinhardt_parameters(
     n_clusters: int | None = 2,
     q: tuple | None = None,
     averaged: bool = False,
-) -> tuple[np.ndarray] | tuple[np.ndarray, np.ndarray]:
+) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """
     Calculate Steinhardts parameters
 
@@ -162,7 +162,7 @@ def get_diamond_structure_descriptors(
 
 def get_adaptive_cna_descriptors(
     structure: Atoms, mode: str = "total", ovito_compatibility: bool = False
-) -> np.ndarray:
+) -> dict | np.ndarray:
     """
     Use common neighbor analysis
 

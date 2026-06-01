@@ -54,6 +54,10 @@ class TestCompound(unittest.TestCase):
             c14.get_chemical_formula(), "Cu8Mg4", "Wrong chemical formula."
         )
 
+    def test_C14_degenerate_raises(self):
+        with self.assertRaises(ValueError):
+            stk.build.C14("Mg", "Cu", z1=0.25)
+
     @unittest.skipIf(
         skip_spglib_test, "spglib is not installed, so the C15 tests are skipped."
     )
@@ -118,6 +122,14 @@ class TestCompound(unittest.TestCase):
         self.assertEqual(
             c36.get_chemical_formula(), "Cu16Mg8", "Wrong chemical formula."
         )
+
+    def test_C36_equal_z_raises(self):
+        with self.assertRaises(ValueError):
+            stk.build.C36("Mg", "Cu", z2=0.5, z3=0.5)
+
+    def test_C36_degenerate_raises(self):
+        with self.assertRaises(ValueError):
+            stk.build.C36("Mg", "Cu", x1=1 / 3)
 
     def test_D03(self):
         element_a, element_b = "Al", "Fe"

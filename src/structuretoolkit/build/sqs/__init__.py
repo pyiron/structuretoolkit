@@ -1,19 +1,19 @@
+from ._interface import sqs_structures
 from ._types import (
-    SqsResultSplit,
-    SqsResult,
-    SqsResultInteract,
-    SublatticeMode,
-    IterationMode,
-    Site,
+    Composition,
     Element,
+    IterationMode,
+    Prec,
+    Shell,
     ShellRadii,
     ShellWeights,
-    Shell,
-    Composition,
-    Prec,
+    Site,
+    SqsResult,
+    SqsResultInteract,
+    SqsResultSplit,
     SroParameter,
+    SublatticeMode,
 )
-from ._interface import sqs_structures
 
 __all__ = [
     "Composition",

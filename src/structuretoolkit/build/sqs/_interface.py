@@ -1,18 +1,21 @@
 from __future__ import annotations
-from ase.atoms import Atoms
+
+from collections.abc import Iterator
 from threading import Event, Thread
-from typing import overload, Literal, TypeVar, Generic, Any, Iterator
+from typing import Any, Generic, Literal, TypeVar, cast, overload
+
+from ase.atoms import Atoms
 
 from ._types import (
     Composition,
-    ShellWeights,
-    ShellRadii,
-    SublatticeMode,
     IterationMode,
+    LogLevel,
     Prec,
+    ShellRadii,
+    ShellWeights,
     SqsResultInteract,
     SqsResultSplit,
-    LogLevel,
+    SublatticeMode,
 )
 
 R = TypeVar("R", SqsResultInteract, SqsResultSplit)
@@ -21,12 +24,12 @@ T = TypeVar("T")
 
 class _SqsResultProxy(Generic[R]):
     def __init__(self, result: R):
-        self._result = result
+        self._result: R = result
 
     def atoms(self) -> Atoms:
         from sqsgenerator import to_ase
 
-        return to_ase(self._result.structure())
+        return to_ase(cast(Any, self._result).structure())
 
     def __getattr__(self, item: str) -> Any:
         return getattr(self._result, item)
@@ -186,24 +189,28 @@ def sqs_structures(
 
     from sqsgenerator import parse_config
     from sqsgenerator.core import (
-        ParseError,
         LogLevel as SqsLogLevel,
+    )
+    from sqsgenerator.core import (
+        ParseError,
         SqsCallbackContext,
+    )
+    from sqsgenerator.core import (
         optimize as sqs_optimize,
     )
 
-    config = dict(
-        prec=precision,
-        iteration_mode=iteration_mode,
-        sublattice_mode=sublattice_mode,
-        structure=dict(
-            lattice=structure.cell.array.tolist(),
-            coords=structure.get_scaled_positions().tolist(),
-            species=structure.get_atomic_numbers().tolist(),
-        ),
-        iterations=iterations,
-        max_results_per_objective=max_results_per_objective,
-    )
+    config: dict[str, Any] = {
+        "prec": precision,
+        "iteration_mode": iteration_mode,
+        "sublattice_mode": sublattice_mode,
+        "structure": {
+            "lattice": structure.cell.array.tolist(),
+            "coords": structure.get_scaled_positions().tolist(),
+            "species": structure.get_atomic_numbers().tolist(),
+        },
+        "iterations": iterations,
+        "max_results_per_objective": max_results_per_objective,
+    }
     if atol is not None:
         config["atol"] = atol
     if rtol is not None:
@@ -216,7 +223,7 @@ def sqs_structures(
                 f"Invalid supercell: {supercell}. All dimensions must be positive integers."
             )
 
-    def _preprocess_for_mode(v: T | list[T] | None) -> list[T] | None:
+    def _preprocess_for_mode(v: T | list[T] | None) -> T | list[T] | None:
         match sublattice_mode:
             case "interact":
                 return v
@@ -227,15 +234,20 @@ def sqs_structures(
                     f"Invalid sublattice mode: {sublattice_mode}. Use 'interact' or 'split'."
                 )
 
-    if (composition := _preprocess_for_mode(composition)) is not None:
-        config["composition"] = composition
-    if (shell_weights := _preprocess_for_mode(shell_weights)) is not None:
-        config["shell_weights"] = shell_weights
-    if (shell_radii := _preprocess_for_mode(shell_radii)) is not None:
-        config["shell_radii"] = shell_radii
+    composition_processed = cast(Any, _preprocess_for_mode(composition))
+    if composition_processed is not None:
+        config["composition"] = composition_processed
+    shell_weights_processed = cast(Any, _preprocess_for_mode(shell_weights))
+    if shell_weights_processed is not None:
+        config["shell_weights"] = shell_weights_processed
+    shell_radii_processed = cast(Any, _preprocess_for_mode(shell_radii))
+    if shell_radii_processed is not None:
+        config["shell_radii"] = shell_radii_processed
     if objective is None:
-        objective = 0.0 if sublattice_mode == "interact" else [0.0] * len(composition)
-    config["target_objective"] = _preprocess_for_mode(objective)
+        objective = (
+            0.0 if sublattice_mode == "interact" else [0.0] * len(composition_processed)
+        )
+    config["target_objective"] = cast(Any, _preprocess_for_mode(objective))
 
     if num_threads is not None:
         if num_threads > 0:

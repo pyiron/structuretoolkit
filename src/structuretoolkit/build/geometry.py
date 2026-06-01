@@ -51,8 +51,7 @@ def repulse(
     """
     if not inplace:
         structure = structure.copy()
-    if axis is None:
-        axis = slice(None)
+    ax: int | slice = axis if axis is not None else slice(None)
     for _ in range(iterations):
         neigh = get_neighbors(structure, num_neighbors=1)
         dd = neigh.distances[:, 0]
@@ -78,7 +77,7 @@ def repulse(
         disp = np.clip(min_dist - dd[I], 0, step_size)
 
         displacement = disp[:, None] * vv  # (N_close, 3)
-        structure.positions[I, axis] -= displacement[:, axis]
+        structure.positions[I, ax] -= displacement[:, ax]
 
     else:
         raise RuntimeError(f"repulse did not converge within {iterations} iterations")
@@ -86,9 +85,7 @@ def repulse(
     return structure
 
 
-def merge(
-    structure: "ase.Atoms", cutoff: float = 1.8, iterations: int = 10
-) -> "ase.Atoms":
+def merge(structure: Atoms, cutoff: float = 1.8, iterations: int = 10) -> Atoms:
     """Merge pairs of atoms that are closer than ``cutoff`` by collapsing each
     pair to their midpoint and deleting one of the two atoms.
 
