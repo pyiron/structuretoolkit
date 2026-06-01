@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 
 from ase.build import bulk
 
@@ -195,8 +196,6 @@ class SQSTestCase(unittest.TestCase):
             result.sublattices()
 
     def test_sqs_keyboard_interrupt(self):
-        from unittest.mock import patch
-
         # We mock time.sleep to raise KeyboardInterrupt to simulate it during the wait loop
         # However sqs_structures uses stop_event.wait(timeout=1.0)
         # Let's mock stop_event.wait instead, but carefully.
@@ -226,7 +225,6 @@ class SQSTestCase(unittest.TestCase):
         )
 
     def test_sqs_optimization_failed(self):
-        from unittest.mock import patch
         # sqs_optimize is imported inside the function, so we need to mock it where it is used.
         # But wait, it's imported from sqsgenerator.core.
         # So we should patch 'sqsgenerator.core.optimize'
