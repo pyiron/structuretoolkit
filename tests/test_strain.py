@@ -1,5 +1,6 @@
 # coding: utf-8
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 from ase.build import bulk
@@ -122,7 +123,6 @@ class TestAtoms(unittest.TestCase):
 
     def test_get_majority_phase_non_dict_raises(self):
         """_get_majority_phase must raise TypeError when CNA result is not a dict."""
-        from unittest.mock import patch
         from structuretoolkit.analyse.strain import Strain
 
         bulk_structure = bulk("Fe", cubic=True)
