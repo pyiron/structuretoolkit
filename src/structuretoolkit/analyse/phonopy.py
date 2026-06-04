@@ -47,4 +47,6 @@ def get_equivalent_atoms(
     ops = spglib.get_symmetry(
         cell=unitcell.totuple(), symprec=symprec, angle_tolerance=angle_tolerance
     )
+    if ops is None:
+        raise RuntimeError("spglib could not determine symmetry")
     return ops["equivalent_atoms"]

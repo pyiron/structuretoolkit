@@ -53,8 +53,8 @@ def get_extended_positions(
     width /= get_vertical_length(structure=structure, norm_order=norm_order)
     rep = 2 * np.ceil(width).astype(int) * structure.pbc + 1
     rep = [np.arange(r) - int(r / 2) for r in rep]
-    meshgrid = np.meshgrid(rep[0], rep[1], rep[2])
-    meshgrid = np.stack(meshgrid, axis=-1).reshape(-1, 3)
+    rep_grids = np.meshgrid(rep[0], rep[1], rep[2])
+    meshgrid = np.stack(rep_grids, axis=-1).reshape(-1, 3)
     v_repeated = np.einsum("ni,ij->nj", meshgrid, structure.cell)
     v_repeated = v_repeated[:, np.newaxis, :] + positions[np.newaxis, :, :]
     v_repeated = v_repeated.reshape(-1, 3)
@@ -184,7 +184,7 @@ def set_indices(structure: Atoms, indices: np.ndarray) -> Atoms:
     return structure
 
 
-def get_average_of_unique_labels(labels: np.ndarray, values: np.ndarray) -> float:
+def get_average_of_unique_labels(labels: np.ndarray, values: np.ndarray) -> np.ndarray:
     """
 
     This function returns the average values of those elements, which share the same labels
@@ -251,20 +251,20 @@ def apply_strain(
             If `lagrangian`, epsilon is given by `(F^T * F - 1) / 2`. It raises an error if
             the strain is not symmetric (if the shear components are given).
     """
-    epsilon = np.array([epsilon]).flatten()
-    if len(epsilon) == 3 or len(epsilon) == 1:
-        epsilon = epsilon * np.eye(3)
-    epsilon = epsilon.reshape(3, 3)
-    if epsilon.min() < -1.0:
+    eps: np.ndarray = np.array([epsilon]).flatten()
+    if len(eps) == 3 or len(eps) == 1:
+        eps = eps * np.eye(3)
+    eps = eps.reshape(3, 3)
+    if eps.min() < -1.0:
         raise ValueError("Strain value too negative")
     structure_copy = structure.copy() if return_box else structure
     cell = structure_copy.cell.copy()
     if mode == "linear":
-        F = epsilon + np.eye(3)
+        F = eps + np.eye(3)
     elif mode == "lagrangian":
-        if not np.allclose(epsilon, epsilon.T):
+        if not np.allclose(eps, eps.T):
             raise ValueError("Strain must be symmetric if `mode = 'lagrangian'`")
-        E, V = np.linalg.eigh(2 * epsilon + np.eye(3))
+        E, V = np.linalg.eigh(2 * eps + np.eye(3))
         F = np.einsum("ik,k,jk->ij", V, np.sqrt(E), V)
     else:
         raise ValueError("mode must be `linear` or `lagrangian`")

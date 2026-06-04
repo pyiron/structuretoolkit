@@ -4,6 +4,7 @@
 import ast
 import dataclasses
 import string
+import warnings
 
 import numpy as np
 import spglib
@@ -62,7 +63,7 @@ class Symmetry(dict):
         self._symprec = symprec
         self._angle_tolerance = angle_tolerance
         self.epsilon = epsilon
-        self._permutations = None
+        self._permutations: np.ndarray | None = None
         for k, v in self._get_symmetry(
             symprec=symprec, angle_tolerance=angle_tolerance
         ).items():
@@ -208,6 +209,7 @@ class Symmetry(dict):
             if np.ptp(distances) > self._symprec:
                 raise AssertionError("Neighbor search failed")
             self._permutations = self._permutations.argsort(axis=-1)
+        assert self._permutations is not None
         return self._permutations
 
     def symmetrize_vectors(
@@ -368,12 +370,12 @@ class Symmetry(dict):
         )
         if space_group is None:
             raise SymmetryError(spglib.error.get_error_message())
-        space_group = space_group.split()
-        if len(space_group) == 1:
-            return {"Number": ast.literal_eval(space_group[0])}
+        parts = space_group.split()
+        if len(parts) == 1:
+            return {"Number": ast.literal_eval(parts[0])}
         return {
-            "InternationalTableSymbol": space_group[0],
-            "Number": ast.literal_eval(space_group[1]),
+            "InternationalTableSymbol": parts[0],
+            "Number": ast.literal_eval(parts[1]),
         }
 
     def get_primitive_cell(
@@ -400,26 +402,40 @@ class Symmetry(dict):
         >>> symmetry = Symmetry(structure)
         >>> len(symmetry.get_primitive_cell()) == len(basis)
         True
+
+        .. warning::
+            Custom arrays defined in the base structures
+            :attr:`ase.atoms.Atoms.arrays` and other state (.info, .calc, etc.) are not copied to the new structure!
         """
+        if not all(self._structure.pbc):
+            raise ValueError("Can only symmetrize periodic structures.")
         ret = spglib.standardize_cell(
             self._get_spglib_cell(use_elements=use_elements, use_magmoms=use_magmoms),
             to_primitive=not standardize,
         )
         if ret is None:
             raise SymmetryError(spglib.error.get_error_message())
-        cell, positions, indices = ret
-        positions = (cell.T @ positions.T).T
-        new_structure = self._structure.copy()
-        new_structure.cell = cell
-        new_structure = new_structure[: len(indices)]
+        cell, scaled_positions, indices = ret
         indices_dict = {
             v: k
             for k, v in structuretoolkit.common.helper.get_species_indices_dict(
                 structure=self._structure
             ).items()
         }
-        new_structure.symbols = [indices_dict[i] for i in indices]
-        new_structure.positions = positions
+        symbols = [indices_dict[i] for i in indices]
+        new_structure = type(self._structure)(
+            symbols=symbols,
+            scaled_positions=scaled_positions,
+            cell=cell,
+            pbc=[True, True, True],
+        )
+        keys = set(self._structure.arrays) - {"numbers", "positions"}
+        if len(keys) > 0:
+            warnings.warn(
+                f"Custom arrays {keys} do not carry over to new structure!",
+                stacklevel=2,
+            )
+
         return new_structure
 
     def get_ir_reciprocal_mesh(
@@ -427,7 +443,7 @@ class Symmetry(dict):
         mesh: np.ndarray,
         is_shift: np.ndarray = np.zeros(3, dtype="intc"),
         is_time_reversal: bool = True,
-    ) -> np.ndarray:
+    ) -> tuple[np.ndarray, np.ndarray]:
         """
         Get the irreducible reciprocal mesh points.
 
@@ -437,21 +453,21 @@ class Symmetry(dict):
             is_time_reversal (bool, optional): Whether to consider time reversal symmetry. Defaults to True.
 
         Returns:
-            ndarray: The irreducible reciprocal mesh points.
+            tuple: The irreducible reciprocal mesh points (mapping, grid_points).
 
         Raises:
             SymmetryError: If the irreducible reciprocal mesh points cannot be obtained.
         """
-        mesh = spglib.get_ir_reciprocal_mesh(
+        result = spglib.get_ir_reciprocal_mesh(
             mesh=mesh,
             cell=self._get_spglib_cell(),
             is_shift=is_shift,
             is_time_reversal=is_time_reversal,
             symprec=self._symprec,
         )
-        if mesh is None:
+        if result is None:
             raise SymmetryError(spglib.error.get_error_message())
-        return mesh
+        return result
 
 
 def _get_inner_slicer(n: int, i: int) -> tuple:
@@ -466,7 +482,7 @@ def _get_inner_slicer(n: int, i: int) -> tuple:
         tuple: Inner slicer tuple.
 
     """
-    s = [None for _ in range(n)]
+    s: list[None | slice] = [None for _ in range(n)]
     s[0] = slice(None)
     s[i] = slice(None)
     return tuple(s)

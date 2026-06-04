@@ -1,5 +1,5 @@
 [build-system]
-requires = ["ase", "numpy", "scipy", "hatchling==1.29.0", "hatch-vcs==0.5.0"]
+requires = ["ase", "numpy", "scipy", "hatchling==1.30.1", "hatch-vcs==0.5.0"]
 build-backend = "hatchling.build"
 
 [project]
@@ -18,7 +18,6 @@ classifiers = [
     "License :: OSI Approved :: BSD License",
     "Intended Audience :: Science/Research",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -52,7 +51,7 @@ surface = [
     "pymatgen==2026.3.23",
 ]
 phonopy = [
-    "phonopy==3.5.1",
+    "phonopy==4.0.1",
     "spglib==2.7.0",
 ]
 mp-api = [
