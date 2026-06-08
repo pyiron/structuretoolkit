@@ -547,13 +547,12 @@ def _extract_computes_snap(
     Returns:
         np.ndarray: Output of the LAMMPS compute command
     """
-    lmp_atom_ids = lmp.numpy.extract_atom(name="id").flatten()
-    print(lmp_atom_ids)
+    lmp_atom_ids = lmp.numpy.extract_atom(name="id", nelem=num_atoms).flatten()
     cond = bool(np.all(lmp_atom_ids == 1 + np.arange(num_atoms)))
     assert cond, "LAMMPS seems to have lost atoms"
 
     # Extract types
-    lmp_types = lmp.numpy.extract_atom(name="type").flatten()
+    lmp_types = lmp.numpy.extract_atom(name="type", nelem=num_atoms).flatten()
     lmp_volume = lmp.get_thermo("vol")
 
     # Extract Bsum
