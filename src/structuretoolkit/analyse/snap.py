@@ -268,7 +268,7 @@ def _set_ase_structure(lmp, structure: Atoms):
     elem_all = np.array([el_dict[el] + 1 for el in structure.get_chemical_symbols()])
     lmp.create_atoms(
         n=len(structure),
-        id=None,
+        atomid=None,
         type=(len(elem_all) * c_int)(*elem_all),
         x=(len(positions) * c_double)(*positions),
         v=None,
