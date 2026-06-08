@@ -548,6 +548,7 @@ def _extract_computes_snap(
         np.ndarray: Output of the LAMMPS compute command
     """
     lmp_atom_ids = lmp.numpy.extract_atom(name="id").flatten()
+    print(lmp_atom_ids)
     cond = bool(np.all(lmp_atom_ids == 1 + np.arange(num_atoms)))
     assert cond, "LAMMPS seems to have lost atoms"
 
