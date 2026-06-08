@@ -268,8 +268,8 @@ def _set_ase_structure(lmp, structure: Atoms):
     elem_all = np.array([el_dict[el] + 1 for el in structure.get_chemical_symbols()])
     lmp.create_atoms(
         n=len(structure),
-        id=None,
-        type=(len(elem_all) * c_int)(*elem_all),
+        atomid=None,
+        atype=(len(elem_all) * c_int)(*elem_all),
         x=(len(positions) * c_double)(*positions),
         v=None,
         image=None,
@@ -547,12 +547,12 @@ def _extract_computes_snap(
     Returns:
         np.ndarray: Output of the LAMMPS compute command
     """
-    lmp_atom_ids = lmp.numpy.extract_atom_iarray("id", num_atoms).flatten()
+    lmp_atom_ids = lmp.numpy.extract_atom(name="id", nelem=num_atoms).flatten()
     cond = bool(np.all(lmp_atom_ids == 1 + np.arange(num_atoms)))
     assert cond, "LAMMPS seems to have lost atoms"
 
     # Extract types
-    lmp_types = lmp.numpy.extract_atom_iarray(name="type", nelem=num_atoms).flatten()
+    lmp_types = lmp.numpy.extract_atom(name="type", nelem=num_atoms).flatten()
     lmp_volume = lmp.get_thermo("vol")
 
     # Extract Bsum
