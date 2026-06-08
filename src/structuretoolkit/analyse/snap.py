@@ -269,7 +269,7 @@ def _set_ase_structure(lmp, structure: Atoms):
     lmp.create_atoms(
         n=len(structure),
         atomid=None,
-        type=(len(elem_all) * c_int)(*elem_all),
+        atype=(len(elem_all) * c_int)(*elem_all),
         x=(len(positions) * c_double)(*positions),
         v=None,
         image=None,
