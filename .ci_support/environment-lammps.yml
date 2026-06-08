@@ -1,4 +1,4 @@
 channels:
 - conda-forge
 dependencies:
-- lammps =2025.07.22
+- lammps =2025.07.22=*openmpi*
