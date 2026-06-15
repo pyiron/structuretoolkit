@@ -1,5 +1,7 @@
-import importlib
+import sys
 import unittest
+from contextlib import contextmanager
+from types import ModuleType
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -17,6 +19,14 @@ except ImportError:
     skip_mp_api_test = True
 
 
+@contextmanager
+def patch_mprester():
+    client_module = ModuleType("mp_api.client")
+    client_module.MPRester = MagicMock()
+    with patch.dict(sys.modules, {"mp_api.client": client_module}):
+        yield client_module.MPRester
+
+
 @unittest.skipIf(
     skip_mp_api_test, "mp_api is not installed, so the dscribe tests are skipped."
 )
@@ -28,7 +38,7 @@ class TestMaterialsProjectSearch(unittest.TestCase):
         self.al_pmg = ase_to_pymatgen(self.al_fcc)
 
     def test_search_single_chemsys(self):
-        with patch("mp_api.client.mprester.MPRester") as MockMPRester:
+        with patch_mprester() as MockMPRester:
             mock_mpr = MagicMock()
             MockMPRester.return_value.__enter__ = MagicMock(return_value=mock_mpr)
             MockMPRester.return_value.__exit__ = MagicMock(return_value=False)
@@ -49,7 +59,7 @@ class TestMaterialsProjectSearch(unittest.TestCase):
             )
 
     def test_search_multiple_chemsys(self):
-        with patch("mp_api.client.mprester.MPRester") as MockMPRester:
+        with patch_mprester() as MockMPRester:
             mock_mpr = MagicMock()
             MockMPRester.return_value.__enter__ = MagicMock(return_value=mock_mpr)
             MockMPRester.return_value.__exit__ = MagicMock(return_value=False)
@@ -67,7 +77,7 @@ class TestMaterialsProjectSearch(unittest.TestCase):
                 self.assertIsInstance(r["structure"], Atoms)
 
     def test_search_with_extra_fields(self):
-        with patch("mp_api.client.mprester.MPRester") as MockMPRester:
+        with patch_mprester() as MockMPRester:
             mock_mpr = MagicMock()
             MockMPRester.return_value.__enter__ = MagicMock(return_value=mock_mpr)
             MockMPRester.return_value.__exit__ = MagicMock(return_value=False)
@@ -88,7 +98,7 @@ class TestMaterialsProjectSearch(unittest.TestCase):
             )
 
     def test_search_with_kwargs(self):
-        with patch("mp_api.client.mprester.MPRester") as MockMPRester:
+        with patch_mprester() as MockMPRester:
             mock_mpr = MagicMock()
             MockMPRester.return_value.__enter__ = MagicMock(return_value=mock_mpr)
             MockMPRester.return_value.__exit__ = MagicMock(return_value=False)
@@ -105,7 +115,7 @@ class TestMaterialsProjectSearch(unittest.TestCase):
             )
 
     def test_search_with_api_key(self):
-        with patch("mp_api.client.mprester.MPRester") as MockMPRester:
+        with patch_mprester() as MockMPRester:
             mock_mpr = MagicMock()
             MockMPRester.return_value.__enter__ = MagicMock(return_value=mock_mpr)
             MockMPRester.return_value.__exit__ = MagicMock(return_value=False)
@@ -120,7 +130,7 @@ class TestMaterialsProjectSearch(unittest.TestCase):
             )
 
     def test_search_without_api_key(self):
-        with patch("mp_api.client.mprester.MPRester") as MockMPRester:
+        with patch_mprester() as MockMPRester:
             mock_mpr = MagicMock()
             MockMPRester.return_value.__enter__ = MagicMock(return_value=mock_mpr)
             MockMPRester.return_value.__exit__ = MagicMock(return_value=False)
@@ -134,7 +144,7 @@ class TestMaterialsProjectSearch(unittest.TestCase):
             )
 
     def test_search_empty_results(self):
-        with patch("mp_api.client.mprester.MPRester") as MockMPRester:
+        with patch_mprester() as MockMPRester:
             mock_mpr = MagicMock()
             MockMPRester.return_value.__enter__ = MagicMock(return_value=mock_mpr)
             MockMPRester.return_value.__exit__ = MagicMock(return_value=False)
@@ -146,7 +156,7 @@ class TestMaterialsProjectSearch(unittest.TestCase):
 
     def test_search_is_generator(self):
         """search() should yield results lazily."""
-        with patch("mp_api.client.mprester.MPRester") as MockMPRester:
+        with patch_mprester() as MockMPRester:
             mock_mpr = MagicMock()
             MockMPRester.return_value.__enter__ = MagicMock(return_value=mock_mpr)
             MockMPRester.return_value.__exit__ = MagicMock(return_value=False)
@@ -169,7 +179,7 @@ class TestMaterialsProjectById(unittest.TestCase):
         self.fe_pmg = ase_to_pymatgen(self.fe_bcc)
 
     def test_by_id_final(self):
-        with patch("mp_api.client.mprester.MPRester") as MockMPRester:
+        with patch_mprester() as MockMPRester:
             mock_mpr = MagicMock()
             MockMPRester.return_value.__enter__ = MagicMock(return_value=mock_mpr)
             MockMPRester.return_value.__exit__ = MagicMock(return_value=False)
@@ -186,7 +196,7 @@ class TestMaterialsProjectById(unittest.TestCase):
             )
 
     def test_by_id_not_final(self):
-        with patch("mp_api.client.mprester.MPRester") as MockMPRester:
+        with patch_mprester() as MockMPRester:
             mock_mpr = MagicMock()
             MockMPRester.return_value.__enter__ = MagicMock(return_value=mock_mpr)
             MockMPRester.return_value.__exit__ = MagicMock(return_value=False)
@@ -208,7 +218,7 @@ class TestMaterialsProjectById(unittest.TestCase):
             )
 
     def test_by_id_conventional_unit_cell(self):
-        with patch("mp_api.client.mprester.MPRester") as MockMPRester:
+        with patch_mprester() as MockMPRester:
             mock_mpr = MagicMock()
             MockMPRester.return_value.__enter__ = MagicMock(return_value=mock_mpr)
             MockMPRester.return_value.__exit__ = MagicMock(return_value=False)
@@ -223,7 +233,7 @@ class TestMaterialsProjectById(unittest.TestCase):
             )
 
     def test_by_id_with_api_key(self):
-        with patch("mp_api.client.mprester.MPRester") as MockMPRester:
+        with patch_mprester() as MockMPRester:
             mock_mpr = MagicMock()
             MockMPRester.return_value.__enter__ = MagicMock(return_value=mock_mpr)
             MockMPRester.return_value.__exit__ = MagicMock(return_value=False)
@@ -237,7 +247,7 @@ class TestMaterialsProjectById(unittest.TestCase):
             )
 
     def test_by_id_without_api_key(self):
-        with patch("mp_api.client.mprester.MPRester") as MockMPRester:
+        with patch_mprester() as MockMPRester:
             mock_mpr = MagicMock()
             MockMPRester.return_value.__enter__ = MagicMock(return_value=mock_mpr)
             MockMPRester.return_value.__exit__ = MagicMock(return_value=False)
@@ -250,7 +260,7 @@ class TestMaterialsProjectById(unittest.TestCase):
             )
 
     def test_by_id_structure_has_correct_cell(self):
-        with patch("mp_api.client.mprester.MPRester") as MockMPRester:
+        with patch_mprester() as MockMPRester:
             mock_mpr = MagicMock()
             MockMPRester.return_value.__enter__ = MagicMock(return_value=mock_mpr)
             MockMPRester.return_value.__exit__ = MagicMock(return_value=False)
