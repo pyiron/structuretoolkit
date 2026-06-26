@@ -69,3 +69,18 @@ stk.plot3d(structure)
 * `stk.common.get_vertical_length()`
 * `stk.common.get_wrapped_coordinates()`
 * `stk.common.select_index()`
+
+## Documentation 
+
+* [structuretoolkit](https://structuretoolkit.readthedocs.io/en/latest/README.html)
+  * [Disclaimer](https://structuretoolkit.readthedocs.io/en/latest/README.html#disclaimer)
+  * [Example](https://structuretoolkit.readthedocs.io/en/latest/README.html#example)
+  * [Features](https://structuretoolkit.readthedocs.io/en/latest/README.html#features)
+* [Introduction](https://structuretoolkit.readthedocs.io/en/latest/introduction.html)
+  * [How the package is organised](https://structuretoolkit.readthedocs.io/en/latest/introduction.html#how-the-package-is-organised)
+  * [Helpers and converters](https://structuretoolkit.readthedocs.io/en/latest/introduction.html#structuretoolkit-common-helpers-and-converters)
+  * [Analysing existing structures](https://structuretoolkit.readthedocs.io/en/latest/introduction.html#structuretoolkit-analyse-analysing-existing-structures)
+  * [Constructing new structures](https://structuretoolkit.readthedocs.io/en/latest/introduction.html#structuretoolkit-build-constructing-new-structures)
+  * [Looking at structures](https://structuretoolkit.readthedocs.io/en/latest/introduction.html#structuretoolkit-visualize-looking-at-structures)
+  * [Where to go from here](https://structuretoolkit.readthedocs.io/en/latest/introduction.html#where-to-go-from-here)
+* [Interface](https://structuretoolkit.readthedocs.io/en/latest/api.html)
