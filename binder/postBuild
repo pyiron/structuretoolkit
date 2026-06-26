@@ -1,0 +1,9 @@
+# install executorlib
+pip install . --no-deps --no-build-isolation
+
+# copy notebooks
+mv notebooks/*.ipynb .
+mv notebooks/images .
+
+# clean up
+rm -rf .ci_support .github binder docs notebooks src tests .gitignore LICENSE MANIFEST.in README.md pyproject.toml
