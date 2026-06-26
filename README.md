@@ -4,12 +4,14 @@
 [![codecov](https://codecov.io/gh/pyiron/structuretoolkit/graph/badge.svg?token=B6I4OACKND)](https://codecov.io/gh/pyiron/structuretoolkit)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/pyiron/structuretoolkit/HEAD)
 
-Originally developed as part of the `pyiron_atomistics` module the `structuretoolkit` was release as standalone library
-for analysing, building and visualising atomistic structures. Internally it uses the `ase.atoms.Atoms` class to 
-represent atomistic structures in python. The `structuretoolkit` is integrated inside `pyiron_atomistics`.
-
-## Disclaimer 
-The `structuretoolkit` is currently under development. 
+`structuretoolkit` extends the [`ase.atoms.Atoms`](https://wiki.fysik.dtu.dk/ase/ase/atoms.html) class from the
+[Atomic Simulation Environment (ASE)](https://wiki.fysik.dtu.dk/ase/) with a large collection of additional
+functions for **building**, **analysing** and **visualising** atomistic structures in materials science. It does
+not introduce a structure class of its own &ndash; every function takes an `ase.atoms.Atoms` object as input and,
+where applicable, returns one again, so `structuretoolkit` combines freely with the rest of the ASE ecosystem
+(`ase.build`, ASE calculators, ASE I/O, ...). `structuretoolkit` also powers the structure-analysis backend of
+[`pyiron_atomistics`](https://github.com/pyiron/pyiron_atomistics), where the same functions are available as
+methods directly on the structure object.
 
 ## Example
 
@@ -73,7 +75,6 @@ stk.plot3d(structure)
 ## Documentation 
 
 * [structuretoolkit](https://structuretoolkit.readthedocs.io/en/latest/README.html)
-  * [Disclaimer](https://structuretoolkit.readthedocs.io/en/latest/README.html#disclaimer)
   * [Example](https://structuretoolkit.readthedocs.io/en/latest/README.html#example)
   * [Features](https://structuretoolkit.readthedocs.io/en/latest/README.html#features)
 * [Introduction](https://structuretoolkit.readthedocs.io/en/latest/introduction.html)
