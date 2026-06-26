@@ -119,9 +119,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Merge Notebook environment
-        run: |
-          cp binder/environment.yml environment.yml
-          echo "- papermill" >> environment.yml
+        run: echo "- papermill" >> binder/environment.yml
       - name: Setup Mambaforge
         uses: conda-incubator/setup-miniconda@v3
         with:
@@ -129,7 +127,7 @@ jobs:
           miniforge-version: latest
           channels: conda-forge
           conda-remove-defaults: "true"
-          environment-file: environment.yml
+          environment-file: binder/environment.yml
       - name: Test
         shell: bash -l {0}
         run: |
