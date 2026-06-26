@@ -23,4 +23,4 @@ dependencies:
 - lammps =2025.07.22=*openmpi*
 - nglview =3.1.4
 - seaborn =0.13.2
-- ipywidgets <7
+- ipykernel <7
