@@ -10,3 +10,4 @@ dependencies:
 - nbsphinx
 - sphinx
 - sphinx_rtd_theme
+- jupyter-book =1.0.0
