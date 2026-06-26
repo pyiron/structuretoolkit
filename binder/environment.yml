@@ -1,4 +1,3 @@
-name: pyiron-structuretoolkit
 channels:
 - conda-forge
 dependencies:
