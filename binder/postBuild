@@ -6,4 +6,4 @@ mv notebooks/*.ipynb .
 mv notebooks/images .
 
 # clean up
-rm -rf .ci_support .github binder docs notebooks src tests .gitignore LICENSE MANIFEST.in README.md pyproject.toml
+rm -rf .ci_support .github binder docs notebooks src tests .gitignore LICENSE MANIFEST.in README.md pyproject.toml CITATION.cff CODE_OF_CONDUCT.md
