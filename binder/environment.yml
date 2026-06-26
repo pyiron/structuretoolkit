@@ -20,5 +20,5 @@ dependencies:
 - hatch-vcs =0.5.0
 - mp-api =0.45.15
 - lammps =2025.07.22=*openmpi*
-- nglview =3.1.5
+- nglview =3.1.4
 - seaborn =0.13.2
