@@ -70,7 +70,7 @@ jobs:
         python-version: '3.14'
         miniforge-version: latest
         condarc-file: .condarc
-        environment-file: .ci_support/environment_mini.yml
+        environment-file: .ci_support/environment-mini.yml
     - name: Test
       shell: bash -l {0}
       timeout-minutes: 5
@@ -112,6 +112,28 @@ jobs:
       run: |
         uv sync --all-extras --dev
         pip check
+
+  notebooks:
+    needs: [black]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Merge Notebook environment
+        run: echo "- papermill" >> binder/environment.yml
+      - name: Setup Mambaforge
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          python-version: "3.12"
+          miniforge-version: latest
+          channels: conda-forge
+          conda-remove-defaults: "true"
+          environment-file: binder/environment.yml
+      - name: Test
+        shell: bash -l {0}
+        run: |
+          pip install . --no-deps --no-build-isolation
+          cd notebooks
+          ../.ci_support/build_notebooks.sh
 
   unittest_matrix:
     needs: [black]
@@ -193,7 +215,7 @@ jobs:
         python -m unittest discover tests
 
   autobot:
-    needs: [uv_check, unittest_old, unittest_matrix, pip_check, minimal]
+    needs: [uv_check, unittest_old, unittest_matrix, pip_check, minimal, notebooks, mypy]
     permissions:
       contents: write
       pull-requests: write
