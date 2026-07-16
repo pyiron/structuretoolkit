@@ -7,7 +7,7 @@ dependencies:
 - dscribe =2.1.2
 - matplotlib-base =3.10.9
 - notebook
-- numpy =2.4.6
+- numpy =2.5.1
 - phonopy =4.3.1
 - plotly =6.9.0
 - pymatgen =2026.3.23
