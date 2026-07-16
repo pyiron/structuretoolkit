@@ -6,7 +6,7 @@ dependencies:
 - ase =3.29.0
 - coverage
 - dscribe =2.1.2
-- matplotlib-base =3.10.9
+- matplotlib-base =3.11.0
 - nglview =4.0.1
 - notebook
 - numpy =2.5.1
@@ -15,7 +15,7 @@ dependencies:
 - pymatgen =2026.3.23
 - pyscal3 =3.3.2
 - scikit-learn =1.8.0
-- scipy =1.17.1
+- scipy =1.18.0
 - spglib =2.7.0
 - sqsgenerator =0.5.5
 - hatchling =1.31.0
