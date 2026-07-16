@@ -6,7 +6,7 @@ dependencies:
 - ase =3.29.0
 - coverage
 - dscribe =2.1.2
-- matplotlib-base =3.10.9
+- matplotlib-base =3.11.0
 - nglview =4.0.1
 - notebook
 - numpy =2.4.6
