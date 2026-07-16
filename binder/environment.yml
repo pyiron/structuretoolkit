@@ -5,7 +5,7 @@ dependencies:
 - aimsgb =1.1.1
 - ase =3.29.0
 - dscribe =2.1.2
-- matplotlib-base =3.10.9
+- matplotlib-base =3.11.0
 - notebook
 - numpy =2.4.6
 - phonopy =4.3.1
