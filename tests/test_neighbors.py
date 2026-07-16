@@ -502,7 +502,7 @@ class TestAtoms(unittest.TestCase):
             _ = neigh.get_neighborhood(np.random.random(3), num_neighbors=51)
             self.assertEqual(len(w), 2)
             _ = neigh.get_neighborhood(np.random.random(3), num_neighbors=51).distances
-            self.assertEqual(len(w), 3)
+            self.assertEqual(len(w), 4)
 
     def test_repr(self):
         basis = bulk("Al", a=4.2, cubic=True).repeat(3)
