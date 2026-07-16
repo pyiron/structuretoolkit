@@ -1,7 +1,7 @@
 channels:
 - conda-forge
 dependencies:
-- python =3.12
+- python =3.14
 - aimsgb =1.1.1
 - ase =3.29.0
 - dscribe =2.1.2
