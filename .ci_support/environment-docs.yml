@@ -6,6 +6,7 @@ dependencies:
 - scipy =1.18.0
 - hatchling =1.31.0
 - hatch-vcs =0.5.0
+- sparse =0.19.0
 - myst-parser
 - nbsphinx
 - sphinx
