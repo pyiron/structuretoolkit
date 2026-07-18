@@ -10,7 +10,7 @@ dependencies:
 - numpy =2.4.6
 - phonopy =4.3.1
 - plotly =6.9.0
-- pymatgen =2026.3.23
+- pymatgen =2026.7.16
 - pyscal3 =3.3.2
 - scikit-learn =1.8.0
 - scipy =1.18.0
