@@ -500,9 +500,9 @@ class TestAtoms(unittest.TestCase):
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             _ = neigh.get_neighborhood(np.random.random(3), num_neighbors=51)
-            self.assertEqual(len(w), 1)
-            _ = neigh.get_neighborhood(np.random.random(3), num_neighbors=51).distances
             self.assertEqual(len(w), 2)
+            _ = neigh.get_neighborhood(np.random.random(3), num_neighbors=51).distances
+            self.assertEqual(len(w), 4)
 
     def test_repr(self):
         basis = bulk("Al", a=4.2, cubic=True).repeat(3)
