@@ -168,11 +168,10 @@ def get_diamond_structure_descriptors(
             return per_atom
         else:
             return np.array([6 if x == 0 else x - 1 for x in per_atom])
+    elif not ovito_compatibility:
+        return np.array([pyscal_identifiers[int(x)] for x in per_atom])
     else:
-        if not ovito_compatibility:
-            return np.array([pyscal_identifiers[int(x)] for x in per_atom])
-        else:
-            return np.array([ovito_identifiers[int(x)] for x in per_atom])
+        return np.array([ovito_identifiers[int(x)] for x in per_atom])
 
 
 def get_adaptive_cna_descriptors(
