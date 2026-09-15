@@ -64,7 +64,7 @@ stk.plot3d(structure)
 * `stk.common.ase_to_pymatgen()` - convert an `ase.atoms.Atoms` object to a `pymatgen.core.Structure`
 * `stk.common.pymatgen_to_ase()` - convert a `pymatgen.core.Structure` back to an `ase.atoms.Atoms` object
 * `stk.common.pymatgen_read_from_file()` - read a structure file directly into an `ase.atoms.Atoms` object via pymatgen
-* `stk.common.ase_to_pyscal()` - convert an `ase.atoms.Atoms` object to a `pyscal3.core.System`
+* `stk.common.ase_to_pyscal()` - deprecated, pyscal3 >= 4.0 works on `ase.atoms.Atoms` objects directly
 * `stk.common.apply_strain()` - apply a homogeneous strain to a structure's cell, and its atoms
 * `stk.common.center_coordinates_in_unit_cell()` - wrap atomic coordinates back into the unit cell
 * `stk.common.get_extended_positions()` - repeat atoms across the periodic boundary to include neighbor images

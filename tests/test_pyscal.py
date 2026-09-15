@@ -31,10 +31,14 @@ class Testpyscal(unittest.TestCase):
 
     def test_simple_system(self):
         """
-        Test a simple ase to pyscal conversion
+        pyscal3 >= 4.0 works on ase.Atoms, so ase_to_pyscal only copies.
         """
         self.assertEqual(len(self.structure), 256)
-        self.assertEqual(len(stk.common.ase_to_pyscal(self.structure).atoms), 256)
+        with self.assertWarns(DeprecationWarning):
+            converted = stk.common.ase_to_pyscal(self.structure)
+        self.assertIsInstance(converted, Atoms)
+        self.assertEqual(len(converted), 256)
+        self.assertIsNot(converted, self.structure)
 
     def test_steinhardt_parameters_returns(self):
         self.assertEqual(
@@ -578,6 +582,22 @@ class Testpyscalatoms(unittest.TestCase):
             structure=self.al_fcc_4, neighbor_method="cutoff", cutoff=0, return_sys=True
         )
         self.assertIsNotNone(sys)
+        # the analysed structure carries the pyscal3 results
+        self.assertIsInstance(sys, Atoms)
+        self.assertIn("pyscal_solid", sys.arrays)
+        self.assertEqual(len(sys), len(self.al_fcc_4))
+
+    def test_input_structure_is_not_modified(self):
+        """pyscal3 stores results on the Atoms object, so stk works on a copy."""
+        structure = self.al_fcc_4.copy()
+        stk.analyse.get_adaptive_cna_descriptors(structure=structure)
+        stk.analyse.get_voronoi_volumes(structure=structure)
+        stk.analyse.find_solids(structure=structure, cutoff=0)
+        self.assertEqual(
+            [k for k in structure.arrays if k.startswith("pyscal")],
+            [],
+            msg="Expected the caller's structure to be free of pyscal3 arrays.",
+        )
 
 
 if __name__ == "__main__":
