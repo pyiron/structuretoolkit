@@ -1,5 +1,5 @@
 [build-system]
-requires = ["ase", "numpy", "scipy", "hatchling==1.32.0", "hatch-vcs==0.5.0"]
+requires = ["ase", "numpy", "scipy", "hatchling==1.32.4", "hatch-vcs==0.5.0"]
 build-backend = "hatchling.build"
 
 [project]
@@ -43,7 +43,7 @@ grainboundary = [
 ]
 pyscal = ["pyscal3==3.3.2"]
 nglview = ["nglview==4.0.1"]
-matplotlib = ["matplotlib==3.11.1"]
+matplotlib = ["matplotlib==3.11.2"]
 plotly = ["plotly==7.0.0"]
 clusters = ["scikit-learn==1.9.1"]
 symmetry = ["spglib==2.7.0"]
