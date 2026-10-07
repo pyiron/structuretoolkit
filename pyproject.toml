@@ -52,7 +52,7 @@ surface = [
     "pymatgen==2026.9.24",
 ]
 phonopy = [
-    "phonopy==4.8.0",
+    "phonopy==4.8.1",
     "spglib==2.7.0",
 ]
 mp-api = [
