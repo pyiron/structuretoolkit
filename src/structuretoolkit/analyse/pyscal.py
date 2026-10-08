@@ -47,8 +47,14 @@ def get_steinhardt_parameters(
     sys = ase_to_pyscal(structure)
     q = (4, 6) if q is None else q
 
-    sys.find.neighbors(method=neighbor_method, cutoff=cutoff)
-    sysq = np.array(sys.calculate.steinhardt_parameter(q, averaged=averaged))
+    if hasattr(sys, "find"):
+        sys.find.neighbors(method=neighbor_method, cutoff=cutoff)
+        sysq = np.array(sys.calculate.steinhardt_parameter(q, averaged=averaged))
+    else:
+        import pyscal3 as pc
+
+        pc.find_neighbors(sys, method=neighbor_method, cutoff=cutoff)
+        sysq = np.array(pc.steinhardt_parameter(sys, l=q, averaged=averaged))
 
     if n_clusters is not None:
         from sklearn import cluster
@@ -75,7 +81,12 @@ def get_centro_symmetry_descriptors(
         np.ndarray: Array of centrosymmetry parameters.
     """
     sys = ase_to_pyscal(structure)
-    return np.array(sys.calculate.centrosymmetry(nmax=num_neighbors))
+    if hasattr(sys, "calculate"):
+        return np.array(sys.calculate.centrosymmetry(nmax=num_neighbors))
+
+    import pyscal3 as pc
+
+    return np.array(pc.centrosymmetry(sys, nmax=num_neighbors))
 
 
 def get_diamond_structure_descriptors(
@@ -97,7 +108,14 @@ def get_diamond_structure_descriptors(
         Union[Dict[str, int], np.ndarray]: Depending on the `mode` parameter.
     """
     sys = ase_to_pyscal(structure)
-    diamond_dict = sys.analyze.diamond_structure()
+    if hasattr(sys, "analyze"):
+        diamond_dict = sys.analyze.diamond_structure()
+        structure_labels = sys.atoms.structure
+    else:
+        import pyscal3 as pc
+
+        diamond_dict = pc.diamond_structure(sys)
+        structure_labels = sys.arrays["pyscal_structure"]
 
     ovito_identifiers = [
         "Other",
@@ -141,18 +159,18 @@ def get_diamond_structure_descriptors(
             }
     elif mode == "numeric":
         if not ovito_compatibility:
-            return np.array(sys.atoms.structure)
+            return np.array(structure_labels)
         else:
-            return np.array([6 if x == 0 else x - 1 for x in sys.atoms.structure])
+            return np.array([6 if x == 0 else x - 1 for x in structure_labels])
 
     elif mode == "str":
         if not ovito_compatibility:
             return np.array(
-                [pyscal_identifiers[structure] for structure in sys.atoms.structure]
+                [pyscal_identifiers[structure] for structure in structure_labels]
             )
         else:
             return np.array(
-                [ovito_identifiers[structure] for structure in sys.atoms.structure]
+                [ovito_identifiers[structure] for structure in structure_labels]
             )
     else:
         raise ValueError(
@@ -191,7 +209,14 @@ def get_adaptive_cna_descriptors(
         "CommonNeighborAnalysis.counts.ICO",
     ]
 
-    cna = sys.analyze.common_neighbor_analysis()
+    if hasattr(sys, "analyze"):
+        cna = sys.analyze.common_neighbor_analysis()
+        structure_labels = sys.atoms.structure
+    else:
+        import pyscal3 as pc
+
+        cna = pc.common_neighbor_analysis(sys)
+        structure_labels = sys.arrays["pyscal_structure"]
 
     if mode == "total":
         if not ovito_compatibility:
@@ -202,7 +227,7 @@ def get_adaptive_cna_descriptors(
                 for o, p in zip(ovito_parameter, pyscal_parameter, strict=True)
             }
     else:
-        cnalist = np.array(sys.atoms.structure)
+        cnalist = np.array(structure_labels)
         if mode == "numeric":
             return cnalist
         elif mode == "str":
@@ -229,8 +254,14 @@ def get_voronoi_volumes(structure: Atoms) -> np.ndarray:
         np.ndarray: Array of Voronoi volumes for each atom.
     """
     sys = ase_to_pyscal(structure)
-    sys.find.neighbors(method="voronoi")
-    return np.array(sys.atoms.voronoi.volume)
+    if hasattr(sys, "find"):
+        sys.find.neighbors(method="voronoi")
+        return np.array(sys.atoms.voronoi.volume)
+
+    import pyscal3 as pc
+
+    pc.find_neighbors(sys, method="voronoi")
+    return np.array(sys.arrays["pyscal_voronoi_volume"])
 
 
 def find_solids(
@@ -259,14 +290,32 @@ def find_solids(
         cluster (bool, optional): See pyscal documentation. Defaults to False.
         q (int, optional): Steinhard parameter to calculate. Defaults to 6.
         right (bool, optional): See pyscal documentation. Defaults to True.
-        return_sys (bool, optional): Whether to return number of solid atoms or pyscal system. Defaults to False.
+        return_sys (bool, optional): Whether to return the pyscal system (v3) or ASE atoms (v4). Defaults to False.
 
     Returns:
-        Union[int, pyscal.system.System]: Number of solids or pyscal system when return_sys=True.
+        Union[int, Any]: Number of solids or the analyzed structure when return_sys=True.
     """
     sys = ase_to_pyscal(structure)
-    sys.find.neighbors(method=neighbor_method, cutoff=cutoff)
-    sys.find.solids(
+    if hasattr(sys, "find"):
+        sys.find.neighbors(method=neighbor_method, cutoff=cutoff)
+        sys.find.solids(
+            bonds=bonds,
+            threshold=threshold,
+            avgthreshold=avgthreshold,
+            q=q,
+            cutoff=cutoff,
+            cluster=cluster,
+            right=right,
+        )
+        if return_sys:
+            return sys
+        return np.sum(sys.atoms.solid)
+
+    import pyscal3 as pc
+
+    pc.find_neighbors(sys, method=neighbor_method, cutoff=cutoff)
+    pc.find_solids(
+        sys,
         bonds=bonds,
         threshold=threshold,
         avgthreshold=avgthreshold,
@@ -277,4 +326,4 @@ def find_solids(
     )
     if return_sys:
         return sys
-    return np.sum(sys.atoms.solid)
+    return np.sum(sys.arrays["pyscal_solid"])
