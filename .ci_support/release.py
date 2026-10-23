@@ -11,7 +11,8 @@ def get_setup_version_and_pattern(setup_content):
                 .split(",")
             )
             for dep in lst:
-                if dep != "\n":
+                dep = dep.strip()
+                if dep != "":
                     version_lst.append(dep.split("==")[1])
                     depend_lst.append(dep.split("==")[0])
 
@@ -26,18 +27,35 @@ def get_env_version(env_content):
         if "dependencies:" in l:
             read_flag = True
         elif read_flag:
-            lst = l.replace("-", "").replace(" ", "").replace("\n", "").split("=")
+            lst = l.replace("- ", "").replace(" ", "").replace("\n", "").split("=")
             if len(lst) == 2:
                 depend_lst.append(lst[0])
                 version_lst.append(lst[1])
     return {d: v for d, v in zip(depend_lst, version_lst, strict=True)}
 
 
+def get_next_minor_version(version):
+    """Return the next minor release of ``version``, e.g. 2.5.3 -> 2.6.0.
+
+    Falls back to ``None`` when the minor component is not an integer, in which
+    case the caller keeps the conservative ``<=pin`` cap.
+    """
+    parts = version.split(".")
+    if len(parts) < 2 or not parts[0].isdigit() or not parts[1].isdigit():
+        return None
+    return parts[0] + "." + str(int(parts[1]) + 1) + ".0"
+
+
 def update_dependencies(setup_content, version_low_dict, version_high_dict):
     version_combo_dict = {}
     for dep, ver in version_high_dict.items():
         if dep in version_low_dict.keys() and version_low_dict[dep] != ver:
-            version_combo_dict[dep] = dep + ">=" + version_low_dict[dep] + ",<=" + ver
+            upper = get_next_minor_version(ver)
+            if upper is None:
+                upper_cap = ",<=" + ver
+            else:
+                upper_cap = ",<" + upper
+            version_combo_dict[dep] = dep + ">=" + version_low_dict[dep] + upper_cap
         else:
             version_combo_dict[dep] = dep + "==" + ver
 
@@ -51,7 +69,14 @@ def update_dependencies(setup_content, version_low_dict, version_high_dict):
     return setup_content_new
 
 
+def convert_key(key, convert_dict):
+    return convert_dict.get(key, key)
+
+
 if __name__ == "__main__":
+    # conda-forge names that differ from the PyPI names used in pyproject.toml
+    name_conversion_dict = {"matplotlib-base": "matplotlib"}
+
     with open("pyproject.toml", "r") as f:
         setup_content = f.readlines()
 
@@ -60,7 +85,10 @@ if __name__ == "__main__":
 
     setup_content_new = update_dependencies(
         setup_content=setup_content[2:],
-        version_low_dict=get_env_version(env_content=env_content),
+        version_low_dict={
+            convert_key(key=k, convert_dict=name_conversion_dict): v
+            for k, v in get_env_version(env_content=env_content).items()
+        },
         version_high_dict=get_setup_version_and_pattern(
             setup_content=setup_content[2:]
         ),
