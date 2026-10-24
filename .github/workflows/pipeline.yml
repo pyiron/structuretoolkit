@@ -175,11 +175,14 @@ jobs:
         python-version: ${{ matrix.python-version }}
         miniforge-version: latest
         condarc-file: .condarc
+        run-init: "false"
         environment-file: .ci_support/environment.yml
     - name: Test
       shell: bash -l {0}
       timeout-minutes: 5
       run: |
+        source "$CONDA/etc/profile.d/conda.sh"
+        conda activate test
         pip install . --no-deps --no-build-isolation
         coverage run
         coverage xml
