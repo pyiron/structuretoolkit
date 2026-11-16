@@ -1,9 +1,9 @@
-from typing import Literal, Protocol, TypeAlias, overload
+from typing import Literal, Protocol, overload
 
 import numpy as np
 from ase import Atoms
 
-Shell: TypeAlias = int
+Shell = int
 
 SublatticeMode = Literal["split", "interact"]
 IterationMode = Literal["random", "systematic"]
