@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from threading import Event, Thread
-from typing import Any, Generic, Literal, TypeVar, cast, overload
+from typing import Any, Literal, TypeVar, cast, overload
 
 from ase.atoms import Atoms
 
@@ -18,11 +18,10 @@ from ._types import (
     SublatticeMode,
 )
 
-R = TypeVar("R", SqsResultInteract, SqsResultSplit)
 T = TypeVar("T")
 
 
-class _SqsResultProxy(Generic[R]):
+class _SqsResultProxy[R: (SqsResultInteract, SqsResultSplit)]:
     def __init__(self, result: R):
         self._result: R = result
 
@@ -48,7 +47,7 @@ class _SqsResultProxy(Generic[R]):
             )
 
 
-class SqsResultPack(Generic[R]):
+class SqsResultPack[R: (SqsResultInteract, SqsResultSplit)]:
     def __init__(self, pack):
         self._pack = pack
 
@@ -70,7 +69,7 @@ class SqsResultPack(Generic[R]):
                 yield _SqsResultProxy(result)
 
 
-def _ensure_list(v: T | list[T] | None) -> list[T] | None:
+def _ensure_list[T](v: T | list[T] | None) -> list[T] | None:
     if v is not None:
         return v if isinstance(v, list) else [v]
     else:
