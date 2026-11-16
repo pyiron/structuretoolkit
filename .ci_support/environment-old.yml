@@ -5,7 +5,7 @@ dependencies:
 - ase =3.24.0
 - matplotlib-base =3.8.0
 - nglview =2.7.7
-- numpy =1.26.0
+- numpy =1.26.4
 - phonopy =2.21.2
 - plotly =6.0.0
 - pymatgen =2026.3.23
