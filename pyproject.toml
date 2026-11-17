@@ -39,7 +39,7 @@ Repository = "https://github.com/pyiron/structuretoolkit"
 dscribe = ["dscribe==2.1.2"]
 grainboundary = [
     "aimsgb==1.1.1",
-    "pymatgen==2026.9.24",
+    "pymatgen==2026.10.24",
 ]
 pyscal = ["pyscal3==4.1.0"]
 nglview = ["nglview==4.0.1"]
@@ -49,7 +49,7 @@ clusters = ["scikit-learn==1.9.1"]
 symmetry = ["spglib==2.8.0"]
 surface = [
     "spglib==2.8.0",
-    "pymatgen==2026.9.24",
+    "pymatgen==2026.10.24",
 ]
 phonopy = [
     "phonopy==4.10.0",
@@ -57,7 +57,7 @@ phonopy = [
 ]
 mp-api = [
     "mp-api==0.45.15",
-    "pymatgen==2026.9.24",
+    "pymatgen==2026.10.24",
 ]
 
 [tool.ruff]
