@@ -59,6 +59,13 @@ mp-api = [
     "mp-api==0.47.2",
     "pymatgen==2026.10.24",
 ]
+docs = [
+    "myst-parser",
+    "nbsphinx",
+    "sphinx",
+    "sphinx_rtd_theme",
+    "jupyter-book==1.0.0",
+]
 
 [tool.ruff]
 exclude = [".ci_support", "tests", "setup.py", "_version.py"]
